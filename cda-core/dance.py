@@ -36,33 +36,46 @@ ABBREVIATION_MAPS = {"Smooth": SMOOTH_MAP,
 FLC_LEVELS = ["Newcomer", "Bronze", "Silver", "Gold", "Novice", "Prechamp", "Champ"]
 ALL_LEVELS = FLC_LEVELS + ["Beginner", "Int/Adv", "Rookie/Vet"]
 
+def convert_dance(style, dance):
+    """Converts input dance from entry spreadsheet into standard naming convention"""
+    if dance.isupper():
+        raise ValueError("""Attempted to construct a dance from a multi-dance event. 
+                            Please use the Event class to handle multi-dance events.""")
+    
+    if dance == "West Coast Swing":
+        return "WCS"
+
+    if dance == "Night Club 2-Step" or dance == "Nightclub 2-Step":
+        return "NC2S"
+
+    # Check if dance name is the same as in the standard naming convention.
+    if dance in DANCES[style]:
+        return dance
+    
+    # Check if dance is abbreviated in standard naming convention.
+    for dance_name in DANCES[style]:
+        if dance_name in dance:
+            return dance_name
+
 class Dance:
     """Representation of a dance style at a certain level."""
 
     style = None
     dance = None
     level = None
-    o2cm_name = None
 
-    def __init__(self, style, dance, level, o2cm_name):
+    def __init__(self, style, dance, level):
         self.style = style
-        self.dance = self.convert_dance(dance)
-        self.level = level
-        self.o2cm_name = o2cm_name
+        self.dance = convert_dance(style, dance)
+        self.level = convert_level(style, level)  # TODO (CWA): Implement this.
 
+    
+    def __repr__(self):
+        designation = ""
+        if self.style in AM_STYLES:
+            designation = "Am. "
+        elif self.style in INTL_STYLES:
+            designation = "Intl. "
 
-    def convert_dance(self, dance):
-        """Converts input dance into standard naming convention"""
-        if dance.isupper():
-            raise ValueError("""Attempted to construct a dance from a multi-dance event. 
-                             Please use the Event class to handle multi-dance events.""")
-        
-        # Check if dance name is the same as in the standard naming convention.
-        if dance in DANCES[self.style]:
-            return dance
-        
-        # Check if dance is abbreviated in standard naming convention.
-        for dance_name in DANCES[self.style]:
-            if dance_name in dance:
-                return dance_name
+        return f"{self.level} {designation}{self.dance}"
         
