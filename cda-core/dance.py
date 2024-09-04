@@ -1,36 +1,36 @@
-STYLES = ["Smooth", "Standard", "Rhythm", "Latin", "Nightclub"]
+STYLES = ["Standard", "Smooth", "Latin", "Rhythm", "Nightclub"]
 AM_STYLES = ["Smooth", "Rhythm"]
 INTL_STYLES = ["Standard", "Latin"]
 
-DANCES = {"Smooth": ["Waltz", "Tango", "Foxtrot", "Viennese"],
-          "Standard": ["Waltz", "Tango", "Viennese", "Foxtrot", "Quickstep"],
-          "Rhythm": ["ChaCha", "Rumba", "Swing", "Bolero", "Mambo"],
+DANCES = {"Standard": ["Waltz", "Tango", "Viennese", "Foxtrot", "Quickstep"],
+          "Smooth": ["Waltz", "Tango", "Foxtrot", "Viennese"],
           "Latin": ["ChaCha", "Samba", "Rumba", "Paso", "Jive"],
+          "Rhythm": ["ChaCha", "Rumba", "Swing", "Bolero", "Mambo"],
           "Nightclub": ["WCS", "NC2S", "Lindy", "Merengue", "Blues", "Salsa", "Argentine", "Hustle", "Bachata", "Polka"]}
 
-SMOOTH_MAP = {"W": "Waltz",
-              "T": "Tango",
-              "F": "Foxtrot",
-              "V": "Viennese"}
 STANDARD_MAP = {"W": "Waltz",
                 "T": "Tango",
                 "V": "Viennese",
                 "F": "Foxtrot",
                 "Q": "Quickstep"}
-RHYTHM_MAP = {"C": "ChaCha",
-              "R": "Rumba",
-              "S": "Swing",
-              "B": "Bolero",
-              "M": "Mambo"}
+SMOOTH_MAP = {"W": "Waltz",
+              "T": "Tango",
+              "F": "Foxtrot",
+              "V": "Viennese"}
 LATIN_MAP = {"C": "ChaCha",
              "S": "Samba",
              "R": "Rumba",
              "P": "Paso",
              "J": "Jive"}
-ABBREVIATION_MAPS = {"Smooth": SMOOTH_MAP,
-                     "Standard": STANDARD_MAP,
-                     "Rhythm": RHYTHM_MAP,
-                     "Latin": LATIN_MAP}
+RHYTHM_MAP = {"C": "ChaCha",
+              "R": "Rumba",
+              "S": "Swing",
+              "B": "Bolero",
+              "M": "Mambo"}
+ABBREVIATION_MAPS = {"Standard": STANDARD_MAP,
+                     "Smooth": SMOOTH_MAP,
+                     "Latin": LATIN_MAP,
+                     "Rhythm": RHYTHM_MAP}
 
 SYLLABUS_LEVELS = ["Newcomer", "Bronze", "Silver", "Gold"]
 OPEN_LEVELS = ["Novice", "Prechamp", "Champ"]
