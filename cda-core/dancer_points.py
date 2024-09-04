@@ -18,7 +18,7 @@ class Points:
         self.open_data = open_pts
 
     def __repr__(self):
-        """String representation of points; modeled after CDA points database UI."""
+        """String representation of points modeled after CDA points database UI."""
 
 
         string = f"""\
@@ -32,7 +32,6 @@ class Points:
           Prechamp        s
              Champ        s
         """
-
         return string
 
     def linear_data(self) -> np.ndarray:
@@ -43,8 +42,22 @@ class Points:
         (Matches CDA point database website.)"""
         return np.reshape(self.syllabus_data, -1) + np.reshape(self.open_data, -1)
     
-    def get_points(self, dance: dance.Dance) -> int:
+    # TODO (CWA): Test this method.
+    def get_points(self, target_dance: dance.Dance) -> int:
         """Retrieves the points earned for a given dance at a given level."""
+        if target_dance.style not in dance.STYLES[:-1]:
+            raise ValueError("This dance is not eligible for FLC points (e.g. nightclub).")
+
+        if target_dance.level in dance.SYLLABUS_LEVELS:
+            row_idx = dance.SYLLABUS_LEVELS.index(target_dance.level)
+            col_idx = dance.DANCES[target_dance.style].index(target_dance.dance)
+            return self.syllabus_data[row_idx][col_idx]
+        elif target_dance.level in dance.OPEN_LEVELS:
+            row_idx = dance.OPEN_LEVELS.index(target_dance.level)
+            col_idx = dance.STYLES.index(target_dance.style)
+            return self.open_data[row_idx][col_idx]
+        else:
+            raise ValueError("Invalid dance level.")
 
     def standard(self):
         """Returns the subarrays of points corresponding to syllabus and open Standard points."""
