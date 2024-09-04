@@ -41,8 +41,8 @@ ALL_LEVELS = FLC_LEVELS + NC_LEVELS + ["Rookie/Vet"]
 def convert_dance(style, dance):
     """Converts input dance from entry spreadsheet into standard naming convention"""
     if dance.isupper():
-        raise ValueError("""Attempted to construct a dance from a multi-dance event. 
-                            Please use the Event class to handle multi-dance events.""")
+        raise ValueError("""Attempted to construct a Dance from a multi-dance event. 
+                            Please handle multi-dance events in the entry checker.""")
     
     if dance == "West Coast Swing":
         return "WCS"

@@ -13,7 +13,8 @@ class Entry:
     def __init__(self, style, dance, skill, lead_first, lead_last, follow_first, follow_last, event_name, heat=None):
         if dance.isupper():
             multi_dance = True
-            raise ValueError("Tried to enter a multi-dance event. This functionality not yet implemented.")
+            raise ValueError("""Attempted to construct an Entry from a multi-dance event. 
+                                Please handle multi-dance events in the entry checker.""")
             for symbol in dance.ABBREVIATION_MAPS[style].keys():
                 if symbol in dance:
                     continue
