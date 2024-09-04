@@ -48,25 +48,25 @@ def flc_fulldancelist():
     return fulldancelist
 
 
-def convert_dance(style, dance):
+def convert_dance(style, input_name):
     """Converts input dance from entry spreadsheet into standard naming convention"""
 
-    if dance == "West Coast Swing":
+    if input_name == "West Coast Swing":
         return "WCS"
 
-    if dance == "Night Club 2-Step" or dance == "Nightclub 2-Step":
+    if input_name == "Night Club 2-Step" or input_name == "Nightclub 2-Step":
         return "NC2S"
 
     # Check if dance name is the same as in the standard naming convention.
-    if dance in DANCES[style]:
-        return dance
+    if input_name in DANCES[style]:
+        return input_name
     
     # Check if dance is abbreviated in standard naming convention.
     for dance_name in DANCES[style]:
-        if dance_name in dance:
+        if dance_name in input_name:
             return dance_name
 
-    if dance.isupper():
+    if input_name.isupper():
         raise ValueError("""Attempted to construct a Dance from a multi-dance event. 
                             Please handle multi-dance events in the entry checker.""")
     
@@ -83,7 +83,6 @@ class Dance:
         self.level = level
         # self.level = convert_level(style, level)  # TODO (CWA): Implement this to handle data imports.
 
-    
     def __repr__(self):
         designation = ""
         if self.style in AM_STYLES:

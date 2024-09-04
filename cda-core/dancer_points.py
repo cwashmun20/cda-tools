@@ -36,7 +36,6 @@ class Points:
                         open_pt = " " + open_pt
                     strs.append(open_pt)
 
-
         string = f"""\
                      Standard      |  Smooth     |  Latin         |  Rhythm        |
                      W  T  V  F  Q |  W  T  F  V |  C  S  R  P  J |  C  R  S  B  M |
