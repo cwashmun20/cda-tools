@@ -17,21 +17,36 @@ class Points:
         self.syllabus_data = syllabus_pts
         self.open_data = open_pts
 
-    # TODO (CWA): Finish implementing data-dependent version of repr.
     def __repr__(self):
         """String representation of points modeled after CDA points database UI."""
+        strs = []
+        lin_data = self.linear_data()
+        for offset in [0, 19, 38, 57, 76, 80, 84]:
+            if offset < 76:
+                for start, end in [(0, 5), (5, 9), (9, 14), (14, 19)]:
+                    pt_line = str(lin_data[offset + start:offset + end])[1:-1]
+                    condensed_line = ''.join(pt_line.split())
+                    if (start != 5 and len(condensed_line) == 5) or (start == 5 and len(condensed_line) == 4):
+                        pt_line = " " + "  ".join(pt_line.split())
+                    strs.append(pt_line)
+            else:
+                for i in range(4):
+                    open_pt = str(lin_data[offset + i:offset + i + 1])[1:-1]
+                    if len(open_pt) == 1:
+                        open_pt = " " + open_pt
+                    strs.append(open_pt)
 
 
         string = f"""\
                      Standard      |  Smooth     |  Latin         |  Rhythm        |
                      W  T  V  F  Q |  W  T  F  V |  C  S  R  P  J |  C  R  S  B  M |
-          Newcomer  34  3 11  0 37 | 21
-            Bronze  s
-            Silver  s
-              Gold  s
-            Novice        s
-          Prechamp        s
-             Champ        s
+          Newcomer  {strs[0]} | {strs[1]} | {strs[2]} | {strs[3]} |
+            Bronze  {strs[4]} | {strs[5]} | {strs[6]} | {strs[7]} |
+            Silver  {strs[8]} | {strs[9]} | {strs[10]} | {strs[11]} |
+              Gold  {strs[12]} | {strs[13]} | {strs[14]} | {strs[15]} |
+            Novice        {strs[16]}       |      {strs[17]}     |       {strs[18]}       |       {strs[19]}       |
+          Prechamp        {strs[20]}       |      {strs[21]}     |       {strs[22]}       |       {strs[23]}       |
+             Champ        {strs[24]}       |      {strs[25]}     |       {strs[26]}       |       {strs[27]}       |
         """
         return string
 
@@ -40,8 +55,9 @@ class Points:
             Newcomer -> Bronze -> Silver -> Gold -> Novice -> Prechamp -> Champ.
         Within each level, the order is:
             Standard -> Smooth -> Latin -> Rhythm
-        (Matches CDA point database website.)"""
-        return np.reshape(self.syllabus_data, -1) + np.reshape(self.open_data, -1)
+        (Matches CDA point database format.)"""
+        temp_list = list(np.reshape(self.syllabus_data, -1)) + list(np.reshape(self.open_data, -1))
+        return np.array(temp_list)
     
     # TODO (CWA): Test this method.
     def get_points(self, target_dance: dance.Dance) -> int:
