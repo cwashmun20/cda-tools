@@ -59,7 +59,6 @@ class Points:
         temp_list = list(np.reshape(self.syllabus_data, -1)) + list(np.reshape(self.open_data, -1))
         return np.array(temp_list)
     
-    # TODO (CWA): Test this method.
     def get_points(self, target_dance: dance.Dance) -> int:
         """Retrieves the points earned for a given dance at a given level."""
         if target_dance.style not in dance.STYLES[:-1]:
