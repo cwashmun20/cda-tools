@@ -5,7 +5,7 @@ INTL_STYLES = ["Standard", "Latin"]
 DANCES = {"Smooth": ["Waltz", "Tango", "Foxtrot", "Viennese"],
           "Standard": ["Waltz", "Tango", "Viennese", "Foxtrot", "Quickstep"],
           "Rhythm": ["ChaCha", "Rumba", "Swing", "Bolero", "Mambo"],
-          "Latin": ["ChaCha", "Rumba", "Samba", "Jive", "Paso"],
+          "Latin": ["ChaCha", "Samba", "Rumba", "Paso", "Jive"],
           "Nightclub": ["WCS", "NC2S", "Lindy", "Merengue", "Blues", "Salsa", "Argentine", "Hustle", "Bachata", "Polka"]}
 
 SMOOTH_MAP = {"W": "Waltz",
@@ -23,10 +23,10 @@ RHYTHM_MAP = {"C": "ChaCha",
               "B": "Bolero",
               "M": "Mambo"}
 LATIN_MAP = {"C": "ChaCha",
-             "R": "Rumba",
              "S": "Samba",
-             "J": "Jive",
-             "P": "Paso"}
+             "R": "Rumba",
+             "P": "Paso",
+             "J": "Jive"}
 ABBREVIATION_MAPS = {"Smooth": SMOOTH_MAP,
                      "Standard": STANDARD_MAP,
                      "Rhythm": RHYTHM_MAP,
