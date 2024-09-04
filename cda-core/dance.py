@@ -32,9 +32,11 @@ ABBREVIATION_MAPS = {"Smooth": SMOOTH_MAP,
                      "Rhythm": RHYTHM_MAP,
                      "Latin": LATIN_MAP}
 
-
-FLC_LEVELS = ["Newcomer", "Bronze", "Silver", "Gold", "Novice", "Prechamp", "Champ"]
-ALL_LEVELS = FLC_LEVELS + ["Beginner", "Int/Adv", "Rookie/Vet"]
+SYLLABUS_LEVELS = ["Newcomer", "Bronze", "Silver", "Gold"]
+OPEN_LEVELS = ["Novice", "Prechamp", "Champ"]
+FLC_LEVELS = SYLLABUS_LEVELS + OPEN_LEVELS
+NC_LEVELS = ["Beginner", "Int/Adv"]
+ALL_LEVELS = FLC_LEVELS + NC_LEVELS + ["Rookie/Vet"]
 
 def convert_dance(style, dance):
     """Converts input dance from entry spreadsheet into standard naming convention"""
