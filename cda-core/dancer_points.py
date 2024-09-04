@@ -17,6 +17,7 @@ class Points:
         self.syllabus_data = syllabus_pts
         self.open_data = open_pts
 
+    # TODO (CWA): Finish implementing data-dependent version of repr.
     def __repr__(self):
         """String representation of points modeled after CDA points database UI."""
 
