@@ -38,12 +38,19 @@ FLC_LEVELS = SYLLABUS_LEVELS + OPEN_LEVELS
 NC_LEVELS = ["Beginner", "Int/Adv"]
 ALL_LEVELS = FLC_LEVELS + NC_LEVELS + ["Rookie/Vet"]
 
+def flc_fulldancelist():
+    """Generates a list of all points-eligible dances at all levels, Newcomer through Champ."""
+    fulldancelist = []
+    for level in FLC_LEVELS:
+        for style in STYLES[:-1]:
+            for dance_name in DANCES[style]:
+                fulldancelist.append(Dance(style, dance_name, level))
+    return fulldancelist
+
+
 def convert_dance(style, dance):
     """Converts input dance from entry spreadsheet into standard naming convention"""
-    if dance.isupper():
-        raise ValueError("""Attempted to construct a Dance from a multi-dance event. 
-                            Please handle multi-dance events in the entry checker.""")
-    
+
     if dance == "West Coast Swing":
         return "WCS"
 
@@ -59,6 +66,10 @@ def convert_dance(style, dance):
         if dance_name in dance:
             return dance_name
 
+    if dance.isupper():
+        raise ValueError("""Attempted to construct a Dance from a multi-dance event. 
+                            Please handle multi-dance events in the entry checker.""")
+    
 class Dance:
     """Representation of a dance style at a certain level."""
 
@@ -69,7 +80,8 @@ class Dance:
     def __init__(self, style, dance, level):
         self.style = style
         self.dance = convert_dance(style, dance)
-        self.level = convert_level(style, level)  # TODO (CWA): Implement this.
+        self.level = level
+        # self.level = convert_level(style, level)  # TODO (CWA): Implement this to handle data imports.
 
     
     def __repr__(self):
