@@ -1,7 +1,5 @@
 import dance
 import dancer
-import dancer_points as pts
-import numpy as np
 
 class Partnership:
     """Representation of a partnership."""
