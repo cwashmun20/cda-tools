@@ -19,8 +19,8 @@ class Points:
 
     def __repr__(self):
         """String representation of points modeled after CDA points database UI.
-           Should only need updating if point totals regularly exceed 100 or more
-           point-eligible dances or levels are added.
+        Should only need updating if point totals regularly exceed 100 or more
+        point-eligible dances or levels are added.
         """
         strs = []
         lin_data = self.linear_data()
@@ -59,7 +59,8 @@ class Points:
             Newcomer -> Bronze -> Silver -> Gold -> Novice -> Prechamp -> Champ.
         Within each level, the order is:
             Standard -> Smooth -> Latin -> Rhythm
-        (Matches CDA point database format.)"""
+        (Matches CDA point database format.)
+        """
         temp_list = list(np.reshape(self.syllabus_data, -1)) + list(np.reshape(self.open_data, -1))
         return np.array(temp_list)
     

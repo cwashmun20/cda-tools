@@ -21,7 +21,8 @@ class Partnership:
     
     def get_proficiencies(self):
         """Calculates the proficiency levels of all dances for a couple, which
-            corresponds to what level they can register for in each dance."""
+        corresponds to what level they can register for in each dance.
+        """
         # TODO (CWA): Implement proper merging once the Points class is finished.
         return self.lead.points + self.follow.points
 

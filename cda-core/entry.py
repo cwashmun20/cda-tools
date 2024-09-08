@@ -2,7 +2,9 @@ import dance
 import partnership as partners
 
 class Entry:
-    """Representation of a competition entry; holds all the info obtainable from an o2cm registration."""
+    """Representation of a competition entry; holds all the info obtainable from
+    an o2cm entry.
+    """
 
     dance_info = None
     dancers = None
@@ -22,7 +24,7 @@ class Entry:
         else:
             self.dance_info = dance.Dance(style, dance, skill)
         
-        # TODO (CWA): Implement way to grab first comp date.
+        # TODO (CWA): Implement way to grab first comp date from database.
         # TODO (CWA): Implement way to make a Dancer object with their points data if they
         #               already exist in the system.
         lead = dance.Dancer(f"{lead_first} {lead_last}", get_first_comp())
