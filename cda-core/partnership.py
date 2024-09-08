@@ -12,7 +12,6 @@ class Partnership:
     newcomers = None
     nc_beginners = None
 
-
     def __init__(self, leader: dancer.Dancer, follower: dancer.Dancer):
         """Create a partnership from two dancers."""
         
