@@ -1,7 +1,8 @@
 import dance
+import dancer
 import numpy as np
 
-class Points:
+class Points(dancer.Dancer):
     """Representation of a Dancer's point totals."""
 
     syllabus_data = None
@@ -17,7 +18,7 @@ class Points:
         self.syllabus_data = syllabus_pts
         self.open_data = open_pts
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """String representation of points modeled after CDA points database UI.
         Should only need updating if point totals regularly exceed 100 or more
         point-eligible dances or levels are added.
@@ -54,6 +55,22 @@ class Points:
         """
         return string
 
+    def standard(self):
+        """Returns the subarrays of points corresponding to syllabus and open Standard points."""
+        return self.syllabus_data[:, :5], self.open_data[:, :1]
+    
+    def smooth(self):
+        """Returns the subarrays of points corresponding to syllabus and open Smooth points."""
+        return self.syllabus_data[:, 5:9], self.open_data[:, 1:2]
+    
+    def latin(self):
+        """Returns the subarrays of points corresponding to syllabus and open Latin points."""
+        return self.syllabus_data[:, 9:14], self.open_data[:, 2:3]
+    
+    def rhythm(self):
+        """Returns the subarrays of points corresponding to syllabus and open Rhythm points."""
+        return self.syllabus_data[:, 14:19], self.open_data[:, 3:4]
+    
     def linear_data(self) -> np.ndarray:
         """Returns a linear representation of a dancer's point totals in this order:
             Newcomer -> Bronze -> Silver -> Gold -> Novice -> Prechamp -> Champ.
@@ -80,18 +97,42 @@ class Points:
         else:
             raise ValueError("Invalid dance level.")
 
-    def standard(self):
-        """Returns the subarrays of points corresponding to syllabus and open Standard points."""
-        return self.syllabus_data[:, :5], self.open_data[:, :1]
-    
-    def smooth(self):
-        """Returns the subarrays of points corresponding to syllabus and open Smooth points."""
-        return self.syllabus_data[:, 5:9], self.open_data[:, 1:2]
-    
-    def latin(self):
-        """Returns the subarrays of points corresponding to syllabus and open Latin points."""
-        return self.syllabus_data[:, 9:14], self.open_data[:, 2:3]
-    
-    def rhythm(self):
-        """Returns the subarrays of points corresponding to syllabus and open Rhythm points."""
-        return self.syllabus_data[:, 14:19], self.open_data[:, 3:4]
+    def proficiency_level(self, dance_obj: dance.Dance) -> int:
+        """Calculates a dancer's proficiency level for a given dance, following
+        CDA Fair Level Certification rules: https://collegiatedancesport.org/fairlevel/
+        Can calculate by passing in a Dance object, which will ignore the level.
+        """
+        return self.proficiency_level(dance_obj.style, dance_obj.dance)
+
+    def proficiency_level(self, style: str, dance: str) -> int:
+        """Calculates a dancer's proficiency level for a given dance, following
+        CDA Fair Level Certification rules: https://collegiatedancesport.org/fairlevel/
+        Proficiency level integer corresponds to the index of the level in
+        dance.FLC_LEVELS:
+        0 = Newcomer
+        1 = Bronze
+        2 = Silver
+        3 = Gold
+        4 = Novice
+        5 = Pre-Champ
+        6 = Championship
+        """
+        newcomer_level = 0 if super().newcomer() else 1
+
+        # Proficiency via Pointing Out
+        point_out_level = 0
+        for level in dance.FLC_LEVELS:
+            dance_obj = dance.Dance(level, style, dance)
+            if self.get_points(dance_obj) >= 7:
+                point_out_level += 1
+            else:
+                break
+
+        # TODO (CWA): Finish implementing this based on CDA FLC rules.
+        # Within-Style Proficiency
+        within_style_level = 0
+
+        # Cross-Style Proficiency
+        cross_style_level = 0
+
+        return max(newcomer_level, point_out_level, within_style_level, cross_style_level)
