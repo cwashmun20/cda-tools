@@ -29,8 +29,8 @@ class Dancer:
         """Returns true if a dancer would be considered a newcomer (competing < 1 year)."""
         return (date.today() - self.first_comp_date).days // 365 < 1
     
-    def nc_advanced(self) -> bool:
-        """Returns true if a dancer would be considered an intermediate/advanced
+    def nc_beginner(self) -> bool:
+        """Returns true if a dancer would be considered a beginner
             nightclub dancer (competing < 2 years).
         """
         return (date.today() - self.first_comp_date).days // 365 < 2
