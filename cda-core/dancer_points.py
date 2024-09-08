@@ -128,7 +128,14 @@ class Points(dancer.Dancer):
             else:
                 break
 
-        # TODO (CWA): Finish implementing this based on CDA FLC rules.
+        # TODO (CWA): Finish implementing this based on CDA FLC rules. Move the 
+        #             basic "pointing out" check to a helper method and use that
+        #             to implement all three checks. Theoretically, the within-
+        #             and cross-style proficiencies can be calculated just based
+        #             on whether a dancer has pointed out of those other dances
+        #             because if their level for the current dance is higher
+        #             because of pointing out, then their level in this dance 
+        #             will affect those dances (and not the other way around).
         # Within-Style Proficiency
         within_style_level = 0
 
