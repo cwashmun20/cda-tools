@@ -77,8 +77,8 @@ def convert_dance(style: str, input_name: str) -> str:
                             Please handle multi-dance events in the entry checker.""")
     
     # Unrecognized level name format.
-    raise ValueError(f"Unrecognized dance name. 
-                     Please add support for {input_name} to convert_dance in dance.py.")
+    raise ValueError(f"""Unrecognized dance name. 
+                     Please add support for {input_name} to convert_dance in dance.py.""")
     
 def convert_level(input_name: str) -> str:
     """Converts input level from entry spreadsheet into standard naming convention"""
@@ -106,8 +106,8 @@ def convert_level(input_name: str) -> str:
         return OPEN_LEVELS[2]
 
     # Unrecognized level name format.
-    raise ValueError(f"Unrecognized level name. 
-                     Please add support for {input_name} to convert_level in dance.py.")
+    raise ValueError(f"""Unrecognized level name. 
+                     Please add support for {input_name} to convert_level in dance.py.""")
     
 class Dance:
     """Representation of a dance style at a certain level."""

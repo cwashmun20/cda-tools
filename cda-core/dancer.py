@@ -11,9 +11,9 @@ class Dancer:
     first_comp_date = None
     points = None
 
-    def __init__(self, name: str, first_comp_date: tuple[str, str, str]):  #TODO (CWA): Assess whether this is the best format for importing comp date data.
+    def __init__(self, name: str, first_comp_date):  #TODO (CWA): Assess whether this is the best format for importing comp date data.
         """Parameterized constructor for adding a new dancer to the system (TODO: (CWA): check if this function is needed?).
-        first_comp_date must be in MM DD YYYY format.
+        first_comp_date should be a tuple of 3 strings in ('MM', 'DD', 'YYYY') format.
         """
         self.name = name
         self.id = 9999  #TODO (CWA): Implement grabbing the next available CDA #.
