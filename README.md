@@ -1,6 +1,6 @@
 # cda-tools: Fair Level Certification Made Simple
 
-Authors: Clifford Ashmun
+Authors: Clifford Ashmun, CDA Board Member and Record Keeper
 
 cda-tools is a repo for the [Collegiate Dancesport Association (CDA)](https://collegiatedancesport.org/) to automate 
 [Fair Level Certification (FLC)](https://collegiatedancesport.org/fairlevel/) at circuit dancesport competitions.
