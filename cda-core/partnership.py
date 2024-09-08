@@ -60,7 +60,7 @@ class Partnership:
                 return self.lead.newcomer() and not self.follow.newcomer()
             # Check Rookie Follow
             elif dance_obj.level == dance.ALL_LEVELS[-1]:
-                return self.follow.newcomer and not self.lead.newcomer()     
+                return self.follow.newcomer() and not self.lead.newcomer()     
         elif rv_ruleset == "level":
             # TODO (CWA): Checking rookie/vet based on dancer level will require 
             #             keeping a list of each dancer's entries.
