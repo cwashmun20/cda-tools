@@ -41,7 +41,9 @@ NC_LEVELS = ["Beginner", "IntAdv"]
 ALL_LEVELS = FLC_LEVELS + NC_LEVELS + ["RkLead", "RkFollow"]
 
 def flc_fulldancelist() -> list:
-    """Generates a list of all points-eligible dances at all levels, Newcomer through Champ."""
+    """Generates a list of all points-eligible dances at all levels, 
+    Newcomer through Champ.
+    """
     fulldancelist = []
     for level in FLC_LEVELS:
         for style in STYLES[:-1]:
@@ -51,7 +53,9 @@ def flc_fulldancelist() -> list:
 
 
 def convert_dance(style: str, input_name: str) -> str:
-    """Converts input dance from entry spreadsheet into standard naming convention"""
+    """Converts input dance from entry spreadsheet into a standard 
+    naming convention
+    """
 
     if input_name == "West Coast Swing":
         return DANCES["Nightclub"][0]
