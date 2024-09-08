@@ -69,7 +69,7 @@ class Partnership:
             raise ValueError("Invalid Rookie/Vet ruleset.")
 
         lead_level = self.lead.points.proficiency_level(dance_obj)
-        follow_level = self.lead.points.proficiency_level(dance_obj)
+        follow_level = self.follow.points.proficiency_level(dance_obj)
         event_level = dance.FLC_LEVELS.index(dance_obj.level)
 
         # Check for Split-Level Exception and Pointing Out
