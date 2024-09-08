@@ -22,7 +22,7 @@ class Entry:
                     continue
             # TODO (CWA): Figure out *where* and how to handle multi-dance events.        
         else:
-            self.dance_info = dance.Dance(style, dance, skill)
+            self.dance_info = dance.Dance(skill, style, dance)
         
         # TODO (CWA): Implement way to grab first comp date from database.
         # TODO (CWA): Implement way to make a Dancer object with their points data if they

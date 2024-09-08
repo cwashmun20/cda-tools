@@ -48,7 +48,7 @@ def flc_fulldancelist() -> list:
     for level in FLC_LEVELS:
         for style in STYLES[:-1]:
             for dance_name in DANCES[style]:
-                fulldancelist.append(Dance(style, dance_name, level))
+                fulldancelist.append(Dance(level, style, dance_name))
     return fulldancelist
 
 
@@ -112,14 +112,14 @@ def convert_level(input_name: str) -> str:
 class Dance:
     """Representation of a dance style at a certain level."""
 
+    level = None
     style = None
     dance = None
-    level = None
 
-    def __init__(self, style: str, dance: str, level: str):
+    def __init__(self, level: str, style: str, dance: str):
+        self.level = convert_level(level)
         self.style = style
         self.dance = convert_dance(style, dance)
-        self.level = convert_level(level)
 
     def __repr__(self):
         designation = ""
