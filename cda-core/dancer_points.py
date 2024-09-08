@@ -18,10 +18,14 @@ class Points:
         self.open_data = open_pts
 
     def __repr__(self):
-        """String representation of points modeled after CDA points database UI."""
+        """String representation of points modeled after CDA points database UI.
+           Should only need updating if point totals regularly exceed 100 or more
+           point-eligible dances or levels are added.
+        """
         strs = []
         lin_data = self.linear_data()
         for offset in [0, 19, 38, 57, 76, 80, 84]:
+            # Format Syllabus points.
             if offset < 76:
                 for start, end in [(0, 5), (5, 9), (9, 14), (14, 19)]:
                     pt_line = str(lin_data[offset + start:offset + end])[1:-1]
@@ -29,6 +33,7 @@ class Points:
                     if (start != 5 and len(condensed_line) == 5) or (start == 5 and len(condensed_line) == 4):
                         pt_line = " " + "  ".join(pt_line.split())
                     strs.append(pt_line)
+            # Format Open points.
             else:
                 for i in range(4):
                     open_pt = str(lin_data[offset + i:offset + i + 1])[1:-1]
