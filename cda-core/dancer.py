@@ -3,7 +3,7 @@ from datetime import date
 
 class Dancer:
     """Abstract representation of a dancer for FLC entry checking and point updating purposes.
-       All dates are handeled using MM DD YYYY format.
+       All dates are handeled using the datetime library's date object.
     """
     
     name = None
@@ -11,13 +11,16 @@ class Dancer:
     first_comp_date = None
     points = None
 
-    def __init__(self, name: str, first_comp_date: tuple[str, str, str]):
+    def __init__(self, name: str, first_comp_date: tuple[str, str, str]):  #TODO (CWA): Assess whether this is the best format for importing comp date data.
         """Parameterized constructor for adding a new dancer to the system (TODO: (CWA): check if this function is needed?).
         first_comp_date must be in MM DD YYYY format.
         """
         self.name = name
         self.id = 9999  #TODO (CWA): Implement grabbing the next available CDA #.
-        self.first_comp_date = first_comp_date
+
+        month, day, year = map(int, first_comp_date)
+        self.first_comp_date = date(year, month, day)
+
         self.points = pts.DancerPoints()  #TODO (CWA): Construct this properly
     
     # TODO (CWA): Implement a new constructor for making a Dancer from existing database data.
