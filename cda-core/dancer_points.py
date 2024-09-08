@@ -107,8 +107,8 @@ class Points(dancer.Dancer):
     def proficiency_level(self, style: str, dance: str) -> int:
         """Calculates a dancer's proficiency level for a given dance, following
         CDA Fair Level Certification rules: https://collegiatedancesport.org/fairlevel/
-        Proficiency level integer corresponds to the index of the level in
-        dance.FLC_LEVELS:
+        Proficiency level integer represents the lowest level a dancer *is* eligible
+        to register for and corresponds to the index of the level in dance.FLC_LEVELS:
         0 = Newcomer
         1 = Bronze
         2 = Silver
