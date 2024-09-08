@@ -6,7 +6,7 @@ cda-tools is a repo for the [Collegiate Dancesport Association (CDA)](https://co
 [Fair Level Certification (FLC)](https://collegiatedancesport.org/fairlevel/) at circuit dancesport competitions.
 
 These tools aim to streamline the process of validating entries for dancers at member competitions and updating dancers' CDA FLC points after competitions, 
-ensuring that dancers' points are verified and updated in a timely manner and that competitions remain fun and fair for dancers with less experience.
+ensuring that dancers' points are verified and updated in a timely manner and that competitions remain fun and fair for dancers of all levels of experience.
 
 ## Directory Roadmap
 
