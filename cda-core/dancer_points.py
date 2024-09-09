@@ -30,8 +30,11 @@ class Points(dancer.Dancer):
             if offset < 76:
                 for start, end in [(0, 5), (5, 9), (9, 14), (14, 19)]:
                     pt_line = str(lin_data[offset + start:offset + end])[1:-1]
+                    # Format segments of all single-digit numbers
                     condensed_line = ''.join(pt_line.split())
-                    if (start != 5 and len(condensed_line) == 5) or (start == 5 and len(condensed_line) == 4):
+                    singledigit_smooth = start == 5 and len(condensed_line) == 4
+                    singledigit_non_smooth = start != 5 and len(condensed_line) == 5
+                    if singledigit_smooth or singledigit_non_smooth:
                         pt_line = " " + "  ".join(pt_line.split())
                     strs.append(pt_line)
             # Format Open points.
