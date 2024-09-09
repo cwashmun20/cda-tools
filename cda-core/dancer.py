@@ -3,7 +3,7 @@ from datetime import date
 
 class Dancer:
     """Abstract representation of a dancer for FLC entry checking and point updating purposes.
-       All dates are handeled using the datetime library's date object.
+       All dates are handled using the datetime library's date object.
     """
     
     name = None
