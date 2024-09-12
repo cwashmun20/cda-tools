@@ -26,7 +26,9 @@ class Points(dancer.Dancer):
         strs = []
         lin_data = self.linear_data()
         for offset in [0, 19, 38, 57, 76, 80, 84]:
-            # Format Syllabus points.
+            # Format Syllabus points 
+            # (this is not very nice because Smooth doesn't have a 5th dance, so
+            # let's add Peabody, Polka, or Quickstep so I can write prettier code :).
             if offset < 76:
                 for start, end in [(0, 5), (5, 9), (9, 14), (14, 19)]:
                     pt_line = str(lin_data[offset + start:offset + end])[1:-1]
@@ -100,12 +102,32 @@ class Points(dancer.Dancer):
         else:
             raise ValueError("Invalid dance level.")
 
-    def proficiency_level(self, dance_obj: dance.Dance) -> int:
-        """Calculates a dancer's proficiency level for a given dance, following
-        CDA Fair Level Certification rules: https://collegiatedancesport.org/fairlevel/
-        Can calculate by passing in a Dance object, which will ignore the level.
+    def pointed_out(self, dance_obj: dance.Dance) -> bool:
+        """Returns True if a dancer has pointed out of a Dance (at a certain
+        level); otherwise, False.
         """
-        return self.proficiency_level(dance_obj.style, dance_obj.dance)
+        return self.get_points(dance_obj) >= 7
+
+    def point_out_level(self, style: str, dance: str) -> int:
+        """Returns a dancer's proficiency level in a Dance based only on pointing
+        out. See proficiency_level() for correspondences between the output int
+        and FLC levels.
+        """
+        point_out_level = 0
+        for level in dance.FLC_LEVELS:
+            curr_dance = dance.Dance(level, style, dance)
+            if self.pointed_out(curr_dance):
+                point_out_level += 1
+            else:
+                break
+        return point_out_level
+    
+    def point_out_level(self, dance_obj: dance.Dance) -> int:
+        """Returns a dancer's proficiency level in a Dance based only on pointing
+        out. See proficiency_level() for correspondences between the output int
+        and FLC levels.
+        """
+        return self.point_out_level(dance_obj.style, dance_obj.dance)
 
     def proficiency_level(self, style: str, dance: str) -> int:
         """Calculates a dancer's proficiency level for a given dance, following
@@ -122,15 +144,9 @@ class Points(dancer.Dancer):
         """
         newcomer_level = 0 if super().newcomer() else 1
 
-        # Proficiency via Pointing Out
-        point_out_level = 0
-        for level in dance.FLC_LEVELS:
-            dance_obj = dance.Dance(level, style, dance)
-            if self.get_points(dance_obj) >= 7:
-                point_out_level += 1
-            else:
-                break
-
+        # Proficiency via Pointing Out (input level doesn't matter)
+        point_out_level = self.point_out_level(style, dance)
+        
         # TODO (CWA): Finish implementing this based on CDA FLC rules. Move the 
         #             basic "pointing out" check to a helper method and use that
         #             to implement all three checks. Theoretically, the within-
@@ -146,3 +162,10 @@ class Points(dancer.Dancer):
         cross_style_level = 0
 
         return max(newcomer_level, point_out_level, within_style_level, cross_style_level)
+    
+    def proficiency_level(self, dance_obj: dance.Dance) -> int:
+        """Calculates a dancer's proficiency level for a given dance, following
+        CDA Fair Level Certification rules: https://collegiatedancesport.org/fairlevel/
+        Can calculate by passing in a Dance object, which will ignore the level.
+        """
+        return self.proficiency_level(dance_obj.style, dance_obj.dance)
