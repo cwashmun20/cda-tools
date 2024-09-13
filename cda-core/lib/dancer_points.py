@@ -89,7 +89,8 @@ class Points(dancer.Dancer):
     def get_points(self, target_dance: dance.Dance) -> int:
         """Retrieves the points earned for a given dance at a given level."""
         if target_dance.style not in dance.STYLES[:-1]:
-            raise ValueError("This dance is not eligible for FLC points (e.g. nightclub).")
+            raise ValueError(f"""{target_dance} is not eligible for FLC points 
+                                 (e.g. nightclub dances).""")
 
         if target_dance.level in dance.SYLLABUS_LEVELS:
             row_idx = dance.SYLLABUS_LEVELS.index(target_dance.level)
@@ -108,14 +109,14 @@ class Points(dancer.Dancer):
         """
         return self.get_points(dance_obj) >= 7
 
-    def point_out_level(self, style: str, dance: str) -> int:
+    def point_out_level(self, style: str, dance_name: str) -> int:
         """Returns a dancer's proficiency level in a Dance based only on pointing
         out. See proficiency_level() for correspondences between the output int
         and FLC levels.
         """
         point_out_level = 0
         for level in dance.FLC_LEVELS:
-            curr_dance = dance.Dance(level, style, dance)
+            curr_dance = dance.Dance(level, style, dance_name)
             if self.pointed_out(curr_dance):
                 point_out_level += 1
             else:
@@ -129,7 +130,7 @@ class Points(dancer.Dancer):
         """
         return self.point_out_level(dance_obj.style, dance_obj.dance)
 
-    def proficiency_level(self, style: str, dance: str) -> int:
+    def proficiency_level(self, style: str, dance_name: str) -> int:
         """Calculates a dancer's proficiency level for a given dance, following
         CDA Fair Level Certification rules: https://collegiatedancesport.org/fairlevel/
         Proficiency level integer represents the lowest level a dancer *is* eligible
@@ -144,22 +145,41 @@ class Points(dancer.Dancer):
         """
         newcomer_level = 0 if super().newcomer() else 1
 
-        # Proficiency via Pointing Out (input level doesn't matter)
-        point_out_level = self.point_out_level(style, dance)
+        # Proficiency via Pointing Out
+        point_out_level = self.point_out_level(style, dance_name)
         
-        # TODO (CWA): Finish implementing this based on CDA FLC rules. Move the 
-        #             basic "pointing out" check to a helper method and use that
-        #             to implement all three checks. Theoretically, the within-
-        #             and cross-style proficiencies can be calculated just based
-        #             on whether a dancer has pointed out of those other dances
-        #             because if their level for the current dance is higher
-        #             because of pointing out, then their level in this dance 
-        #             will affect those dances (and not the other way around).
-        # Within-Style Proficiency
+        # Within-Style Proficiency: never less than two levels two levels lower
+        # than any other dance within the same style.
         within_style_level = 0
+        for curr_dance_name in dance.DANCES[style]:
+            if curr_dance_name != dance_name:
+                within_style_level = max(within_style_level, 
+                                         self.point_out_level(style, curr_dance_name) - 2)
 
         # Cross-Style Proficiency
         cross_style_level = 0
+        if style == "Standard":
+            other_style == "Smooth"
+        elif style == "Smooth":
+            other_style = "Standard"
+        elif style == "Latin":
+            other_style = "Rhythm"
+        elif style == "Rhythm":
+            other_style = "Latin"
+        else:
+            raise ValueError(f"{style} is not eligible for FLC points (e.g. nightclub dances).")
+        
+        # Cross-Style: Dances where their corresponding dance has the same name.
+        if (style in ["Standard", "Smooth"] or dance_name in ["ChaCha", "Rumba"]) and dance_name != "Quickstep":
+            cross_style_level = max(cross_style_level, 
+                                    self.point_out_level(other_style, dance_name) - 2)
+        # Cross-Style: Swing and Jive Handling
+        elif dance_name == "Jive":
+            other_dance = "Swing"
+        elif dance_name == "Swing":
+            other_dance = "Jive"
+            cross_style_level = max(cross_style_level,
+                                    self.point_out_level(other_style, other_dance) - 2)
 
         return max(newcomer_level, point_out_level, within_style_level, cross_style_level)
     
