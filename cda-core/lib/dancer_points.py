@@ -60,19 +60,19 @@ class Points(dancer.Dancer):
         """
         return string
 
-    def standard(self):
+    def standard(self) -> np.ndarray:
         """Returns the subarrays of points corresponding to syllabus and open Standard points."""
         return self.syllabus_data[:, :5], self.open_data[:, :1]
     
-    def smooth(self):
+    def smooth(self) -> np.ndarray:
         """Returns the subarrays of points corresponding to syllabus and open Smooth points."""
         return self.syllabus_data[:, 5:9], self.open_data[:, 1:2]
     
-    def latin(self):
+    def latin(self) -> np.ndarray:
         """Returns the subarrays of points corresponding to syllabus and open Latin points."""
         return self.syllabus_data[:, 9:14], self.open_data[:, 2:3]
     
-    def rhythm(self):
+    def rhythm(self) -> np.ndarray:
         """Returns the subarrays of points corresponding to syllabus and open Rhythm points."""
         return self.syllabus_data[:, 14:19], self.open_data[:, 3:4]
     
@@ -173,6 +173,7 @@ class Points(dancer.Dancer):
         if (style in ["Standard", "Smooth"] or dance_name in ["ChaCha", "Rumba"]) and dance_name != "Quickstep":
             cross_style_level = max(cross_style_level, 
                                     self.point_out_level(other_style, dance_name) - 2)
+        
         # Cross-Style: Swing and Jive Handling
         elif dance_name == "Jive":
             other_dance = "Swing"

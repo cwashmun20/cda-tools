@@ -121,7 +121,7 @@ class Dance:
         self.style = style
         self.dance = convert_dance(style, dance)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         designation = ""
         if self.style in AM_STYLES:
             designation = "Am. "
