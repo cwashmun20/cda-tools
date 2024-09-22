@@ -33,14 +33,22 @@ class Partnership:
         #             out of any dances, plus the level above that. Will need to
         #             ignore Newcomer if dancers are ineligible. 
 
-    # TODO (CWA): Change default value of rv_ruleset if new ruleset not in effect Fall 2024.
+    # TODO (CWA): Change or remove default value of rv_ruleset depending on convention in Fall 2024.
     def eligible(self, dance_obj: dance.Dance, rv_ruleset: str = "newcomer") -> bool:
         """Returns a boolean corresponding to whether a couple is eligible for
         a certain dance at a certain level.
-        rv_ruleset should be a string, either "newcomer" or "level" based on
-            how rookie-vet eligibility is assigned. 
-            "newcomer": rookies == newcomers; vets == non-newcomers
-            "level": rookies == newcomer/bronze dancer; vets == silver+ dancers 
+
+        Args:
+            dance_obj: a Dance object used to determine eligibility for that dance.
+            rv_ruleset: a string, either "newcomer" or "level", based on which
+                        ruleset a competition uses for rookie-vet eligibility:
+                        "newcomer": rookies == newcomers; vets == non-newcomers;
+                        "level": rookies == newcomer/bronze dancer; vets == silver+ dancers.
+        Returns:
+            True if a couple is eligible for the dance; otherwise False.
+        Raises:
+            NotImplementedError: if the "level" ruleset is used (not yet implemented).
+            ValueError: if the ruleset is not recognized. 
         """
         # Check eligibility for Newcomer
         if not self.newcomers and dance_obj.level == dance.SYLLABUS_LEVELS[0]:

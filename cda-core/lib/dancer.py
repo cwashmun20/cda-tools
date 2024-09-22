@@ -26,11 +26,13 @@ class Dancer:
     # TODO (CWA): Implement a new constructor for making a Dancer from existing database data.
 
     def newcomer(self) -> bool:
-        """Returns true if a dancer would be considered a newcomer (competing < 1 year)."""
+        """Returns True if a dancer would be considered a newcomer 
+        (competing < 1 year); otherwise False.
+        """
         return (date.today() - self.first_comp_date).days // 365 < 1
     
     def nc_beginner(self) -> bool:
-        """Returns true if a dancer would be considered a beginner
-            nightclub dancer (competing < 2 years).
+        """Returns True if a dancer would be considered a beginner
+            nightclub dancer (competing < 2 years); otherwise False.
         """
         return (date.today() - self.first_comp_date).days // 365 < 2

@@ -87,7 +87,15 @@ class Points(dancer.Dancer):
         return np.array(temp_list)
     
     def get_points(self, target_dance: dance.Dance) -> int:
-        """Retrieves the points earned for a given dance at a given level."""
+        """Retrieves the points earned for a given dance at a given level, returning an int.
+        
+        Args:
+            target_dance: a Dance object used to search for the dancer's points.
+        Returns:
+            the number of points the dancer has in target_dance.
+        Raises:
+            ValueError: if target_dance is not eligible for FLC points (e.g. nightclub dances).
+        """
         if target_dance.style not in dance.STYLES[:-1]:
             raise ValueError(f"""{target_dance} is not eligible for FLC points 
                                  (e.g. nightclub dances).""")
@@ -100,8 +108,6 @@ class Points(dancer.Dancer):
             row_idx = dance.OPEN_LEVELS.index(target_dance.level)
             col_idx = dance.STYLES.index(target_dance.style)
             return self.open_data[row_idx][col_idx]
-        else:
-            raise ValueError("Invalid dance level.")
 
     def pointed_out(self, dance_obj: dance.Dance) -> bool:
         """Returns True if a dancer has pointed out of a Dance (at a certain
@@ -110,9 +116,16 @@ class Points(dancer.Dancer):
         return self.get_points(dance_obj) >= 7
 
     def point_out_level(self, style: str, dance_name: str) -> int:
-        """Returns a dancer's proficiency level in a Dance based only on pointing
-        out. See proficiency_level() for correspondences between the output int
-        and FLC levels.
+        """Returns an int representing a dancer's proficiency level in a Dance 
+        based only on pointing out. See proficiency_level() for correspondences 
+        between the output int and FLC levels.
+
+        Args:
+            style: the dance's style/category (e.g. "Smooth", "Latin").
+            dance_name: the dance's name (e.g. "Tango", "Samba").
+        Returns:
+            an int representing the lowest level a dancer may register for in a dance.
+        Raises: None.
         """
         point_out_level = 0
         for level in dance.FLC_LEVELS:
@@ -124,14 +137,21 @@ class Points(dancer.Dancer):
         return point_out_level
     
     def point_out_level(self, dance_obj: dance.Dance) -> int:
-        """Returns a dancer's proficiency level in a Dance based only on pointing
-        out. See proficiency_level() for correspondences between the output int
-        and FLC levels.
+        """Returns an int representing a dancer's proficiency level in a Dance 
+        based only on pointing out. See proficiency_level() for correspondences 
+        between the output int and FLC levels.
+
+        Args:
+            dance_obj: a Dance object used to find a dancer's point-out level in the dance.
+        Returns:
+            an int representing the lowest level a dancer may register for in a dance 
+            based only on pointing out.
+        Raises: None.
         """
         return self.point_out_level(dance_obj.style, dance_obj.dance)
 
     def proficiency_level(self, style: str, dance_name: str) -> int:
-        """Calculates a dancer's proficiency level for a given dance, following
+        """Returns an int representing a dancer's proficiency level for a given dance, following
         CDA Fair Level Certification rules: https://collegiatedancesport.org/fairlevel/
         Proficiency level integer represents the lowest level a dancer *is* eligible
         to register for and corresponds to the index of the level in dance.FLC_LEVELS:
@@ -142,6 +162,14 @@ class Points(dancer.Dancer):
         4 = Novice
         5 = Pre-Champ
         6 = Championship
+
+        Args:
+            style: the dance's style/category (e.g. "Smooth", "Latin").
+            dance_name: the dance's name (e.g. "Tango", "Samba").
+        Returns:
+            an int representing the lowest level a dancer may register for in a dance.
+        Raises:
+            ValueError: if style is not eligible for FLC points (e.g. nightclub dances).
         """
         newcomer_level = 0 if super().newcomer() else 1
 
@@ -185,8 +213,22 @@ class Points(dancer.Dancer):
         return max(newcomer_level, point_out_level, within_style_level, cross_style_level)
     
     def proficiency_level(self, dance_obj: dance.Dance) -> int:
-        """Calculates a dancer's proficiency level for a given dance, following
+        """Returns an int representing a dancer's proficiency level for a given dance, following
         CDA Fair Level Certification rules: https://collegiatedancesport.org/fairlevel/
-        Can calculate by passing in a Dance object, which will ignore the level.
+        Proficiency level integer represents the lowest level a dancer *is* eligible
+        to register for and corresponds to the index of the level in dance.FLC_LEVELS:
+        0 = Newcomer
+        1 = Bronze
+        2 = Silver
+        3 = Gold
+        4 = Novice
+        5 = Pre-Champ
+        6 = Championship
+
+        Args:
+            dance_obj: a Dance object used to find a dancer's proficiency level in the dance.
+        Returns:
+            an int representing the lowest level a dancer may register for in a dance.
+        Raises: None
         """
         return self.proficiency_level(dance_obj.style, dance_obj.dance)
