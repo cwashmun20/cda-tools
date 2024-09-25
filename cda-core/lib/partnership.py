@@ -52,7 +52,6 @@ class Partnership:
         Returns:
             True if a couple is eligible for the dance; otherwise False.
         Raises:
-            NotImplementedError: if the "level" ruleset is used (not yet implemented).
             ValueError: if the ruleset is not recognized. 
         """
         # Check eligibility for Newcomer
@@ -74,6 +73,7 @@ class Partnership:
         elif rv_ruleset == "level":
             # Check Rookie Lead
             if dance_obj.level == dance.ALL_LEVELS[-2]:
+                # TODO (CWA): Rename and update has_BLANK_entries so that negation isn't needed.
                 rookie_lead = not self.lead.has_vet_entries(dance_obj.style)
                 vet_follow = not self.follow.has_rookie_entries(dance_obj.style)
                 return rookie_lead and vet_follow
