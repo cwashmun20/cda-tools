@@ -5,16 +5,16 @@ class Entry:
     """Representation of a competition entry."""
 
     dance_data = dance.Dance()
+    event_name = ""
     partnership = partners.Partnership()
-    event_name = None
-    heat = None
+    heat = ""
 
-    def __init__(self, dance_obj: dance.Dance, dancers: partners.Partnership, event_name, heat=None):
+    def __init__(self, dance_obj: dance.Dance, dancers: partners.Partnership, heat=None):
         self.dance_data = dance_obj
+        self.event_name = str(dance_obj)
         self.partnership = dancers
-        self.event_name = event_name
         self.heat = heat
         self.partnership.add(self)
 
     def __repr__(self):
-        return str(self.dance_data)
+        return str((self.partnership, self.dance_data))

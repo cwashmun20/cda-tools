@@ -20,7 +20,7 @@ class Partnership:
         self.follow = follower
         self.newcomers = leader.newcomer() and follower.newcomer()
         self.nc_beginners = leader.nc_beginner() and follower.nc_beginner()
-        self.entries = []
+        self.entries = set()
 
     def __repr__(self) -> str:
         """String representation of a partnership with registration-relevant 
@@ -146,7 +146,7 @@ class Partnership:
     def add(self, comp_entry: entry.Entry):
         """Adds a competition entry for a couple. Should only be called within the Entry constructor."""
         if comp_entry not in self.entries:
-            self.entries.append(comp_entry)
+            self.entries.add(comp_entry)
             self.lead.add(comp_entry)
             self.follow.add(comp_entry)
 

@@ -12,7 +12,7 @@ class Dancer:
     id = 9999  # Dancer's CDA #
     first_comp_date = None
     points = None
-    entries = []
+    entries = set()
 
     def __init__(self, name: str, first_comp_date):  #TODO (CWA): Assess whether this is the best format for importing comp date data.
         """Parameterized constructor for adding a new dancer to the system (TODO: (CWA): check if this function is needed?).
@@ -44,7 +44,7 @@ class Dancer:
     def add(self, comp_entry: entry.Entry):
         """Adds a competition entry for a dancer. Should only be called from a partnership."""
         if comp_entry not in self.entries:
-            self.entries.append(comp_entry)
+            self.entries.add(comp_entry)
 
     def drop(self, comp_entry: entry.Entry):
         """Drops a competition entry for a couple. Should only be called from a partnership"""
