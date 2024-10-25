@@ -165,3 +165,6 @@ test.ipynb
 
 # Test spreadsheets
 *.csv
+
+# Ignore config (contains secrets)
+config.py
