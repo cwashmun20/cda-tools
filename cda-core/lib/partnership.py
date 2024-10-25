@@ -79,16 +79,16 @@ class Partnership:
                 if self.lead.newcomer() and not self.follow.newcomer():
                     return True
                 else:
-                    print(f"{self.names} ineligible for {dance_obj}: 
-                          ROOKIE-LEAD VIOLATION: Lead is Vet and/or Follow is Rookie.")
+                    print(f"""{self.names} ineligible for {dance_obj}: 
+                          ROOKIE-LEAD VIOLATION: Lead is Vet and/or Follow is Rookie.""")
                     return False
             # Check Rookie Follow
             elif dance_obj.level == dance.ALL_LEVELS[-1]:
                 if self.follow.newcomer() and not self.lead.newcomer():
                     return True
                 else:
-                    print(f"{self.names} ineligible for {dance_obj}: 
-                          ROOKIE-FOLLOW VIOLATION: Follow is Vet and/or Lead is Rookie.")
+                    print(f"""{self.names} ineligible for {dance_obj}: 
+                          ROOKIE-FOLLOW VIOLATION: Follow is Vet and/or Lead is Rookie.""")
                     return False
 
         elif rv_ruleset == "level":
@@ -100,8 +100,8 @@ class Partnership:
                 if rookie_lead and vet_follow:
                     return True
                 else:
-                    print(f"{self.names} ineligible for {dance_obj}: 
-                          ROOKIE-LEAD VIOLATION: Lead is Vet and/or Follow is Rookie.")
+                    print(f"""{self.names} ineligible for {dance_obj}: 
+                          ROOKIE-LEAD VIOLATION: Lead is Vet and/or Follow is Rookie.""")
                     return False
             # Check Rookie Follow
             elif dance_obj.level == dance.ALL_LEVELS[-1]:
@@ -110,8 +110,8 @@ class Partnership:
                 if rookie_follow and vet_lead:
                     return True
                 else:
-                    print(f"{self.names} ineligible for {dance_obj}: 
-                          ROOKIE-FOLLOW VIOLATION: Follow is Vet and/or Lead is Rookie.")
+                    print(f"""{self.names} ineligible for {dance_obj}: 
+                          ROOKIE-FOLLOW VIOLATION: Follow is Vet and/or Lead is Rookie.""")
                     return False
         elif rv_ruleset not in ["newcomer", "level"]:
             raise ValueError("Invalid Rookie/Vet ruleset.")
@@ -123,9 +123,9 @@ class Partnership:
         # Check for Split-Level Exception and Pointing Out
         if abs(lead_level - follow_level) >= 2:
             combined_level = max(lead_level, follow_level) - 1
-            print(f"SPLIT-LEVEL EXCEPTION: {self.names} are competing {dance_obj} 
+            print(f"""SPLIT-LEVEL EXCEPTION: {self.names} are competing {dance_obj} 
                   under the Split-Level Exception. Be sure to award 3x points 
-                  if points are awarded.")
+                  if points are awarded.""")
             # TODO (CWA): If this is how combined_level is assigned, sync this
             #             with the couple's entries and awarded points to award 
             #             3x points, if applicable.

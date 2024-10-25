@@ -1,15 +1,18 @@
+from typing import TYPE_CHECKING
 import dance
+
+if TYPE_CHECKING:
+    from partnership import Partnership
 
 class Entry:
     """Representation of a competition entry."""
 
-    dance_data = dance.Dance()
+    dance_data = None
     event_name = ""
     partnership = None
     heat = ""
 
-    from partnership import Partnership
-    def __init__(self, dance_obj: dance.Dance, partnership_obj: Partnership, heat=None):
+    def __init__(self, dance_obj: dance.Dance, partnership_obj: 'Partnership', heat=None):
         self.dance_data = dance_obj
         self.event_name = str(dance_obj)
         self.partnership = partnership_obj
