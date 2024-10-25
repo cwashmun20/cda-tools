@@ -1,18 +1,18 @@
 import dance
-import partnership as partners
 
 class Entry:
     """Representation of a competition entry."""
 
     dance_data = dance.Dance()
     event_name = ""
-    partnership = partners.Partnership()
+    partnership = None
     heat = ""
 
-    def __init__(self, dance_obj: dance.Dance, dancers: partners.Partnership, heat=None):
+    from partnership import Partnership
+    def __init__(self, dance_obj: dance.Dance, partnership_obj: Partnership, heat=None):
         self.dance_data = dance_obj
         self.event_name = str(dance_obj)
-        self.partnership = dancers
+        self.partnership = partnership_obj
         self.heat = heat
         self.partnership.add(self)
 

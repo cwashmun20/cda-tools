@@ -1,6 +1,5 @@
 import dance
 import dancer
-import entry
 
 class Partnership:
     """Representation of a partnership."""
@@ -143,15 +142,15 @@ class Partnership:
             print(f"{self.follow} lowest allowed level is {follow_eligibility}.")
             return False
     
-    def add(self, comp_entry: entry.Entry):
+    def add(self, entry_obj):
         """Adds a competition entry for a couple. Should only be called within the Entry constructor."""
-        if comp_entry not in self.entries:
-            self.entries.add(comp_entry)
-            self.lead.add(comp_entry)
-            self.follow.add(comp_entry)
+        if entry_obj not in self.entries:
+            self.entries.add(entry_obj)
+            self.lead.add(entry_obj)
+            self.follow.add(entry_obj)
 
-    def drop(self, comp_entry: entry.Entry):
+    def drop(self, entry_obj):
         """Drops a competition entry for a couple."""
-        self.entries.remove(comp_entry)
-        self.lead.drop(comp_entry)
-        self.follow.drop(comp_entry)
+        self.entries.remove(entry_obj)
+        self.lead.drop(entry_obj)
+        self.follow.drop(entry_obj)

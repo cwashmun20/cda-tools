@@ -1,5 +1,4 @@
 import dance
-import dancer_points as pts
 from datetime import date
 import entry
 
@@ -24,7 +23,7 @@ class Dancer:
         month, day, year = map(int, first_comp_date)
         self.first_comp_date = date(year, month, day)
 
-        self.points = pts.DancerPoints()  #TODO (CWA): Construct this properly
+        self.points = None  #TODO (CWA): Construct this properly
         self.entries = []
     
     # TODO (CWA): Implement a new constructor for making a Dancer from existing database data.
