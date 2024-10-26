@@ -5,14 +5,6 @@ import dancer
 import entry
 import partnership
 
-# TODO(CWA): TOP PRIORITY
-#            1) Reorganize repo to allow for safe API key storage
-#            2) After all entries have been added, loop through all competitors
-#               to check whether they have registered for more than 2 consecutive
-#               or any non-consecutive levels.
-#            3) Integrate API data fetching into Dancer class (rework the constructor).
-#            4) In dancer.py, make a way to handle new dancers not in the system.
-
 class Competition:
     """Representation of a CDA competition."""
 
@@ -26,13 +18,21 @@ class Competition:
 
     def __init__(self, path: str = None, df: pd.DataFrame = None):
         self.comp_name = input("Please enter competition name: ")
-        date_str = input("Please enter competition date (MM/DD/YYYY): ")
-        month, day, year = date_str.split('/')
-        self.comp_date = date(int(year), int(month), int(day))
+        # Bypass naming for test purposes (defaults to newcomer rv ruleset).
+        if self.comp_name == "test":
+            self.comp_date = date.today()
+            self.rv_ruleset = "newcomer"
+        else:
+            date_str = input("Please enter competition date (MM/DD/YYYY): ")
+            month, day, year = date_str.split('/')
+            self.comp_date = date(int(year), int(month), int(day))
 
-        rv_ruleset_input = input("Please enter desired rookie-vet ruleset ('newcomer' or 'level'): ")
-        if rv_ruleset_input not in ['newcomer', 'level']:
-            raise ValueError("Rookie-vet ruleset must be either 'newcomer' or 'level' (without asterisks).")
+            rv_ruleset_input = input("Please enter desired rookie-vet ruleset ('newcomer' or 'level'): ")
+            if rv_ruleset_input not in ['newcomer', 'level']:
+                raise ValueError("Rookie-vet ruleset must be either 'newcomer' or 'level' (without asterisks).")
+            self.rv_ruleset = rv_ruleset_input
+
+        print()  # Add newline after comp setup.
 
         if not df and not path:
             raise ValueError("""Must provide a path to a .csv file or a dataframe 
@@ -82,7 +82,8 @@ class Competition:
                 full_name = first + " " + last
                 partners.append(full_name)
                 if full_name not in self.competitors:
-                    self.competitors[full_name] = dancer.Dancer(first, last)
+                    self.competitors[full_name] = dancer.Dancer(curr_comp_date=self.comp_date, 
+                                                                first=first, last=last)
 
             partnership_name = " & ".join(partners)
             lead_obj = self.competitors[partners[0]]

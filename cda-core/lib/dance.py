@@ -70,7 +70,7 @@ def convert_dance(style: str, input_name: str) -> str:
         ValueError: if input_name is not a recognized dance.
     """
     if style not in STYLES:
-        raise ValueError("""Unrecognized style.
+        raise ValueError(f"""Unrecognized style.
                          Please add support for {style} to convert_dance in dance.py""")
 
     if input_name == "West Coast Swing":
