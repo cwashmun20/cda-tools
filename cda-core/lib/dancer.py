@@ -138,7 +138,14 @@ class Dancer:
     
     def add(self, comp_entry: entry.Entry):
         """Adds a competition entry for a dancer. Should only be called from a partnership."""
-        if comp_entry not in self.entries:
+        if comp_entry in self.entries:
+            print(f"DUPLICATE ENTRY: '{self.name}' has registered for '{comp_entry.dance_data}' more than once:")
+            print(f"As '{comp_entry}'")
+            for existing_entry in self.entries:
+                if existing_entry == comp_entry:
+                    print(f"As '{existing_entry}'")
+            print()
+        else:
             self.entries.add(comp_entry)
 
     def drop(self, comp_entry: entry.Entry):
@@ -192,7 +199,7 @@ class Dancer:
             ValueError: if target_dance is not eligible for FLC points (e.g. nightclub dances).
         """
         if target_dance.style not in dance.STYLES[:-1]:
-            raise ValueError(f"""{target_dance} is not eligible for FLC points 
+            raise ValueError(f"""'{target_dance}' is not eligible for FLC points 
                                  (e.g. nightclub dances).""")
 
         if target_dance.level in dance.SYLLABUS_LEVELS:
@@ -300,7 +307,7 @@ class Dancer:
         elif style == "Rhythm":
             other_style = "Latin"
         else:
-            raise ValueError(f"{style} is not eligible for FLC points (e.g. nightclub dances).")
+            raise ValueError(f"'{style}' is not eligible for FLC points (e.g. nightclub dances).")
         
         # Cross-Style: Dances where their corresponding dance has the same name.
         if (style in ["Standard", "Smooth"] or dance_name in ["ChaCha", "Rumba"]) and dance_name != "Quickstep":

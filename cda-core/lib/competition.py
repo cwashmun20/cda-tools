@@ -97,3 +97,8 @@ class Competition:
             if partnership_obj.eligible(dance_obj, self.rv_ruleset):
                 self.entries.add(entry.Entry(dance_obj, partnership_obj, heat))
                 # If ineligible, violations will already be printed.
+    
+        #TODO (CWA): Add code here for checking violations (such as consecutive
+        #               level violations) that only arise from issues with an
+        #               individual dancer's entries (i.e. loop through each dancer
+        #               to check for duplicate dances, consecutive level violations, etc.).

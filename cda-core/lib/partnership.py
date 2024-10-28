@@ -25,16 +25,12 @@ class Partnership:
         """String representation of a partnership with registration-relevant 
         information.
         """
-        string = f"""\
-        Names (Lead & Follow): {self.names}
-        Newcomers?             {self.newcomers}
-        NC Beginners?          {self.nc_beginners}
-        Entries:               {self.entries}
-        """
-        # TODO (CWA): Future feature: add recommended levels for each syllabus style,
-        #             AKA the lowest common level where neither dancer has pointed
-        #             out of any dances, plus the level above that. Will need to
-        #             ignore Newcomer if dancers are ineligible. 
+        return self.names
+    
+    # TODO (CWA): Future feature: add recommended levels for each syllabus style,
+    #             AKA the lowest common level where neither dancer has pointed
+    #             out of any dances, plus the level above that. Will need to
+    #             ignore Newcomer if dancers are ineligible. 
 
     # TODO (CWA): Change or remove default value of rv_ruleset depending on convention in Fall 2024.
     # TODO (CWA): Implement a way to pass on the reason why eligibility was denied.
@@ -64,7 +60,7 @@ class Partnership:
             if self.nc_beginners:
                 return True
             else:
-                print(f"NIGHTCLUB BEGINNER VIOLATION: {self.names} are ineligible for {dance_obj}.")
+                print(f"NIGHTCLUB BEGINNER VIOLATION: '{self.names}' are ineligible for '{dance_obj}'.")
                 return False
 
         # Check eligibility for Newcomer
@@ -72,7 +68,7 @@ class Partnership:
             if self.newcomers:
                 return True
             else:
-                print(f"NEWCOMER VIOLATION: {self.names} ineligible for {dance_obj}.")
+                print(f"NEWCOMER VIOLATION: '{self.names}' ineligible for '{dance_obj}'.")
                 return False
         
         # Check eligibility for Rookie/Vet
@@ -82,7 +78,7 @@ class Partnership:
                 if self.lead.newcomer() and not self.follow.newcomer():
                     return True
                 else:
-                    print(f"ROOKIE-LEAD VIOLATION: {self.names} ineligible for {dance_obj}.")
+                    print(f"ROOKIE-LEAD VIOLATION: '{self.names}' ineligible for '{dance_obj}'.")
                     print(f"\tLead ({self.lead}) is rookie: {self.lead.newcomer()}.")
                     print(f"\tFollow ({self.follow}) is vet: {not self.follow.newcomer()}.")
                     print()
@@ -92,7 +88,7 @@ class Partnership:
                 if self.follow.newcomer() and not self.lead.newcomer():
                     return True
                 else:
-                    print(f"ROOKIE-FOLLOW VIOLATION: {self.names} ineligible for {dance_obj}.")
+                    print(f"ROOKIE-FOLLOW VIOLATION: '{self.names}' ineligible for '{dance_obj}'.")
                     print(f"\tLead ({self.lead}) is vet: {not self.lead.newcomer()}.")
                     print(f"\tFollow ({self.follow}) is rookie: {self.follow.newcomer()}.")
                     print()
@@ -107,7 +103,7 @@ class Partnership:
                 if rookie_lead and vet_follow:
                     return True
                 else:
-                    print(f"ROOKIE-LEAD VIOLATION: {self.names} ineligible for {dance_obj}.")
+                    print(f"ROOKIE-LEAD VIOLATION: '{self.names}' ineligible for '{dance_obj}'.")
                     print(f"\tLead ({self.lead}) is rookie: {rookie_lead}.")
                     print(f"\tFollow ({self.follow}) is vet: {vet_follow}.")
                     print()
@@ -119,13 +115,13 @@ class Partnership:
                 if rookie_follow and vet_lead:
                     return True
                 else:
-                    print(f"ROOKIE-FOLLOW VIOLATION: {self.names} ineligible for {dance_obj}.")
+                    print(f"ROOKIE-FOLLOW VIOLATION: '{self.names}' ineligible for '{dance_obj}'.")
                     print(f"\tLead ({self.lead}) is vet: {vet_lead}.")
                     print(f"\tFollow ({self.follow}) is rookie: {rookie_follow}.")
                     print()
                     return False
         elif rv_ruleset not in ["newcomer", "level"]:
-            raise ValueError("Invalid Rookie/Vet ruleset.")
+            raise ValueError(f"'{rv_ruleset}' is an invalid Rookie/Vet ruleset.")
 
         lead_level = self.lead.proficiency_level(dance_obj)
         follow_level = self.follow.proficiency_level(dance_obj)
@@ -135,7 +131,7 @@ class Partnership:
         if abs(lead_level - follow_level) >= 2:
             combined_level = max(lead_level, follow_level) - 1
             if combined_level == event_level:
-                print(f"""SPLIT-LEVEL EXCEPTION (NOT a violation): {self.names} are competing {dance_obj} 
+                print(f"""SPLIT-LEVEL EXCEPTION (NOT a violation): '{self.names}' are competing '{dance_obj}' 
                     under the Split-Level Exception. Be sure to award 3x points 
                     if points are awarded to this couple for this event.""")
                 # TODO (CWA): If this is how combined_level is assigned, sync this
@@ -149,7 +145,7 @@ class Partnership:
         else:
             lead_eligibility = dance.FLC_LEVELS[lead_level]
             follow_eligibility = dance.FLC_LEVELS[follow_level]
-            print(f"POINTED OUT VIOLATION: {self.names} are ineligible for {dance_obj}")
+            print(f"POINTED OUT VIOLATION: '{self.names}' are ineligible for '{dance_obj}'")
             print(f"\t{self.lead} lowest allowed level is {lead_eligibility}.")
             print(f"\t{self.follow} lowest allowed level is {follow_eligibility}.")
             print()
@@ -157,10 +153,9 @@ class Partnership:
     
     def add(self, entry_obj):
         """Adds a competition entry for a couple. Should only be called within the Entry constructor."""
-        if entry_obj not in self.entries:
-            self.entries.add(entry_obj)
-            self.lead.add(entry_obj)
-            self.follow.add(entry_obj)
+        self.entries.add(entry_obj)
+        self.lead.add(entry_obj)
+        self.follow.add(entry_obj)
 
     def drop(self, entry_obj):
         """Drops a competition entry for a couple."""

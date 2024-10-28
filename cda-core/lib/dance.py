@@ -43,10 +43,8 @@ ALL_LEVELS = FLC_LEVELS + NC_LEVELS + ["RkLead", "RkFollow"]
 def flc_fulldancelist() -> list:
     """Returns a list of all points-eligible dances at all levels, Newcomer through Champ.
 
-    Args: None.
     Returns:
         a list of all points-eligible dances at all levels.
-    Raises: None.
     """
     fulldancelist = []
     for level in FLC_LEVELS:
@@ -71,7 +69,7 @@ def convert_dance(style: str, input_name: str) -> str:
     """
     if style not in STYLES:
         raise ValueError(f"""Unrecognized style.
-                         Please add support for {style} to convert_dance in dance.py""")
+                         Please add support for '{style}' to convert_dance in dance.py""")
 
     if input_name == "West Coast Swing":
         return DANCES["Nightclub"][0]
@@ -94,7 +92,7 @@ def convert_dance(style: str, input_name: str) -> str:
     
     # Unrecognized level name format.
     raise ValueError(f"""Unrecognized dance. 
-                     Please add support for {style} {input_name} to convert_dance in dance.py.""")
+                     Please add support for '{style} {input_name}' to convert_dance in dance.py.""")
     
 def convert_level(input_name: str) -> str:
     """Converts input level from entry spreadsheet into standard naming convention, returning a string.
@@ -130,7 +128,7 @@ def convert_level(input_name: str) -> str:
 
     # Unrecognized level name format.
     raise ValueError(f"""Unrecognized level name. 
-                     Please add support for {input_name} to convert_level in dance.py.""")
+                     Please add support for '{input_name}' to convert_level in dance.py.""")
     
 class Dance:
     """Represents a dance style at a certain level."""
@@ -147,9 +145,18 @@ class Dance:
     def __repr__(self) -> str:
         designation = ""
         if self.style in AM_STYLES:
-            designation = "Am. "
+            designation = "Am."
         elif self.style in INTL_STYLES:
-            designation = "Intl. "
+            designation = "Intl."
 
-        return f"{self.level} {designation}{self.dance}"
-        
+        return f"{self.level} {designation} {self.dance}"
+    
+    def __key(self):
+        return (self.level, self.style, self.dance)
+    
+    def __hash__(self):
+        return hash(self.__key())
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Dance):
+            return self.__key == other.__key
