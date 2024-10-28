@@ -15,6 +15,7 @@ class Competition:
     partnerships = {}  # Partnership name keys, Partnership object values.
     rv_ruleset = ""
     entries = set()
+    FLC_LEVEL_LIMIT = 2  # The number of allowed consecutive Smooth/Standard/Rhythm/Latin levels.
 
     def __init__(self, path: str = None, df: pd.DataFrame = None):
         self.comp_name = input("Please enter competition name: ")
@@ -22,6 +23,7 @@ class Competition:
         if self.comp_name == "test":
             self.comp_date = date.today()
             self.rv_ruleset = "newcomer"
+            self.FLC_LEVEL_LIMIT = 2
         else:
             date_str = input("Please enter competition date (MM/DD/YYYY): ")
             month, day, year = date_str.split('/')
@@ -31,6 +33,8 @@ class Competition:
             if rv_ruleset_input not in ['newcomer', 'level']:
                 raise ValueError("Rookie-vet ruleset must be either 'newcomer' or 'level' (without asterisks).")
             self.rv_ruleset = rv_ruleset_input
+            
+            self.FLC_LEVEL_LIMIT = input("Please enter the number of consecutive Smooth/Standard/Rhythm/Latin levels allowed (2 is recommended): ")
 
         print()  # Add newline after comp setup.
 
@@ -73,6 +77,8 @@ class Competition:
         self.raw_data = pd.DataFrame(row_list, columns=col_names)
     
     def check_entries(self):
+        # Check for Proficiency Violations, Newcomer Violations,  
+        # Nightclub Beginner Violations, and Rookie-Vet Violations.
         for _, row in self.raw_data.iterrows():
             lead_first, lead_last = row["Lead First"], row["Lead Last"]
             follow_first, follow_last = row["Follow First"], row["Follow Last"]
@@ -98,7 +104,35 @@ class Competition:
                 self.entries.add(entry.Entry(dance_obj, partnership_obj, heat))
                 # If ineligible, violations will already be printed.
     
-        #TODO (CWA): Add code here for checking violations (such as consecutive
-        #               level violations) that only arise from issues with an
-        #               individual dancer's entries (i.e. loop through each dancer
-        #               to check for duplicate dances, consecutive level violations, etc.).
+        # Check for Consecutive Level Violations
+        for dancer_obj in list(self.competitors.values()):
+            name = dancer_obj.name
+            level_log = {"Smooth": set(),
+                         "Standard": set(),
+                         "Rhythm": set(),
+                         "Latin": set()}
+            for entry_obj in dancer_obj.entries:
+                style = entry_obj.dance_data.style
+                level = entry_obj.dance_data.level
+                if style in dance.STYLES and level in dance.FLC_LEVELS:
+                    level_log[style].add(dance.FLC_LEVELS.index(level))
+            
+            for style, level_set in level_log.items():
+                # Check for too many levels registered.
+                if len(level_set) > self.FLC_LEVEL_LIMIT:
+                    print(f"CONSECUTIVE LEVEL VIOLATION: {name} is registered for more than {self.FLC_LEVEL_LIMIT} level(s) of {style}:")
+                    for level_number in sorted(level_set):
+                        print(f"\t {name} is registered for at least one dance in '{dance.FLC_LEVELS[level_number]} {style}'.")
+                    print()
+                
+                # Check for non-consecutive levels registered.
+                else:
+                    sorted_levels = sorted(list(level_set))
+                    curr_idx, next_idx = 0, 1
+                    while next_idx < len(sorted_levels):
+                        if sorted_levels[next_idx] - sorted_levels[curr_idx] != 1:
+                            level_name_1 = dance.FLC_LEVELS[sorted_levels[curr_idx]]
+                            level_name_2 = dance.FLC_LEVELS[sorted_levels[next_idx]]
+                            print(f"CONSECUTIVE LEVEL VIOLATION: {name} is registered for at least one event in both '{level_name_1} {style}' and '{level_name_2} {style}'.")
+                        curr_idx += 1
+                        next_idx += 1

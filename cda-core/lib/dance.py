@@ -145,11 +145,11 @@ class Dance:
     def __repr__(self) -> str:
         designation = ""
         if self.style in AM_STYLES:
-            designation = "Am."
+            designation = "Am. "
         elif self.style in INTL_STYLES:
-            designation = "Intl."
+            designation = "Intl. "
 
-        return f"{self.level} {designation} {self.dance}"
+        return f"{self.level} {designation}{self.dance}"
     
     def __key(self):
         return (self.level, self.style, self.dance)
@@ -159,4 +159,4 @@ class Dance:
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Dance):
-            return self.__key == other.__key
+            return self.__key() == other.__key()

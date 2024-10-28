@@ -138,13 +138,31 @@ class Dancer:
     
     def add(self, comp_entry: entry.Entry):
         """Adds a competition entry for a dancer. Should only be called from a partnership."""
-        if comp_entry in self.entries:
-            print(f"DUPLICATE ENTRY: '{self.name}' has registered for '{comp_entry.dance_data}' more than once:")
-            print(f"As '{comp_entry}'")
-            for existing_entry in self.entries:
-                if existing_entry == comp_entry:
-                    print(f"As '{existing_entry}'")
-            print()
+        # Grab nightclub-related info.
+        entry_style = comp_entry.dance_data.style
+        is_nightclub = False
+        if entry_style == dance.STYLES[-1]:
+            is_nightclub = True
+            nc_dance = comp_entry.dance_data.dance
+            nc_level = comp_entry.dance_data.level
+            other_nc_level = dance.NC_LEVELS[0] if nc_level == dance.NC_LEVELS[1] else dance.NC_LEVELS[1]
+            other_nc_dance = dance.Dance(other_nc_level, entry_style, nc_dance)
+        
+        # TODO(CWA): Fix duplicate entry checking:
+        # # Check for duplicate entries (currently broken but not essential).
+        # if comp_entry in self.entries:
+        #     print(f"DUPLICATE ENTRY: '{self.name}' is registered for '{comp_entry.dance_data}' more than once:")
+        #     print(f"As '{comp_entry}'")
+        #     for existing_entry in self.entries:
+        #         if existing_entry == comp_entry:
+        #             print(f"As '{existing_entry}'")
+        #     print()
+        # # Check for registration in two levels of the same Nightclub dance.
+        # elif is_nightclub and other_nc_dance in self.entries:
+
+        # Check for registration in two levels of the same Nightclub dance.
+        if is_nightclub and other_nc_dance in self.entries:
+            print(f"CONSECUTIVE LEVEL VIOLATION: '{self.name}' is registered for both levels of '{nc_dance}'.")
         else:
             self.entries.add(comp_entry)
 

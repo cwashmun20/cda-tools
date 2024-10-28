@@ -29,6 +29,9 @@ class Entry:
         who they're dancing with."""
         if isinstance(other, Entry):
             return self.dance_data == other.dance_data
+        # You can also check equality between Entries and Dances.
+        elif isinstance(other, dance.Dance):
+            return self.dance_data == other
     
     def __hash__(self):
         """Hashing is based only on the entry's dance (not its partnership)."""
