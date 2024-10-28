@@ -34,7 +34,7 @@ class Competition:
                 raise ValueError("Rookie-vet ruleset must be either 'newcomer' or 'level' (without asterisks).")
             self.rv_ruleset = rv_ruleset_input
             
-            self.FLC_LEVEL_LIMIT = input("Please enter the number of consecutive Smooth/Standard/Rhythm/Latin levels allowed (2 is recommended): ")
+            self.FLC_LEVEL_LIMIT = int(input("Please enter the number of consecutive Smooth/Standard/Rhythm/Latin levels allowed (2 is recommended): "))
 
         print()  # Add newline after comp setup.
 
@@ -48,7 +48,7 @@ class Competition:
         self.multi_dance_preprocess()
 
     def multi_dance_preprocess(self):
-        """Repalces multi-dance event rows in a competition's raw data with one
+        """Replaces multi-dance event rows in a competition's raw data with one
         row for each dance in the multi-dance event.
         """
         row_list = []
@@ -58,6 +58,9 @@ class Competition:
             if not dances.isupper():
                 row_list.append(row.tolist())
             else:
+                # TODO (CWA): Rework this to leverage row.tolist() and then replacing
+                #               the dance name in each deep copy of row.tolist() to eliminate
+                #               the need for saving most of the data in variables.
                 style = row["Style"]
                 level = row["Skill"]
                 lead_first = row["Lead First"]

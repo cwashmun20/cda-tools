@@ -75,21 +75,19 @@ class Partnership:
         if rv_ruleset == "newcomer":
             # Check Rookie Lead
             if dance_obj.level == dance.ALL_LEVELS[-2]:
-                if self.lead.newcomer() and not self.follow.newcomer():
+                if self.lead.newcomer():
                     return True
                 else:
                     print(f"ROOKIE-LEAD VIOLATION: '{self.names}' ineligible for '{dance_obj}'.")
                     print(f"\tLead ({self.lead}) is rookie: {self.lead.newcomer()}.")
-                    print(f"\tFollow ({self.follow}) is vet: {not self.follow.newcomer()}.")
                     print()
                     return False
             # Check Rookie Follow
             elif dance_obj.level == dance.ALL_LEVELS[-1]:
-                if self.follow.newcomer() and not self.lead.newcomer():
+                if self.follow.newcomer():
                     return True
                 else:
                     print(f"ROOKIE-FOLLOW VIOLATION: '{self.names}' ineligible for '{dance_obj}'.")
-                    print(f"\tLead ({self.lead}) is vet: {not self.lead.newcomer()}.")
                     print(f"\tFollow ({self.follow}) is rookie: {self.follow.newcomer()}.")
                     print()
                     return False

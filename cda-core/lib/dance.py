@@ -113,10 +113,10 @@ def convert_level(input_name: str) -> str:
         return NC_LEVELS[1]
 
     # Rookie-Vet Levels
-    if input_name in ["Rookie Leader"]:
+    if input_name in ["Rookie Leader", "Rookie Leaders"]:
         return ALL_LEVELS[-2]
     
-    if input_name in ["Rookie Follower"]:
+    if input_name in ["Rookie Follower", "Rookie Followers"]:
         return ALL_LEVELS[-1]
     
     # Open Levels
