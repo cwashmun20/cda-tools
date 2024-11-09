@@ -120,7 +120,7 @@ def convert_level(input_name: str) -> str:
         return ALL_LEVELS[-1]
     
     # Open Levels
-    if input_name in ["Pre-Champ"]:
+    if input_name in ["Pre-Champ, PreChamp"]:
         return OPEN_LEVELS[1]
     
     if input_name in ["Championship"]:
