@@ -57,6 +57,7 @@ class Competition:
         """Replaces multi-dance event rows in a competition's raw data with one
         row for each dance in the multi-dance event.
         """
+        data_has_heat = "Heat" in self.raw_data.columns
         row_list = []
         for _, row in self.raw_data.iterrows():
             # Ignore TBA rows (should only be checked once the partnership is known
@@ -81,7 +82,8 @@ class Competition:
                 follow_first = row["Follow First"]
                 follow_last = row["Follow Last"]
                 o2cm_name = row["O2CM Name"]
-                heat = row["Heat"]
+                if data_has_heat:
+                    heat = row["Heat"]
 
                 if '/' in dances:
                     dances = ''.join(dances.split('/'))
@@ -90,8 +92,12 @@ class Competition:
                     dance_name = dance.ABBREVIATION_MAPS[style][char]
                     # TODO(CWA): Eventually, update o2cm name to match each 
                     #               individual dance (unclear if this is important).
-                    row_list.append([style, dance_name, level, lead_first, lead_last, 
-                                     follow_first, follow_last, o2cm_name, heat])
+                    if data_has_heat:
+                        row_list.append([style, dance_name, level, lead_first, lead_last, 
+                                        follow_first, follow_last, o2cm_name, heat])
+                    else:
+                        row_list.append([style, dance_name, level, lead_first, lead_last, 
+                                        follow_first, follow_last, o2cm_name])
         
         col_names = self.raw_data.columns.tolist()
         self.raw_data = pd.DataFrame(row_list, columns=col_names)
@@ -118,7 +124,12 @@ class Competition:
                 self.partnerships[partnership_name] = partnership.Partnership(lead_obj, follow_obj)
 
             partnership_obj = self.partnerships[partnership_name]
-            level, style, dance_name, heat = row["Skill"], row["Style"], row["Dance"], row["Heat"]
+            level, style, dance_name = row["Skill"], row["Style"], row["Dance"]
+            if "Heat" in self.raw_data.columns:
+                heat = row["Heat"]
+            else:
+                heat = None
+
             dance_obj = dance.Dance(level, style, dance_name)
             if partnership_obj.eligible(dance_obj, self.rv_ruleset):
                 self.entries.add(entry.Entry(dance_obj, partnership_obj, heat))
