@@ -69,6 +69,10 @@ class Competition:
                 follow_last = row["Follow Last"]
                 o2cm_name = row["O2CM Name"]
                 heat = row["Heat"]
+
+                if '/' in dances:
+                    dances = ''.join(dances.split('/'))
+
                 for char in dances:
                     dance_name = dance.ABBREVIATION_MAPS[style][char]
                     # TODO(CWA): Eventually, update o2cm name to match each 
