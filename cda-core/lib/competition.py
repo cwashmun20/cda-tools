@@ -5,6 +5,12 @@ import dancer
 import entry
 import partnership
 
+def is_tba_row(row) -> bool:
+    """Checks whether an entry row is a TBA entry (missing a lead or follow name)."""
+    missing_lead = type(row["Lead First"]) == float and type(row["Lead Last"]) == float
+    missing_follow = type(row["Follow First"]) == float and type(row["Follow Last"]) == float
+    return missing_lead or missing_follow
+
 class Competition:
     """Representation of a CDA competition."""
 
@@ -53,6 +59,11 @@ class Competition:
         """
         row_list = []
         for _, row in self.raw_data.iterrows():
+            # Ignore TBA rows (should only be checked once the partnership is known
+            # in case of Split Level Exception, etc.).
+            if is_tba_row(row):
+                continue
+
             dances = row["Dance"]
             # Leave non-multi-dance rows as-is.
             if not dances.isupper():
@@ -61,6 +72,8 @@ class Competition:
                 # TODO (CWA): Rework this to leverage row.tolist() and then replacing
                 #               the dance name in each deep copy of row.tolist() to eliminate
                 #               the need for saving most of the data in variables.
+
+                # TODO (CWA): Add support for alternate headers (e.g. "Leader First").
                 style = row["Style"]
                 level = row["Skill"]
                 lead_first = row["Lead First"]
