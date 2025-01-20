@@ -94,7 +94,8 @@ class Dancer:
     points = None
     entries = set()
 
-    def __init__(self, curr_comp_date: datetime.date, name: str = None, first: str = None, last: str = None):
+    def __init__(self, curr_comp_date: datetime.date, name: str = None, 
+                 first: str = None, last: str = None):
         """Parameterized constructor for fetching a dancer's info from the CDA points database."""
         if name is None and (first is None or last is None):
             raise ValueError("Must provide a full name when constructing a Dancer")
@@ -207,14 +208,16 @@ class Dancer:
         return False
     
     def get_points(self, target_dance: dance.Dance) -> int:
-        """Retrieves the points earned for a given dance at a given level, returning an int.
+        """Retrieves the points earned for a given dance at a given level, 
+           returning an int.
         
         Args:
             target_dance: a Dance object used to search for the dancer's points.
         Returns:
             the number of points the dancer has in target_dance.
         Raises:
-            ValueError: if target_dance is not eligible for FLC points (e.g. nightclub dances).
+            ValueError: if target_dance is not eligible for FLC points 
+                        (e.g. nightclub dances).
         """
         if target_dance.style not in dance.STYLES[:-1]:
             raise ValueError(f"""'{target_dance}' is not eligible for FLC points 
