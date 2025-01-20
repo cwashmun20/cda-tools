@@ -72,13 +72,19 @@ def lookup_dancer(first: str, last: str) -> dict:
 
         dancer_info['created_date'] = profile['dateCreated']
 
-        syllabus_pts = [[int(pt) for pt in profile_points[key][1:-1].split(',')] 
-                for key in SYLLABUS_KEYS]
-        dancer_info['syllabus_pts'] = np.array(syllabus_pts)
+        # Set zero points if no points table exists for a competitor.
+        if profile_points == False:
+            dancer_info['syllabus_pts'] = np.zeros((4, 19), dtype=int)
+            dancer_info['open_pts'] = np.zeros((3, 4), dtype=int)
+        # Otherwise, populate points using competitor data.
+        else:
+            syllabus_pts = [[int(pt) for pt in profile_points[key][1:-1].split(',')] 
+                            for key in SYLLABUS_KEYS]
+            dancer_info['syllabus_pts'] = np.array(syllabus_pts)
 
-        open_pts = [[int(pt) for pt in profile_points[key][1:-1].split(',')] 
-                    for key in OPEN_KEYS]
-        dancer_info['open_pts'] = np.array(open_pts)
+            open_pts = [[int(pt) for pt in profile_points[key][1:-1].split(',')] 
+                        for key in OPEN_KEYS]
+            dancer_info['open_pts'] = np.array(open_pts)
 
     return dancer_info
 
