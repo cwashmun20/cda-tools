@@ -7,8 +7,8 @@ import partnership
 
 def is_tba_row(row) -> bool:
     """Checks whether an entry row is a TBA entry (missing a lead or follow name)."""
-    missing_lead = type(row["Lead First"]) == float and type(row["Lead Last"]) == float
-    missing_follow = type(row["Follow First"]) == float and type(row["Follow Last"]) == float
+    missing_lead = type(row["Lead First"]) == float or type(row["Lead Last"]) == float
+    missing_follow = type(row["Follow First"]) == float or type(row["Follow Last"]) == float
     return missing_lead or missing_follow
 
 class Competition:
@@ -57,6 +57,7 @@ class Competition:
         """Replaces multi-dance event rows in a competition's raw data with one
         row for each dance in the multi-dance event.
         """
+        data_has_o2cm_name = "O2CM Name" in self.raw_data.columns
         data_has_heat = "Heat" in self.raw_data.columns
         row_list = []
         for _, row in self.raw_data.iterrows():
@@ -81,7 +82,8 @@ class Competition:
                 lead_last = row["Lead Last"]
                 follow_first = row["Follow First"]
                 follow_last = row["Follow Last"]
-                o2cm_name = row["O2CM Name"]
+                if data_has_o2cm_name:
+                    o2cm_name = row["O2CM Name"]
                 if data_has_heat:
                     heat = row["Heat"]
 
@@ -92,12 +94,14 @@ class Competition:
                     dance_name = dance.ABBREVIATION_MAPS[style][char]
                     # TODO(CWA): Eventually, update o2cm name to match each 
                     #               individual dance (unclear if this is important).
+
+                    curr_row = [style, dance_name, level, lead_first, lead_last, follow_first, follow_last]
+                    if data_has_o2cm_name:
+                        curr_row.append(o2cm_name)
                     if data_has_heat:
-                        row_list.append([style, dance_name, level, lead_first, lead_last, 
-                                        follow_first, follow_last, o2cm_name, heat])
-                    else:
-                        row_list.append([style, dance_name, level, lead_first, lead_last, 
-                                        follow_first, follow_last, o2cm_name])
+                        curr_row.append(heat)
+                    
+                    row_list.append(curr_row)
         
         col_names = self.raw_data.columns.tolist()
         self.raw_data = pd.DataFrame(row_list, columns=col_names)

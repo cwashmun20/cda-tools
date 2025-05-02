@@ -132,6 +132,7 @@ class Partnership:
                 print(f"""SPLIT-LEVEL EXCEPTION (NOT a violation): '{self.names}' are competing '{dance_obj}' 
                     under the Split-Level Exception. Be sure to award 3x points 
                     if points are awarded to this couple for this event.""")
+                print()
                 # TODO (CWA): If this is how combined_level is assigned, sync this
                 #             with the couple's entries and awarded points to award 
                 #             3x points, if applicable.

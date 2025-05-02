@@ -76,6 +76,9 @@ def convert_dance(style: str, input_name: str) -> str:
 
     if input_name == "Night Club 2-Step" or input_name == "Nightclub 2-Step":
         return DANCES["Nightclub"][1]
+    
+    if input_name == "Viennese Waltz":
+        return "Viennese"
 
     # Check if dance name is the same as in the standard naming convention.
     if input_name in DANCES[style]:
