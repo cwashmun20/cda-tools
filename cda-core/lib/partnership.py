@@ -17,7 +17,7 @@ class Partnership:
         self.names = leader.name + " & " + follower.name
         self.lead = leader
         self.follow = follower
-        self.newcomers = leader.newcomer() and follower.newcomer()
+        self.newcomers = leader.is_newcomer() and follower.is_newcomer()
         self.nc_beginners = leader.nc_beginner() and follower.nc_beginner()
         self.entries = set()
 
@@ -74,21 +74,22 @@ class Partnership:
         # Check eligibility for Rookie/Vet
         if rv_ruleset == "newcomer":
             # Check Rookie Lead
+            curr_style = dance_obj.style
             if dance_obj.level == dance.ALL_LEVELS[-2]:
-                if self.lead.newcomer():
+                if self.lead.is_newcomer() and not self.follow.is_registered_newcomer(curr_style):
                     return True
                 else:
                     print(f"ROOKIE-LEAD VIOLATION: '{self.names}' ineligible for '{dance_obj}'.")
-                    print(f"\tLead ({self.lead}) is rookie: {self.lead.newcomer()}.")
+                    print(f"\tLead ({self.lead}) is rookie: {self.lead.is_newcomer()}.")
                     print()
                     return False
             # Check Rookie Follow
             elif dance_obj.level == dance.ALL_LEVELS[-1]:
-                if self.follow.newcomer():
+                if self.follow.is_newcomer() and not self.lead.is_registered_newcomer(curr_style):
                     return True
                 else:
                     print(f"ROOKIE-FOLLOW VIOLATION: '{self.names}' ineligible for '{dance_obj}'.")
-                    print(f"\tFollow ({self.follow}) is rookie: {self.follow.newcomer()}.")
+                    print(f"\tFollow ({self.follow}) is rookie: {self.follow.is_newcomer()}.")
                     print()
                     return False
 

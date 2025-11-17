@@ -131,11 +131,21 @@ class Dancer:
     def __repr__(self) -> str:
         return self.name
 
-    def newcomer(self) -> bool:
+    def is_newcomer(self) -> bool:
         """Returns True if a dancer would be considered a newcomer 
         (competing < 1 year); otherwise False.
         """
         return (self.curr_comp_date - self.first_comp_date).days // 365 < 1
+    
+    def is_registered_newcomer(self, curr_style: str) -> bool:
+        # Returns True if the dancer is registered for a Newcomer event in the current style; otherwise, False.
+        for entry in self.entries:
+            entry_style = entry.dance_data.style
+            entry_level = entry.dance_data.level
+            if curr_style == entry_style and entry_level == dance.SYLLABUS_LEVELS[0]:
+                print(f"{self.name} is registered for at least one Newcomer event in {curr_style}.")
+                return True
+        return False
     
     def nc_beginner(self) -> bool:
         """Returns True if a dancer would be considered a beginner
@@ -310,7 +320,7 @@ class Dancer:
         elif len(args) == 2:
             style, dance_name = args
 
-        newcomer_level = 0 if self.newcomer() else 1
+        newcomer_level = 0 if self.is_newcomer() else 1
 
         # Proficiency via Pointing Out
         point_out_level = self.point_out_level(style, dance_name)
