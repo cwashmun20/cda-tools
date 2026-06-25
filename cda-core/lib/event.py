@@ -1,6 +1,7 @@
-import dance
+"""Event representation for competition events."""
 
-ROUNDS = ["Final", "Semifinal", "Quarterfinal", "1/8 Final", "1/16 Final", "1/32 Final"]  # We hope we won't have to add more!
+import constants
+
 
 class Event:
     """Representation of a competition event."""

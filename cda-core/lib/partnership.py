@@ -1,5 +1,7 @@
+import constants
 import dance
 import dancer
+
 
 class Partnership:
     """Representation of a partnership."""
@@ -13,7 +15,7 @@ class Partnership:
 
     def __init__(self, leader: dancer.Dancer, follower: dancer.Dancer):
         """Create a partnership from two dancers."""
-        
+
         self.names = leader.name + " & " + follower.name
         self.lead = leader
         self.follow = follower
@@ -22,15 +24,15 @@ class Partnership:
         self.entries = set()
 
     def __repr__(self) -> str:
-        """String representation of a partnership with registration-relevant 
+        """String representation of a partnership with registration-relevant
         information.
         """
         return self.names
-    
+
     # TODO (CWA): Future feature: add recommended levels for each syllabus style,
     #             AKA the lowest common level where neither dancer has pointed
     #             out of any dances, plus the level above that. Will need to
-    #             ignore Newcomer if dancers are ineligible. 
+    #             ignore Newcomer if dancers are ineligible.
 
     # TODO (CWA): Change or remove default value of rv_ruleset depending on convention in Fall 2024.
     # TODO (CWA): Implement a way to pass on the reason why eligibility was denied.
@@ -49,14 +51,14 @@ class Partnership:
         Prints:
             The couple's name, dance, and violation description if ineligible for an event.
         Raises:
-            ValueError: if the ruleset is not recognized. 
+            ValueError: if the ruleset is not recognized.
         """
         # Everyone is always eligible for int./adv. Nightclub and Championship
-        if dance_obj.level == dance.NC_LEVELS[-1] or dance_obj.level == dance.OPEN_LEVELS[-1]:
+        if dance_obj.level == constants.NC_LEVELS[-1] or dance_obj.level == constants.OPEN_LEVELS[-1]:
             return True
 
         # Check eligibility for Beginner Nightclub
-        if dance_obj.level == dance.NC_LEVELS[0]:
+        if dance_obj.level == constants.NC_LEVELS[0]:
             if self.nc_beginners:
                 return True
             else:
@@ -64,18 +66,18 @@ class Partnership:
                 return False
 
         # Check eligibility for Newcomer
-        if dance_obj.level == dance.SYLLABUS_LEVELS[0]:
+        if dance_obj.level == constants.SYLLABUS_LEVELS[0]:
             if self.newcomers:
                 return True
             else:
                 print(f"NEWCOMER VIOLATION: '{self.names}' ineligible for '{dance_obj}'.")
                 return False
-        
+
         # Check eligibility for Rookie/Vet
         if rv_ruleset == "newcomer":
             # Check Rookie Lead
             curr_style = dance_obj.style
-            if dance_obj.level == dance.ALL_LEVELS[-2]:
+            if dance_obj.level == constants.RookieVetLevel.ROOKIE_LEAD:
                 if self.lead.is_newcomer() and not self.follow.is_registered_newcomer(curr_style) and not self.follow.is_registered_bronze(curr_style):
                     return True
                 else:
@@ -84,7 +86,7 @@ class Partnership:
                     print()
                     return False
             # Check Rookie Follow
-            elif dance_obj.level == dance.ALL_LEVELS[-1]:
+            elif dance_obj.level == constants.RookieVetLevel.ROOKIE_FOLLOW:
                 if self.follow.is_newcomer() and not self.lead.is_registered_newcomer(curr_style) and not self.lead.is_registered_bronze(curr_style):
                     return True
                 else:
@@ -95,7 +97,7 @@ class Partnership:
 
         elif rv_ruleset == "level":
             # Check Rookie Lead
-            if dance_obj.level == dance.ALL_LEVELS[-2]:
+            if dance_obj.level == constants.RookieVetLevel.ROOKIE_LEAD:
                 # TODO (CWA): Rename and update has_BLANK_entries so that negation isn't needed.
                 rookie_lead = not self.lead.has_vet_entries(dance_obj.style)
                 vet_follow = not self.follow.has_rookie_entries(dance_obj.style)
@@ -108,7 +110,7 @@ class Partnership:
                     print()
                     return False
             # Check Rookie Follow
-            elif dance_obj.level == dance.ALL_LEVELS[-1]:
+            elif dance_obj.level == constants.RookieVetLevel.ROOKIE_FOLLOW:
                 rookie_follow = not self.follow.has_vet_entries(dance_obj.style)
                 vet_lead = not self.lead.has_rookie_entries(dance_obj.style)
                 if rookie_follow and vet_lead:
@@ -124,18 +126,18 @@ class Partnership:
 
         lead_level = self.lead.proficiency_level(dance_obj)
         follow_level = self.follow.proficiency_level(dance_obj)
-        event_level = dance.FLC_LEVELS.index(dance_obj.level)
+        event_level = constants.FLC_LEVELS.index(dance_obj.level)
 
         # Check for Split-Level Exception and Pointing Out
         if abs(lead_level - follow_level) >= 2:
             combined_level = max(lead_level, follow_level) - 1
             if combined_level == event_level:
-                print(f"""SPLIT-LEVEL EXCEPTION (NOT a violation): '{self.names}' are competing '{dance_obj}' 
-                    under the Split-Level Exception. Be sure to award 3x points 
+                print(f"""SPLIT-LEVEL EXCEPTION (NOT a violation): '{self.names}' are competing '{dance_obj}'
+                    under the Split-Level Exception. Be sure to award 3x points
                     if points are awarded to this couple for this event.""")
                 print()
                 # TODO (CWA): If this is how combined_level is assigned, sync this
-                #             with the couple's entries and awarded points to award 
+                #             with the couple's entries and awarded points to award
                 #             3x points, if applicable.
         else:
             combined_level = max(lead_level, follow_level)
@@ -143,14 +145,14 @@ class Partnership:
         if combined_level <= event_level:
             return True
         else:
-            lead_eligibility = dance.FLC_LEVELS[lead_level]
-            follow_eligibility = dance.FLC_LEVELS[follow_level]
+            lead_eligibility = constants.FLC_LEVELS[lead_level]
+            follow_eligibility = constants.FLC_LEVELS[follow_level]
             print(f"POINTED OUT VIOLATION: '{self.names}' are ineligible for '{dance_obj}'")
             print(f"\t{self.lead} lowest allowed level is {lead_eligibility}.")
             print(f"\t{self.follow} lowest allowed level is {follow_eligibility}.")
             print()
             return False
-    
+
     def add(self, entry_obj):
         """Adds a competition entry for a couple. Should only be called within the Entry constructor."""
         self.entries.add(entry_obj)

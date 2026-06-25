@@ -1,6 +1,4 @@
-import dance
 import datetime
-import entry
 import inspect
 import numpy as np
 import os
@@ -14,13 +12,17 @@ cda_tools_dir = os.path.dirname(os.path.dirname(curr_dir))
 sys.path.insert(0, cda_tools_dir)
 
 import config
+import constants
+import dance
+import entry
 
 SYLLABUS_KEYS = ['newcomer_points', 'bronze_points', 'silver_points', 'gold_points']
 OPEN_KEYS = ['novice_points', 'prechamp_points', 'champ_points']
 
+
 def lookup_dancer(first: str, last: str) -> dict:
     """Fetches all relevant data from the CDA points database for a dancer.
-    
+
     Args:
         first: The dancer's first name.
         last: The dancer's last name.
@@ -30,15 +32,15 @@ def lookup_dancer(first: str, last: str) -> dict:
         'syllabus_pts', 'open_pts') and the values are strings, datetime objects,
         NumPy arrays, etc. corresponding to those pieces of information.
     Note:
-        In the output dictionary, the keys 'id' and 'first_comp_date' will have 
+        In the output dictionary, the keys 'id' and 'first_comp_date' will have
         values of None if the dancer is not already in the points database.
     """
     HEADER = {"x-api-key": config.API_KEY}
     parameters = {"firstName": first,
                   "lastName": last}
-    result = requests.get("https://collegiatedancesport.org/db/namematch.php", 
+    result = requests.get("https://collegiatedancesport.org/db/namematch.php",
                           headers=HEADER, params=parameters).json()
-    
+
     dancer_info = {'id': None,
                    'first': None,
                    'last': None,
@@ -46,7 +48,7 @@ def lookup_dancer(first: str, last: str) -> dict:
                    'created_date': None,
                    'syllabus_pts': None,
                    'open_pts': None}
-    
+
     if not result['success']:
         dancer_info['first'] = first
         dancer_info['last'] = last
@@ -78,15 +80,16 @@ def lookup_dancer(first: str, last: str) -> dict:
             dancer_info['open_pts'] = np.zeros((3, 4), dtype=int)
         # Otherwise, populate points using competitor data.
         else:
-            syllabus_pts = [[int(pt) for pt in profile_points[key][1:-1].split(',')] 
+            syllabus_pts = [[int(pt) for pt in profile_points[key][1:-1].split(',')]
                             for key in SYLLABUS_KEYS]
             dancer_info['syllabus_pts'] = np.array(syllabus_pts)
 
-            open_pts = [[int(pt) for pt in profile_points[key][1:-1].split(',')] 
+            open_pts = [[int(pt) for pt in profile_points[key][1:-1].split(',')]
                         for key in OPEN_KEYS]
             dancer_info['open_pts'] = np.array(open_pts)
 
     return dancer_info
+
 
 class Dancer:
     """Abstract representation of a dancer for FLC entry checking and point updating purposes.
@@ -100,16 +103,16 @@ class Dancer:
     points = None
     entries = set()
 
-    def __init__(self, curr_comp_date: datetime.date, name: str = None, 
+    def __init__(self, curr_comp_date: datetime.date, name: str = None,
                  first: str = None, last: str = None):
         """Parameterized constructor for fetching a dancer's info from the CDA points database."""
         if name is None and (first is None or last is None):
             raise ValueError("Must provide a full name when constructing a Dancer")
-        
+
         # Make sure first and last have values.
         if name is not None:
             first, last = name.split()
-        
+
         dancer_info = lookup_dancer(first, last)
 
         self.name = ' '.join([dancer_info['first'], dancer_info['last']])
@@ -122,7 +125,7 @@ class Dancer:
         if dancer_info['id'] is None:
             self.cda_id = None
             self.first_comp_date = curr_comp_date
-            
+
         # Existing Dancers in the Database
         else:
             self.cda_id = dancer_info['id']
@@ -132,49 +135,49 @@ class Dancer:
         return self.name
 
     def is_newcomer(self) -> bool:
-        """Returns True if a dancer would be considered a newcomer 
+        """Returns True if a dancer would be considered a newcomer
         (competing < 1 year); otherwise False.
         """
         return (self.curr_comp_date - self.first_comp_date).days // 365 < 1
-    
+
     def is_registered_newcomer(self, curr_style: str) -> bool:
         # Returns True if the dancer is registered for a Newcomer event in the current style; otherwise, False.
-        for entry in self.entries:
-            entry_style = entry.dance_data.style
-            entry_level = entry.dance_data.level
-            if curr_style == entry_style and entry_level == dance.SYLLABUS_LEVELS[0]:
+        for e in self.entries:
+            entry_style = e.dance_data.style
+            entry_level = e.dance_data.level
+            if curr_style == entry_style and entry_level == constants.SYLLABUS_LEVELS[0]:
                 print(f"{self.name} is registered for at least one Newcomer event in {curr_style}.")
                 return True
         return False
-    
+
     def is_registered_bronze(self, curr_style: str) -> bool:
         # Returns True if the dancer is registered for a Bronze event in the current style; otherwise, False.
-        for entry in self.entries:
-            entry_style = entry.dance_data.style
-            entry_level = entry.dance_data.level
-            if curr_style == entry_style and entry_level == dance.SYLLABUS_LEVELS[1]:
+        for e in self.entries:
+            entry_style = e.dance_data.style
+            entry_level = e.dance_data.level
+            if curr_style == entry_style and entry_level == constants.SYLLABUS_LEVELS[1]:
                 print(f"{self.name} is registered for at least one Bronze event in {curr_style}.")
                 return True
         return False
-    
+
     def nc_beginner(self) -> bool:
         """Returns True if a dancer would be considered a beginner
             nightclub dancer (competing < 2 years); otherwise False.
         """
         return (self.curr_comp_date - self.first_comp_date).days // 365 < 2
-    
+
     def add(self, comp_entry: entry.Entry):
         """Adds a competition entry for a dancer. Should only be called from a partnership."""
         # Grab nightclub-related info.
         entry_style = comp_entry.dance_data.style
         is_nightclub = False
-        if entry_style == dance.STYLES[-1]:
+        if entry_style == constants.Style.NIGHTCLUB:
             is_nightclub = True
             nc_dance = comp_entry.dance_data.dance
             nc_level = comp_entry.dance_data.level
-            other_nc_level = dance.NC_LEVELS[0] if nc_level == dance.NC_LEVELS[1] else dance.NC_LEVELS[1]
+            other_nc_level = constants.NC_LEVELS[0] if nc_level == constants.NC_LEVELS[1] else constants.NC_LEVELS[1]
             other_nc_dance = dance.Dance(other_nc_level, entry_style, nc_dance)
-        
+
         # TODO(CWA): Fix duplicate entry checking:
         # # Check for duplicate entries (currently broken but not essential).
         # if comp_entry in self.entries:
@@ -201,7 +204,7 @@ class Dancer:
         """Returns True if the dancer has entries of Silver and above in a
         certain style; otherwise False. Having vet entries disqualifies a dancer
         from being a rookie.
-        
+
         Args:
             style: the dance's style/category (e.g. "Smooth", "Latin").
         Returns:
@@ -210,16 +213,16 @@ class Dancer:
         """
         for comp_entry in self.entries:
             style_match = comp_entry.dance_data.style == style
-            is_vet_entry = dance.FLC_LEVELS.index(comp_entry.dance_data.level) >= 2
+            is_vet_entry = constants.FLC_LEVELS.index(comp_entry.dance_data.level) >= 2
             if style_match and is_vet_entry:
                 return True
         return False
-    
+
     def has_rookie_entries(self, style: str) -> bool:
         """Returns True if the dancer has entries of Bronze or below in a
         certain style; otherwise False. Having rookie entries disqualifies a
         dancer from being a vet.
-        
+
         Args:
             style: the dance's style/category (e.g. "Smooth", "Latin").
         Returns:
@@ -228,40 +231,40 @@ class Dancer:
         """
         for comp_entry in self.entries:
             style_match = comp_entry.dance_data.style == style
-            is_rookie_entry = dance.FLC_LEVELS.index(comp_entry.dance_data.level) <= 1
+            is_rookie_entry = constants.FLC_LEVELS.index(comp_entry.dance_data.level) <= 1
             if style_match and is_rookie_entry:
                 return True
         return False
-    
+
     def get_points(self, target_dance: dance.Dance) -> int:
-        """Retrieves the points earned for a given dance at a given level, 
+        """Retrieves the points earned for a given dance at a given level,
            returning an int.
-        
+
         Args:
             target_dance: a Dance object used to search for the dancer's points.
         Returns:
             the number of points the dancer has in target_dance.
         Raises:
-            ValueError: if target_dance is not eligible for FLC points 
+            ValueError: if target_dance is not eligible for FLC points
                         (e.g. nightclub dances).
         """
-        if target_dance.style not in dance.STYLES[:-1]:
-            raise ValueError(f"""'{target_dance}' is not eligible for FLC points 
+        if target_dance.style not in constants.STYLES[:-1]:
+            raise ValueError(f"""'{target_dance}' is not eligible for FLC points
                                  (e.g. nightclub dances).""")
 
-        if target_dance.level in dance.SYLLABUS_LEVELS:
-            row_idx = dance.SYLLABUS_LEVELS.index(target_dance.level)
-            col_idx = dance.DANCES[target_dance.style].index(target_dance.dance)
-            if target_dance.style == "Smooth":
+        if target_dance.level in constants.SYLLABUS_LEVELS:
+            row_idx = constants.SYLLABUS_LEVELS.index(target_dance.level)
+            col_idx = constants.DANCE_NAMES[target_dance.style].index(target_dance.dance)
+            if target_dance.style == constants.Style.SMOOTH:
                 col_idx += 5
-            if target_dance.style == "Latin":
+            if target_dance.style == constants.Style.LATIN:
                 col_idx += 9
-            if target_dance.style == "Rhythm":
+            if target_dance.style == constants.Style.RHYTHM:
                 col_idx += 14
             return self.points.syllabus_data[row_idx][col_idx]
-        elif target_dance.level in dance.OPEN_LEVELS:
-            row_idx = dance.OPEN_LEVELS.index(target_dance.level)
-            col_idx = dance.STYLES.index(target_dance.style)
+        elif target_dance.level in constants.OPEN_LEVELS:
+            row_idx = constants.OPEN_LEVELS.index(target_dance.level)
+            col_idx = constants.STYLES.index(target_dance.style)
             return self.points.open_data[row_idx][col_idx]
 
     def pointed_out(self, dance_obj: dance.Dance) -> bool:
@@ -272,8 +275,8 @@ class Dancer:
         return num_points < 0 or num_points >= 7
 
     def point_out_level(self, *args) -> int:
-        """Returns an int representing a dancer's proficiency level in a Dance 
-        based only on pointing out. See proficiency_level() for correspondences 
+        """Returns an int representing a dancer's proficiency level in a Dance
+        based only on pointing out. See proficiency_level() for correspondences
         between the output int and FLC levels.
 
         Args:
@@ -292,7 +295,7 @@ class Dancer:
             style, dance_name = args
 
         point_out_level = 0
-        for level in dance.FLC_LEVELS:
+        for level in constants.FLC_LEVELS:
             curr_dance = dance.Dance(level, style, dance_name)
             if self.pointed_out(curr_dance):
                 point_out_level += 1
@@ -304,7 +307,7 @@ class Dancer:
         """Returns an int representing a dancer's proficiency level for a given dance, following
         CDA Fair Level Certification rules: https://collegiatedancesport.org/fairlevel/
         Proficiency level integer represents the lowest level a dancer *is* eligible
-        to register for and corresponds to the index of the level in dance.FLC_LEVELS:
+        to register for and corresponds to the index of the level in constants.FLC_LEVELS:
         0 = Newcomer
         1 = Bronze
         2 = Silver
@@ -316,7 +319,7 @@ class Dancer:
         Args:
             *args can be in one of two formats:
             dance_obj: a Dance object.
-            OR 
+            OR
             style: the dance's style/category (e.g. "Smooth", "Latin").
             dance_name: the dance's name (e.g. "Tango", "Samba").
         Returns:
@@ -334,33 +337,34 @@ class Dancer:
 
         # Proficiency via Pointing Out
         point_out_level = self.point_out_level(style, dance_name)
-        
-        # Within-Style Proficiency: never less than two levels two levels lower
+
+        # Within-Style Proficiency: never less than two levels lower
         # than any other dance within the same style.
         within_style_level = 0
-        for curr_dance_name in dance.DANCES[style]:
+        for curr_dance_name in constants.DANCE_NAMES[style]:
             if curr_dance_name != dance_name:
-                within_style_level = max(within_style_level, 
+                within_style_level = max(within_style_level,
                                          self.point_out_level(style, curr_dance_name) - 2)
 
         # Cross-Style Proficiency
         cross_style_level = 0
-        if style == "Standard":
-            other_style = "Smooth"
-        elif style == "Smooth":
-            other_style = "Standard"
-        elif style == "Latin":
-            other_style = "Rhythm"
-        elif style == "Rhythm":
-            other_style = "Latin"
+        if style == constants.Style.STANDARD:
+            other_style = constants.Style.SMOOTH
+        elif style == constants.Style.SMOOTH:
+            other_style = constants.Style.STANDARD
+        elif style == constants.Style.LATIN:
+            other_style = constants.Style.RHYTHM
+        elif style == constants.Style.RHYTHM:
+            other_style = constants.Style.LATIN
         else:
             raise ValueError(f"'{style}' is not eligible for FLC points (e.g. nightclub dances).")
-        
+
         # Cross-Style: Dances where their corresponding dance has the same name.
-        if (style in ["Standard", "Smooth"] or dance_name in ["ChaCha", "Rumba"]) and dance_name != "Quickstep":
-            cross_style_level = max(cross_style_level, 
+        if (style in [constants.Style.STANDARD, constants.Style.SMOOTH]
+                or dance_name in ["ChaCha", "Rumba"]) and dance_name != "Quickstep":
+            cross_style_level = max(cross_style_level,
                                     self.point_out_level(other_style, dance_name) - 2)
-        
+
         # Cross-Style: Swing and Jive Handling
         elif dance_name == "Jive":
             other_dance = "Swing"
@@ -370,7 +374,6 @@ class Dancer:
                                     self.point_out_level(other_style, other_dance) - 2)
 
         return max(newcomer_level, point_out_level, within_style_level, cross_style_level)
-    
 
 
 class Points(Dancer):
@@ -397,9 +400,7 @@ class Points(Dancer):
         strs = []
         lin_data = self.linear_data()
         for offset in [0, 19, 38, 57, 76, 80, 84]:
-            # Format Syllabus points 
-            # (this is not very nice because Smooth doesn't have a 5th dance, so
-            # let's add Peabody, Polka, or Quickstep so I can write prettier code :).
+            # Format Syllabus points
             if offset < 76:
                 for start, end in [(0, 5), (5, 9), (9, 14), (14, 19)]:
                     pt_line = str(lin_data[offset + start:offset + end])[1:-1]
@@ -431,22 +432,22 @@ class Points(Dancer):
         """
         return string
 
-    def standard(self) -> np.ndarray:
+    def standard(self) -> tuple:
         """Returns the subarrays of points corresponding to syllabus and open Standard points."""
         return self.syllabus_data[:, :5], self.open_data[:, :1]
-    
-    def smooth(self) -> np.ndarray:
+
+    def smooth(self) -> tuple:
         """Returns the subarrays of points corresponding to syllabus and open Smooth points."""
         return self.syllabus_data[:, 5:9], self.open_data[:, 1:2]
-    
-    def latin(self) -> np.ndarray:
+
+    def latin(self) -> tuple:
         """Returns the subarrays of points corresponding to syllabus and open Latin points."""
         return self.syllabus_data[:, 9:14], self.open_data[:, 2:3]
-    
-    def rhythm(self) -> np.ndarray:
+
+    def rhythm(self) -> tuple:
         """Returns the subarrays of points corresponding to syllabus and open Rhythm points."""
         return self.syllabus_data[:, 14:19], self.open_data[:, 3:4]
-    
+
     def linear_data(self) -> np.ndarray:
         """Returns a linear representation of a dancer's point totals in this order:
             Newcomer -> Bronze -> Silver -> Gold -> Novice -> Prechamp -> Champ.

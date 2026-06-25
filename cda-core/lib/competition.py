@@ -1,15 +1,18 @@
 from datetime import date
 import pandas as pd
+import constants
 import dance
 import dancer
 import entry
 import partnership
+
 
 def is_tba_row(row) -> bool:
     """Checks whether an entry row is a TBA entry (missing a lead or follow name)."""
     missing_lead = type(row["Lead First"]) == float or type(row["Lead Last"]) == float
     missing_follow = type(row["Follow First"]) == float or type(row["Follow Last"]) == float
     return missing_lead or missing_follow
+
 
 class Competition:
     """Representation of a CDA competition."""
@@ -39,13 +42,13 @@ class Competition:
             if rv_ruleset_input not in ['newcomer', 'level']:
                 raise ValueError("Rookie-vet ruleset must be either 'newcomer' or 'level' (without asterisks).")
             self.rv_ruleset = rv_ruleset_input
-            
+
             self.FLC_LEVEL_LIMIT = int(input("Please enter the number of consecutive Smooth/Standard/Rhythm/Latin levels allowed (2 is recommended): "))
 
         print()  # Add newline after comp setup.
 
         if not df and not path:
-            raise ValueError("""Must provide a path to a .csv file or a dataframe 
+            raise ValueError("""Must provide a path to a .csv file or a dataframe
                              to construct a Competition object.""")
         if not df and path:
             df = pd.read_csv(path)
@@ -91,8 +94,8 @@ class Competition:
                     dances = ''.join(dances.split('/'))
 
                 for char in dances:
-                    dance_name = dance.ABBREVIATION_MAPS[style][char]
-                    # TODO(CWA): Eventually, update o2cm name to match each 
+                    dance_name = constants.ABBREVIATION_MAPS[style][char]
+                    # TODO(CWA): Eventually, update o2cm name to match each
                     #               individual dance (unclear if this is important).
 
                     curr_row = [style, dance_name, level, lead_first, lead_last, follow_first, follow_last]
@@ -100,14 +103,14 @@ class Competition:
                         curr_row.append(o2cm_name)
                     if data_has_heat:
                         curr_row.append(heat)
-                    
+
                     row_list.append(curr_row)
-        
+
         col_names = self.raw_data.columns.tolist()
         self.raw_data = pd.DataFrame(row_list, columns=col_names)
-    
+
     def check_entries(self):
-        # Check for Proficiency Violations, Newcomer Violations,  
+        # Check for Proficiency Violations, Newcomer Violations,
         # Nightclub Beginner Violations, and Rookie-Vet Violations.
         for _, row in self.raw_data.iterrows():
             lead_first, lead_last = row["Lead First"], row["Lead Last"]
@@ -118,7 +121,7 @@ class Competition:
                 full_name = first + " " + last
                 partners.append(full_name)
                 if full_name not in self.competitors:
-                    self.competitors[full_name] = dancer.Dancer(curr_comp_date=self.comp_date, 
+                    self.competitors[full_name] = dancer.Dancer(curr_comp_date=self.comp_date,
                                                                 first=first, last=last)
 
             partnership_name = " & ".join(partners)
@@ -138,7 +141,7 @@ class Competition:
             if partnership_obj.eligible(dance_obj, self.rv_ruleset):
                 self.entries.add(entry.Entry(dance_obj, partnership_obj, heat))
                 # If ineligible, violations will already be printed.
-    
+
         # Check for Consecutive Level Violations
         for dancer_obj in list(self.competitors.values()):
             name = dancer_obj.name
@@ -149,25 +152,25 @@ class Competition:
             for entry_obj in dancer_obj.entries:
                 style = entry_obj.dance_data.style
                 level = entry_obj.dance_data.level
-                if style in dance.STYLES and level in dance.FLC_LEVELS:
-                    level_log[style].add(dance.FLC_LEVELS.index(level))
-            
+                if style in constants.STYLES and level in constants.FLC_LEVELS:
+                    level_log[style].add(constants.FLC_LEVELS.index(level))
+
             for style, level_set in level_log.items():
                 # Check for too many levels registered.
                 if len(level_set) > self.FLC_LEVEL_LIMIT:
                     print(f"CONSECUTIVE LEVEL VIOLATION: {name} is registered for more than {self.FLC_LEVEL_LIMIT} level(s) of {style}:")
                     for level_number in sorted(level_set):
-                        print(f"\t {name} is registered for at least one dance in '{dance.FLC_LEVELS[level_number]} {style}'.")
+                        print(f"\t {name} is registered for at least one dance in '{constants.FLC_LEVELS[level_number]} {style}'.")
                     print()
-                
+
                 # Check for non-consecutive levels registered.
                 else:
                     sorted_levels = sorted(list(level_set))
                     curr_idx, next_idx = 0, 1
                     while next_idx < len(sorted_levels):
                         if sorted_levels[next_idx] - sorted_levels[curr_idx] != 1:
-                            level_name_1 = dance.FLC_LEVELS[sorted_levels[curr_idx]]
-                            level_name_2 = dance.FLC_LEVELS[sorted_levels[next_idx]]
+                            level_name_1 = constants.FLC_LEVELS[sorted_levels[curr_idx]]
+                            level_name_2 = constants.FLC_LEVELS[sorted_levels[next_idx]]
                             print(f"CONSECUTIVE LEVEL VIOLATION: {name} is registered for at least one event in both '{level_name_1} {style}' and '{level_name_2} {style}'.")
                         curr_idx += 1
                         next_idx += 1

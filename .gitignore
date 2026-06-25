@@ -168,3 +168,6 @@ test.ipynb
 
 # Ignore config (contains secrets)
 config.py
+
+# Agent working files (notes, task lists, design docs)
+agents/
