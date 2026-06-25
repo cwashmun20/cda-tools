@@ -76,7 +76,7 @@ class Partnership:
             # Check Rookie Lead
             curr_style = dance_obj.style
             if dance_obj.level == dance.ALL_LEVELS[-2]:
-                if self.lead.is_newcomer() and not self.follow.is_registered_newcomer(curr_style):
+                if self.lead.is_newcomer() and not self.follow.is_registered_newcomer(curr_style) and not self.follow.is_registered_bronze(curr_style):
                     return True
                 else:
                     print(f"ROOKIE-LEAD VIOLATION: '{self.names}' ineligible for '{dance_obj}'.")
@@ -85,7 +85,7 @@ class Partnership:
                     return False
             # Check Rookie Follow
             elif dance_obj.level == dance.ALL_LEVELS[-1]:
-                if self.follow.is_newcomer() and not self.lead.is_registered_newcomer(curr_style):
+                if self.follow.is_newcomer() and not self.lead.is_registered_newcomer(curr_style) and not self.lead.is_registered_bronze(curr_style):
                     return True
                 else:
                     print(f"ROOKIE-FOLLOW VIOLATION: '{self.names}' ineligible for '{dance_obj}'.")

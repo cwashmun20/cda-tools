@@ -8,7 +8,8 @@ DANCES = {"Standard": ["Waltz", "Tango", "Viennese", "Foxtrot", "Quickstep"],
           "Latin": ["ChaCha", "Samba", "Rumba", "Paso", "Jive"],
           "Rhythm": ["ChaCha", "Rumba", "Swing", "Bolero", "Mambo"],
           "Nightclub": ["WCS", "NC2S", "Lindy", "Merengue", "Blues", "Salsa", 
-                        "Argentine", "Hustle", "Bachata", "Polka"]}
+                        "Argentine", "Hustle", "Bachata", "Polka",
+                        "Country 2-Step", "Country Swing"]}
 
 STANDARD_MAP = {"W": "Waltz",
                 "T": "Tango",
@@ -74,7 +75,7 @@ def convert_dance(style: str, input_name: str) -> str:
     if input_name == "West Coast Swing":
         return DANCES["Nightclub"][0]
 
-    if input_name == "Night Club 2-Step" or input_name == "Nightclub 2-Step":
+    if input_name == "Night Club 2-Step" or input_name == "Nightclub 2-Step" or input_name == "Nightclub Two-Step":
         return DANCES["Nightclub"][1]
     
     if input_name == "Viennese Waltz":
@@ -112,14 +113,14 @@ def convert_level(input_name: str) -> str:
         return input_name
 
     # Nightclub Levels
-    if input_name in ["Intermediate/Advanced", "Advanced", "Intermediate/Adv."]:
+    if input_name in ["Intermediate/Advanced", "Advanced", "Intermediate/Adv.", "Int/Adv"]:
         return NC_LEVELS[1]
 
     # Rookie-Vet Levels
-    if input_name in ["Rookie Leader", "Rookie Leaders"]:
+    if input_name in ["Rookie Leader", "Rookie Leaders", "RV Rookie Lead"]:
         return ALL_LEVELS[-2]
     
-    if input_name in ["Rookie Follower", "Rookie Followers"]:
+    if input_name in ["Rookie Follower", "Rookie Followers", "RV Rookie Follow"]:
         return ALL_LEVELS[-1]
     
     # Open Levels

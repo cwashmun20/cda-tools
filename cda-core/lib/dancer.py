@@ -147,6 +147,16 @@ class Dancer:
                 return True
         return False
     
+    def is_registered_bronze(self, curr_style: str) -> bool:
+        # Returns True if the dancer is registered for a Bronze event in the current style; otherwise, False.
+        for entry in self.entries:
+            entry_style = entry.dance_data.style
+            entry_level = entry.dance_data.level
+            if curr_style == entry_style and entry_level == dance.SYLLABUS_LEVELS[1]:
+                print(f"{self.name} is registered for at least one Bronze event in {curr_style}.")
+                return True
+        return False
+    
     def nc_beginner(self) -> bool:
         """Returns True if a dancer would be considered a beginner
             nightclub dancer (competing < 2 years); otherwise False.
