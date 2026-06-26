@@ -1,10 +1,10 @@
 from datetime import date
 import pandas as pd
 import constants
-import dance
-import dancer
-import entry
-import partnership
+from models.dance import Dance
+from models.dancer import Dancer
+from models.entry import Entry
+from models.partnership import Partnership
 
 
 def is_tba_row(row) -> bool:
@@ -121,14 +121,14 @@ class Competition:
                 full_name = first + " " + last
                 partners.append(full_name)
                 if full_name not in self.competitors:
-                    self.competitors[full_name] = dancer.Dancer(curr_comp_date=self.comp_date,
-                                                                first=first, last=last)
+                    self.competitors[full_name] = Dancer(curr_comp_date=self.comp_date,
+                                                         first=first, last=last)
 
             partnership_name = " & ".join(partners)
             lead_obj = self.competitors[partners[0]]
             follow_obj = self.competitors[partners[1]]
             if partnership_name not in self.partnerships:
-                self.partnerships[partnership_name] = partnership.Partnership(lead_obj, follow_obj)
+                self.partnerships[partnership_name] = Partnership(lead_obj, follow_obj)
 
             partnership_obj = self.partnerships[partnership_name]
             level, style, dance_name = row["Skill"], row["Style"], row["Dance"]
@@ -137,9 +137,9 @@ class Competition:
             else:
                 heat = None
 
-            dance_obj = dance.Dance(level, style, dance_name)
+            dance_obj = Dance(level, style, dance_name)
             if partnership_obj.eligible(dance_obj, self.rv_ruleset):
-                self.entries.add(entry.Entry(dance_obj, partnership_obj, heat))
+                self.entries.add(Entry(dance_obj, partnership_obj, heat))
                 # If ineligible, violations will already be printed.
 
         # Check for Consecutive Level Violations
