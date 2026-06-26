@@ -121,8 +121,8 @@ class Competition:
                 full_name = first + " " + last
                 partners.append(full_name)
                 if full_name not in self.competitors:
-                    self.competitors[full_name] = Dancer(curr_comp_date=self.comp_date,
-                                                         first=first, last=last)
+                    self.competitors[full_name] = Dancer.from_api(
+                        curr_comp_date=self.comp_date, first=first, last=last)
 
             partnership_name = " & ".join(partners)
             lead_obj = self.competitors[partners[0]]

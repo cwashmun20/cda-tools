@@ -1,136 +1,71 @@
 import datetime
-import inspect
-import numpy as np
-import os
-import pytz
-import requests
-import sys
+from typing import Optional
 
-# Allow imports from parent directory.
-curr_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-cda_tools_dir = os.path.dirname(os.path.dirname(os.path.dirname(curr_dir)))
-sys.path.insert(0, cda_tools_dir)
-
-import config
 import constants
+from api.client import DancerRecord, lookup_dancer
 from models.dance import Dance
 from models.entry import Entry
 from points import Points
-
-SYLLABUS_KEYS = ['newcomer_points', 'bronze_points', 'silver_points', 'gold_points']
-OPEN_KEYS = ['novice_points', 'prechamp_points', 'champ_points']
-
-
-def lookup_dancer(first: str, last: str) -> dict:
-    """Fetches all relevant data from the CDA points database for a dancer.
-
-    Args:
-        first: The dancer's first name.
-        last: The dancer's last name.
-    Returns:
-        A {str: any} dictionary where the keys are strings representing relevant
-        info ('id', 'first', 'last', 'first_comp_date', 'created_date',
-        'syllabus_pts', 'open_pts') and the values are strings, datetime objects,
-        NumPy arrays, etc. corresponding to those pieces of information.
-    Note:
-        In the output dictionary, the keys 'id' and 'first_comp_date' will have
-        values of None if the dancer is not already in the points database.
-    """
-    HEADER = {"x-api-key": config.API_KEY}
-    parameters = {"firstName": first,
-                  "lastName": last}
-    result = requests.get("https://collegiatedancesport.org/db/namematch.php",
-                          headers=HEADER, params=parameters).json()
-
-    dancer_info = {'id': None,
-                   'first': None,
-                   'last': None,
-                   'first_comp_date': None,
-                   'created_date': None,
-                   'syllabus_pts': None,
-                   'open_pts': None}
-
-    if not result['success']:
-        dancer_info['first'] = first
-        dancer_info['last'] = last
-
-        utc_dt = datetime.datetime.now(pytz.utc)
-        loc_dt = utc_dt.astimezone(pytz.timezone('US/Pacific'))
-        created_dt = loc_dt.strftime('%Y-%m-%dT%H:%M:%S%z')
-        created_dt = created_dt[:-2] + ':' + created_dt[-2:]
-        dancer_info['created_date'] = created_dt
-
-        dancer_info['syllabus_pts'] = np.zeros((4, 19), dtype=int)
-        dancer_info['open_pts'] = np.zeros((3, 4), dtype=int)
-    else:
-        profile = result['competitor']
-        profile_points = profile['fairlevelPoints']
-
-        dancer_info['id'] = profile['cdaId']
-        dancer_info['first'] = profile['firstName']
-        dancer_info['last'] = profile['lastName']
-
-        yr, m, d = [int(x) for x in profile['firstCompetitionDate'].split('-')]
-        dancer_info['first_comp_date'] = datetime.date(yr, m, d)
-
-        dancer_info['created_date'] = profile['dateCreated']
-
-        # Set zero points if no points table exists for a competitor.
-        if profile_points == False:
-            dancer_info['syllabus_pts'] = np.zeros((4, 19), dtype=int)
-            dancer_info['open_pts'] = np.zeros((3, 4), dtype=int)
-        # Otherwise, populate points using competitor data.
-        else:
-            syllabus_pts = [[int(pt) for pt in profile_points[key][1:-1].split(',')]
-                            for key in SYLLABUS_KEYS]
-            dancer_info['syllabus_pts'] = np.array(syllabus_pts)
-
-            open_pts = [[int(pt) for pt in profile_points[key][1:-1].split(',')]
-                        for key in OPEN_KEYS]
-            dancer_info['open_pts'] = np.array(open_pts)
-
-    return dancer_info
 
 
 class Dancer:
     """Abstract representation of a dancer for FLC entry checking and point updating purposes.
        All dates are handled using the datetime library's date object.
     """
-    name = None
-    cda_id = None  # Dancer's CDA #
-    first_comp_date = None
-    curr_comp_date = None
-    created_date = None
-    points = None
-    entries = set()
+    name: Optional[str] = None
+    cda_id: Optional[int] = None  # Dancer's CDA #
+    first_comp_date: Optional[datetime.date] = None
+    curr_comp_date: Optional[datetime.date] = None
+    created_date: Optional[str] = None
+    points: Optional[Points] = None
+    entries: set = set()
 
-    def __init__(self, curr_comp_date: datetime.date, name: str = None,
-                 first: str = None, last: str = None):
-        """Parameterized constructor for fetching a dancer's info from the CDA points database."""
-        if name is None and (first is None or last is None):
-            raise ValueError("Must provide a full name when constructing a Dancer")
+    def __init__(self, curr_comp_date: datetime.date, dancer_record: DancerRecord):
+        """Construct a Dancer from a DancerRecord (typed API response).
 
-        # Make sure first and last have values.
-        if name is not None:
-            first, last = name.split()
-
-        dancer_info = lookup_dancer(first, last)
-
-        self.name = ' '.join([dancer_info['first'], dancer_info['last']])
+        Args:
+            curr_comp_date: The date of the current competition.
+            dancer_record: A DancerRecord from the API client.
+        """
+        self.name = ' '.join([dancer_record.first, dancer_record.last])
         self.curr_comp_date = curr_comp_date
-        self.created_date = dancer_info['created_date']
-        self.points = Points(dancer_info['syllabus_pts'], dancer_info['open_pts'])
+        self.created_date = dancer_record.created_date
+        self.cda_id = dancer_record.cda_id
+        self.points = Points(dancer_record.syllabus_pts, dancer_record.open_pts)
         self.entries = set()
 
-        # New Dancers
-        if dancer_info['id'] is None:
-            self.cda_id = None
+        # New Dancers (not yet in database)
+        if dancer_record.cda_id is None:
             self.first_comp_date = curr_comp_date
-
         # Existing Dancers in the Database
         else:
-            self.cda_id = dancer_info['id']
-            self.first_comp_date = dancer_info['first_comp_date']
+            self.first_comp_date = dancer_record.first_comp_date
+
+    @classmethod
+    def from_api(cls, curr_comp_date: datetime.date, first: str, last: str) -> "Dancer":
+        """Fetch a dancer from the CDA API and construct a Dancer object.
+
+        Args:
+            curr_comp_date: The date of the current competition.
+            first: The dancer's first name.
+            last: The dancer's last name.
+        Returns:
+            A Dancer constructed from the API response.
+        """
+        record = lookup_dancer(first, last)
+        return cls(curr_comp_date, record)
+
+    @classmethod
+    def from_data(cls, curr_comp_date: datetime.date, dancer_record: DancerRecord) -> "Dancer":
+        """Construct a Dancer from an existing DancerRecord (no API call).
+
+        Args:
+            curr_comp_date: The date of the current competition.
+            dancer_record: A DancerRecord, possibly from test/mock data.
+        Returns:
+            A Dancer constructed from the provided data.
+        """
+        return cls(curr_comp_date, dancer_record)
 
     def __repr__(self) -> str:
         return self.name
