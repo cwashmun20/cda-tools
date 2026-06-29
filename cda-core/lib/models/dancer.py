@@ -6,6 +6,7 @@ from api.client import DancerRecord, lookup_dancer
 from models.dance import Dance
 from models.entry import Entry
 from points import Points
+from rules.proficiency import ProficiencyCalculator
 
 
 class Dancer:
@@ -207,8 +208,7 @@ class Dancer:
         """Returns True if a dancer has pointed out of a Dance (at a certain
         level); otherwise, False.
         """
-        num_points = self.get_points(dance_obj)
-        return num_points < 0 or num_points >= 7
+        return ProficiencyCalculator.has_pointed_out(self, dance_obj)
 
     def point_out_level(self, *args) -> int:
         """Returns an int representing a dancer's proficiency level in a Dance
@@ -230,14 +230,7 @@ class Dancer:
         elif len(args) == 2:
             style, dance_name = args
 
-        point_out_level = 0
-        for level in constants.FLC_LEVELS:
-            curr_dance = Dance(level, style, dance_name)
-            if self.pointed_out(curr_dance):
-                point_out_level += 1
-            else:
-                break
-        return point_out_level
+        return ProficiencyCalculator.compute_point_out_level(self, style, dance_name)
 
     def proficiency_level(self, *args) -> int:
         """Returns an int representing a dancer's proficiency level for a given dance, following
@@ -269,44 +262,4 @@ class Dancer:
         elif len(args) == 2:
             style, dance_name = args
 
-        newcomer_level = 0 if self.is_newcomer() else 1
-
-        # Proficiency via Pointing Out
-        point_out_level = self.point_out_level(style, dance_name)
-
-        # Within-Style Proficiency: never less than two levels lower
-        # than any other dance within the same style.
-        within_style_level = 0
-        for curr_dance_name in constants.DANCE_NAMES[style]:
-            if curr_dance_name != dance_name:
-                within_style_level = max(within_style_level,
-                                         self.point_out_level(style, curr_dance_name) - 2)
-
-        # Cross-Style Proficiency
-        cross_style_level = 0
-        if style == constants.Style.STANDARD:
-            other_style = constants.Style.SMOOTH
-        elif style == constants.Style.SMOOTH:
-            other_style = constants.Style.STANDARD
-        elif style == constants.Style.LATIN:
-            other_style = constants.Style.RHYTHM
-        elif style == constants.Style.RHYTHM:
-            other_style = constants.Style.LATIN
-        else:
-            raise ValueError(f"'{style}' is not eligible for FLC points (e.g. nightclub dances).")
-
-        # Cross-Style: Dances where their corresponding dance has the same name.
-        if (style in [constants.Style.STANDARD, constants.Style.SMOOTH]
-                or dance_name in ["ChaCha", "Rumba"]) and dance_name != "Quickstep":
-            cross_style_level = max(cross_style_level,
-                                    self.point_out_level(other_style, dance_name) - 2)
-
-        # Cross-Style: Swing and Jive Handling
-        elif dance_name == "Jive":
-            other_dance = "Swing"
-        elif dance_name == "Swing":
-            other_dance = "Jive"
-            cross_style_level = max(cross_style_level,
-                                    self.point_out_level(other_style, other_dance) - 2)
-
-        return max(newcomer_level, point_out_level, within_style_level, cross_style_level)
+        return ProficiencyCalculator.compute_proficiency_level(self, style, dance_name)

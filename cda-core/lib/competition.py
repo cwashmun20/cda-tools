@@ -5,6 +5,7 @@ from models.dance import Dance
 from models.dancer import Dancer
 from models.entry import Entry
 from models.partnership import Partnership
+from rules.level_rules import LevelRulesChecker
 
 
 def is_tba_row(row) -> bool:
@@ -142,35 +143,10 @@ class Competition:
                 self.entries.add(Entry(dance_obj, partnership_obj, heat))
                 # If ineligible, violations will already be printed.
 
-        # Check for Consecutive Level Violations
+        # Check for Consecutive Level Violations using LevelRulesChecker
         for dancer_obj in list(self.competitors.values()):
-            name = dancer_obj.name
-            level_log = {"Smooth": set(),
-                         "Standard": set(),
-                         "Rhythm": set(),
-                         "Latin": set()}
-            for entry_obj in dancer_obj.entries:
-                style = entry_obj.dance_data.style
-                level = entry_obj.dance_data.level
-                if style in constants.STYLES and level in constants.FLC_LEVELS:
-                    level_log[style].add(constants.FLC_LEVELS.index(level))
-
-            for style, level_set in level_log.items():
-                # Check for too many levels registered.
-                if len(level_set) > self.FLC_LEVEL_LIMIT:
-                    print(f"CONSECUTIVE LEVEL VIOLATION: {name} is registered for more than {self.FLC_LEVEL_LIMIT} level(s) of {style}:")
-                    for level_number in sorted(level_set):
-                        print(f"\t {name} is registered for at least one dance in '{constants.FLC_LEVELS[level_number]} {style}'.")
+            violations = LevelRulesChecker.check(dancer_obj, self.FLC_LEVEL_LIMIT)
+            for violation in violations:
+                if violation.detail_message:
+                    print(violation.detail_message)
                     print()
-
-                # Check for non-consecutive levels registered.
-                else:
-                    sorted_levels = sorted(list(level_set))
-                    curr_idx, next_idx = 0, 1
-                    while next_idx < len(sorted_levels):
-                        if sorted_levels[next_idx] - sorted_levels[curr_idx] != 1:
-                            level_name_1 = constants.FLC_LEVELS[sorted_levels[curr_idx]]
-                            level_name_2 = constants.FLC_LEVELS[sorted_levels[next_idx]]
-                            print(f"CONSECUTIVE LEVEL VIOLATION: {name} is registered for at least one event in both '{level_name_1} {style}' and '{level_name_2} {style}'.")
-                        curr_idx += 1
-                        next_idx += 1
