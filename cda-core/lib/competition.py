@@ -1,3 +1,9 @@
+"""Competition representation and entry checking orchestration.
+
+Coordinates the entry checking process using the models, rules,
+and parsing layers.
+"""
+
 from datetime import date
 import pandas as pd
 import constants
@@ -5,14 +11,10 @@ from models.dance import Dance
 from models.dancer import Dancer
 from models.entry import Entry
 from models.partnership import Partnership
+from parsing.csv_reader import read_entries
+from parsing.row_parser import is_tba_row
+from parsing.multi_dance_expander import expand_multi_dance_events
 from rules.level_rules import LevelRulesChecker
-
-
-def is_tba_row(row) -> bool:
-    """Checks whether an entry row is a TBA entry (missing a lead or follow name)."""
-    missing_lead = type(row["Lead First"]) == float or type(row["Lead Last"]) == float
-    missing_follow = type(row["Follow First"]) == float or type(row["Follow Last"]) == float
-    return missing_lead or missing_follow
 
 
 class Competition:
@@ -52,68 +54,18 @@ class Competition:
             raise ValueError("""Must provide a path to a .csv file or a dataframe
                              to construct a Competition object.""")
         if not df and path:
-            df = pd.read_csv(path)
+            df = read_entries(path)
 
-        self.raw_data = df
-        self.multi_dance_preprocess()
-
-    def multi_dance_preprocess(self):
-        """Replaces multi-dance event rows in a competition's raw data with one
-        row for each dance in the multi-dance event.
-        """
-        data_has_o2cm_name = "O2CM Name" in self.raw_data.columns
-        data_has_heat = "Heat" in self.raw_data.columns
-        row_list = []
-        for _, row in self.raw_data.iterrows():
-            # Ignore TBA rows (should only be checked once the partnership is known
-            # in case of Split Level Exception, etc.).
-            if is_tba_row(row):
-                continue
-
-            dances = row["Dance"]
-            # Leave non-multi-dance rows as-is.
-            if not dances.isupper():
-                row_list.append(row.tolist())
-            else:
-                # TODO (CWA): Rework this to leverage row.tolist() and then replacing
-                #               the dance name in each deep copy of row.tolist() to eliminate
-                #               the need for saving most of the data in variables.
-
-                # TODO (CWA): Add support for alternate headers (e.g. "Leader First").
-                style = row["Style"]
-                level = row["Skill"]
-                lead_first = row["Lead First"]
-                lead_last = row["Lead Last"]
-                follow_first = row["Follow First"]
-                follow_last = row["Follow Last"]
-                if data_has_o2cm_name:
-                    o2cm_name = row["O2CM Name"]
-                if data_has_heat:
-                    heat = row["Heat"]
-
-                if '/' in dances:
-                    dances = ''.join(dances.split('/'))
-
-                for char in dances:
-                    dance_name = constants.ABBREVIATION_MAPS[style][char]
-                    # TODO(CWA): Eventually, update o2cm name to match each
-                    #               individual dance (unclear if this is important).
-
-                    curr_row = [style, dance_name, level, lead_first, lead_last, follow_first, follow_last]
-                    if data_has_o2cm_name:
-                        curr_row.append(o2cm_name)
-                    if data_has_heat:
-                        curr_row.append(heat)
-
-                    row_list.append(curr_row)
-
-        col_names = self.raw_data.columns.tolist()
-        self.raw_data = pd.DataFrame(row_list, columns=col_names)
+        self.raw_data = expand_multi_dance_events(df)
 
     def check_entries(self):
         # Check for Proficiency Violations, Newcomer Violations,
         # Nightclub Beginner Violations, and Rookie-Vet Violations.
         for _, row in self.raw_data.iterrows():
+            # Ignore TBA rows
+            if is_tba_row(row):
+                continue
+
             lead_first, lead_last = row["Lead First"], row["Lead Last"]
             follow_first, follow_last = row["Follow First"], row["Follow Last"]
 
