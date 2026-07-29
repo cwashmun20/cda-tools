@@ -16,16 +16,10 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 
 ```
 .
-├── app/                          # Flask app files (web UI - in development)
-│   ├── __init__.py
-│   ├── routes.py
-│   ├── static/
-│   └── templates/
-│
 ├── cda-core/                     # Core domain model & logic
 │   ├── __init__.py
 │   └── lib/
-│       ├── competition.py        # Competition orchestration
+│       ├── competition.py        # Competition data model (name, date, ruleset, raw entries)
 │       ├── constants.py          # Enums & typed constants (StrEnum)
 │       ├── points.py             # Points tracking & formatting
 │       ├── api/                  # CDA points database API client
@@ -33,8 +27,8 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 │       │   └── config.py.example #   API key template
 │       ├── models/               # Domain model classes
 │       │   ├── dance.py          #   Dance representation & conversion
-│       │   ├── dancer.py         #   Dancer with proficiency/points
-│       │   ├── partnership.py    #   Partnership & eligibility
+│       │   ├── dancer.py         #   Dancer (points, registration state)
+│       │   ├── partnership.py    #   Partnership (registration state)
 │       │   ├── entry.py          #   Competition entry
 │       │   └── event.py          #   Competition event
 │       ├── parsing/              # Input parsing (CSV, multi-dance)
@@ -48,12 +42,15 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 │           └── level_rules.py    #   LevelRulesChecker
 │
 ├── flc-entry-checking/           # CLI tool for entry validation
+│   ├── __init__.py
 │   └── lib/
-│       └── entry-checker.py      # Entry point script
+│       ├── __init__.py
+│       └── entry_checker.py      # EntryChecker orchestration + CLI entry point
 │
 ├── flc-points/                   # Points updating tool (to be implemented)
+│   ├── __init__.py
 │   └── lib/
-│       └── points-updater.py
+│       └── __init__.py
 │
 ├── data/
 │   └── inputs/                   # Competition entry CSVs (gitignored)
@@ -81,6 +78,9 @@ API communication is isolated in `cda-core/lib/api/`. The `DancerRecord` datacla
 1. Copy `cda-core/lib/api/config.py.example` → `cda-core/lib/api/config.py`
 2. Add your API key to `config.py`
 
+### Competition & EntryChecker
+`Competition` (`cda-core/lib/competition.py`) is a plain data model — it holds a competition's identity (name, date, ruleset) and raw entry data, nothing else. Orchestration — building `Dancer`/`Partnership`/`Entry` objects from a `Competition`'s rows, running `EligibilityChecker` and `LevelRulesChecker`, and returning structured results — lives in `EntryChecker` (`flc-entry-checking/lib/entry_checker.py`). Neither class prints; `entry_checker.main()` is the only place that prompts and prints, so the same orchestration can later be reused by a non-interactive caller (e.g. a web UI).
+
 ## Usage
 
 ### CLI Entry Checker
@@ -89,8 +89,20 @@ API communication is isolated in `cda-core/lib/api/`. The `DancerRecord` datacla
 entry-checker
 
 # Or directly
-python -m flc-entry-checking.lib.entry_checker
+python -m flc_entry_checking.lib.entry_checker
 ```
+
+> **Known issue:** `pip install -e .` currently installs via setuptools' legacy
+> "develop" mode, which does not honor `setup.py`'s `package_dir` mapping from
+> hyphenated directories (`cda-core`, `flc-entry-checking`, `flc-points`) to
+> their underscored import names. That means `cda_core`/`flc_entry_checking`/
+> `flc_points` are not actually importable after an editable install, and the
+> `entry-checker` console script currently fails at import time. Until the
+> directories are renamed to match their import names (or the packaging setup
+> is otherwise reworked), run the CLI directly instead:
+> ```bash
+> python flc-entry-checking/lib/entry_checker.py
+> ```
 
 ## Setup
 
