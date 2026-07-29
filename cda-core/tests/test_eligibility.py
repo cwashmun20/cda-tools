@@ -47,9 +47,6 @@ class _MockDancer:
     def has_rookie_entries(self, style):
         return self._has_rookie
 
-    def proficiency_level(self, dance_obj):
-        return 1  # Default to Bronze level
-
     def __repr__(self):
         return self.name
 

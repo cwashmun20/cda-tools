@@ -81,8 +81,10 @@ class EligibilityChecker:
                 return result
 
         # Check proficiency (Split-Level Exception and Pointing Out)
-        lead_level = partnership.lead.proficiency_level(dance_obj)
-        follow_level = partnership.follow.proficiency_level(dance_obj)
+        lead_level = ProficiencyCalculator.compute_proficiency_level(
+            partnership.lead, dance_obj.style, dance_obj.dance)
+        follow_level = ProficiencyCalculator.compute_proficiency_level(
+            partnership.follow, dance_obj.style, dance_obj.dance)
         event_level = constants.FLC_LEVELS.index(dance_obj.level)
 
         # Check for Split-Level Exception

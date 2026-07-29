@@ -6,7 +6,6 @@ from api.client import DancerRecord, lookup_dancer
 from models.dance import Dance
 from models.entry import Entry
 from points import Points
-from rules.proficiency import ProficiencyCalculator
 
 
 class Dancer:
@@ -203,63 +202,3 @@ class Dancer:
             row_idx = constants.OPEN_LEVELS.index(target_dance.level)
             col_idx = constants.STYLES.index(target_dance.style)
             return self.points.open_data[row_idx][col_idx]
-
-    def pointed_out(self, dance_obj: Dance) -> bool:
-        """Returns True if a dancer has pointed out of a Dance (at a certain
-        level); otherwise, False.
-        """
-        return ProficiencyCalculator.has_pointed_out(self, dance_obj)
-
-    def point_out_level(self, *args) -> int:
-        """Returns an int representing a dancer's proficiency level in a Dance
-        based only on pointing out. See proficiency_level() for correspondences
-        between the output int and FLC levels.
-
-        Args:
-            *args can be in one of two formats:
-            dance_obj: a Dance object.
-            OR
-            style: the dance's style/category (e.g. "Smooth", "Latin").
-            dance_name: the dance's name (e.g. "Tango", "Samba").
-        Returns:
-            an int representing the lowest level a dancer may register for in a dance.
-        """
-        if len(args) == 1:
-            dance_obj = args[0]
-            style, dance_name = dance_obj.style, dance_obj.dance
-        elif len(args) == 2:
-            style, dance_name = args
-
-        return ProficiencyCalculator.compute_point_out_level(self, style, dance_name)
-
-    def proficiency_level(self, *args) -> int:
-        """Returns an int representing a dancer's proficiency level for a given dance, following
-        CDA Fair Level Certification rules: https://collegiatedancesport.org/fairlevel/
-        Proficiency level integer represents the lowest level a dancer *is* eligible
-        to register for and corresponds to the index of the level in constants.FLC_LEVELS:
-        0 = Newcomer
-        1 = Bronze
-        2 = Silver
-        3 = Gold
-        4 = Novice
-        5 = Pre-Champ
-        6 = Championship
-
-        Args:
-            *args can be in one of two formats:
-            dance_obj: a Dance object.
-            OR
-            style: the dance's style/category (e.g. "Smooth", "Latin").
-            dance_name: the dance's name (e.g. "Tango", "Samba").
-        Returns:
-            an int representing the lowest level a dancer may register for in a dance.
-        Raises:
-            ValueError: if style is not eligible for FLC points (e.g. nightclub dances).
-        """
-        if len(args) == 1:
-            dance_obj = args[0]
-            style, dance_name = dance_obj.style, dance_obj.dance
-        elif len(args) == 2:
-            style, dance_name = args
-
-        return ProficiencyCalculator.compute_proficiency_level(self, style, dance_name)
