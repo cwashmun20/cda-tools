@@ -9,7 +9,8 @@ from cda_core.lib import constants
 
 
 def convert_dance(style: str, input_name: str) -> str:
-    """Converts input dance from entry spreadsheet into a standard naming convention, returning a string.
+    """Converts input dance from entry spreadsheet into a standard naming convention,
+    returning a string.
 
     Args:
         style: the dance's style/category (e.g. "Smooth", "Latin").
@@ -53,7 +54,8 @@ def convert_dance(style: str, input_name: str) -> str:
 
 
 def convert_level(input_name: str) -> str:
-    """Converts input level from entry spreadsheet into standard naming convention, returning a string.
+    """Converts input level from entry spreadsheet into standard naming convention,
+    returning a string.
 
     Args:
         input_name: the dance's level from spreasheet input (e.g. "Newcomer", "Pre-Championship").

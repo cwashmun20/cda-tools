@@ -13,9 +13,17 @@ from flc_entry_checking.lib.rules.violations import ViolationType
 
 class _MockDancer:
     """Minimal mock Dancer for testing without API access."""
-    def __init__(self, name, is_newcomer=False, nc_beginner=False,
-                 is_reg_newcomer=False, is_reg_bronze=False,
-                 has_vet=False, has_rookie=False):
+
+    def __init__(
+        self,
+        name,
+        is_newcomer=False,
+        nc_beginner=False,
+        is_reg_newcomer=False,
+        is_reg_bronze=False,
+        has_vet=False,
+        has_rookie=False,
+    ):
         self.name = name
         self._is_newcomer = is_newcomer
         self._nc_beginner = nc_beginner
@@ -49,6 +57,7 @@ class _MockDancer:
 
 class _MockPartnership:
     """Minimal mock Partnership for testing."""
+
     def __init__(self, lead, follow, newcomers=False, nc_beginners=False):
         self.lead = lead
         self.follow = follow
@@ -68,7 +77,9 @@ def _make_dancer(name_first, name_last, syllabus_pts=None, open_pts=None):
     if open_pts is None:
         open_pts = np.zeros((3, 4), dtype=int)
     record = DancerRecord(
-        cda_id=1, first=name_first, last=name_last,
+        cda_id=1,
+        first=name_first,
+        last=name_last,
         first_comp_date=datetime.date(2020, 1, 1),  # >1 year ago - not a newcomer
         created_date="2020-01-01",
         syllabus_pts=syllabus_pts,
@@ -270,5 +281,5 @@ class TestEligibilityChecker(unittest.TestCase):
         self.assertTrue(result.eligible)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -85,8 +85,11 @@ class TestProficiencyCalculator(unittest.TestCase):
     def test_newcomer_proficiency_new_dancer(self):
         """A new dancer with no points should have proficiency 0 (Newcomer)."""
         record = DancerRecord(
-            cda_id=None, first="New", last="Comer",
-            first_comp_date=None, created_date="2026-01-01",
+            cda_id=None,
+            first="New",
+            last="Comer",
+            first_comp_date=None,
+            created_date="2026-01-01",
             syllabus_pts=np.zeros((4, 19), dtype=int),
             open_pts=np.zeros((3, 4), dtype=int),
         )
@@ -151,5 +154,5 @@ class TestProficiencyCalculator(unittest.TestCase):
         self.assertEqual(level, 1)  # Just the experienced-dancer floor - no cross-style credit
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

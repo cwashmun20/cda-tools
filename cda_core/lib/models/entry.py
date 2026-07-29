@@ -13,7 +13,7 @@ class Entry:
     partnership = None
     heat = ""
 
-    def __init__(self, dance_obj: Dance, partnership_obj: 'Partnership', heat=None):
+    def __init__(self, dance_obj: Dance, partnership_obj: "Partnership", heat=None):
         self.dance_data = dance_obj
         self.event_name = str(dance_obj)
         self.partnership = partnership_obj

@@ -18,7 +18,9 @@ from flc_entry_checking.lib.entry_checker import EntryChecker
 def _mock_dancer(comp_date, first, last):
     """Build an experienced (>1yr), zero-points Dancer without hitting the API."""
     record = DancerRecord(
-        cda_id=1, first=first, last=last,
+        cda_id=1,
+        first=first,
+        last=last,
         first_comp_date=datetime.date(2020, 1, 1),
         created_date="2020-01-01",
         syllabus_pts=np.zeros((4, 19), dtype=int),
@@ -32,15 +34,17 @@ class TestEntryCheckerPipeline(unittest.TestCase):
 
     def setUp(self):
         self.comp_date = datetime.date(2026, 6, 1)
-        raw_data = pd.DataFrame({
-            "Style":       ["Smooth", "Smooth", "Smooth", "Smooth",  "Smooth"],
-            "Dance":       ["Waltz",  "Waltz",  "Waltz",  "Tango",   "Waltz"],
-            "Skill":       ["Bronze", "Silver", "Gold",   "Newcomer", "Bronze"],
-            "Lead First":  ["Baris",   "Baris",   "Baris",   "Baris",    "Baris"],
-            "Lead Last":   ["Varol",    "Varol",    "Varol",    "Varol",     "Varol"],
-            "Follow First": ["Denise",  "Denise",   "Denise",   "Denise",    np.nan],  # last row is TBA
-            "Follow Last": ["Machin",  "Machin",  "Machin",  "Machin",   np.nan],
-        })
+        raw_data = pd.DataFrame(
+            {
+                "Style": ["Smooth", "Smooth", "Smooth", "Smooth", "Smooth"],
+                "Dance": ["Waltz", "Waltz", "Waltz", "Tango", "Waltz"],
+                "Skill": ["Bronze", "Silver", "Gold", "Newcomer", "Bronze"],
+                "Lead First": ["Baris", "Baris", "Baris", "Baris", "Baris"],
+                "Lead Last": ["Varol", "Varol", "Varol", "Varol", "Varol"],
+                "Follow First": ["Denise", "Denise", "Denise", "Denise", np.nan],  # last row is TBA
+                "Follow Last": ["Machin", "Machin", "Machin", "Machin", np.nan],
+            }
+        )
         self.comp = competition.Competition(
             comp_name="test",
             comp_date=self.comp_date,
@@ -49,7 +53,10 @@ class TestEntryCheckerPipeline(unittest.TestCase):
             raw_data=raw_data,
         )
         # Pre-populate competitors so EntryChecker never calls the live API.
-        for full_name, first, last in [("Baris Varol", "Baris", "Varol"), ("Denise Machin", "Denise", "Machin")]:
+        for full_name, first, last in [
+            ("Baris Varol", "Baris", "Varol"),
+            ("Denise Machin", "Denise", "Machin"),
+        ]:
             self.comp.competitors[full_name] = _mock_dancer(self.comp_date, first, last)
 
         self.eligibility_results, self.level_violations = EntryChecker(self.comp).check()
@@ -83,5 +90,5 @@ class TestEntryCheckerPipeline(unittest.TestCase):
             self.assertEqual(violation.levels, [1, 2, 3])  # Bronze, Silver, Gold indices
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

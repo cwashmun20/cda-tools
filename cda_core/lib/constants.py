@@ -11,6 +11,7 @@ from enum import StrEnum
 
 class Style(StrEnum):
     """Dance style/category."""
+
     STANDARD = "Standard"
     SMOOTH = "Smooth"
     LATIN = "Latin"
@@ -35,6 +36,7 @@ class Style(StrEnum):
 
 class SyllabusLevel(StrEnum):
     """Syllabus (closed) levels eligible for FLC points."""
+
     NEWCOMER = "Newcomer"
     BRONZE = "Bronze"
     SILVER = "Silver"
@@ -43,6 +45,7 @@ class SyllabusLevel(StrEnum):
 
 class OpenLevel(StrEnum):
     """Open levels eligible for FLC points."""
+
     NOVICE = "Novice"
     PRECHAMP = "Prechamp"
     CHAMP = "Champ"
@@ -50,18 +53,21 @@ class OpenLevel(StrEnum):
 
 class NightclubLevel(StrEnum):
     """Nightclub competition levels."""
+
     BEGINNER = "Beginner"
     INT_ADV = "IntAdv"
 
 
 class RookieVetLevel(StrEnum):
     """Rookie-Vet special level designations."""
+
     ROOKIE_LEAD = "RkLead"
     ROOKIE_FOLLOW = "RkFollow"
 
 
 class Round(StrEnum):
     """Competition round names."""
+
     FINAL = "Final"
     SEMIFINAL = "Semifinal"
     QUARTERFINAL = "Quarterfinal"
@@ -83,9 +89,7 @@ FLC_LEVELS: list[str] = SYLLABUS_LEVELS + OPEN_LEVELS
 NC_LEVELS: list[str] = list(NightclubLevel)
 
 ALL_LEVELS: list[str] = (
-    FLC_LEVELS
-    + NC_LEVELS
-    + [RookieVetLevel.ROOKIE_LEAD, RookieVetLevel.ROOKIE_FOLLOW]
+    FLC_LEVELS + NC_LEVELS + [RookieVetLevel.ROOKIE_LEAD, RookieVetLevel.ROOKIE_FOLLOW]
 )
 
 ROUNDS: list[str] = list(Round)
@@ -100,9 +104,18 @@ DANCE_NAMES: dict[str, list[str]] = {
     Style.LATIN: ["ChaCha", "Samba", "Rumba", "Paso", "Jive"],
     Style.RHYTHM: ["ChaCha", "Rumba", "Swing", "Bolero", "Mambo"],
     Style.NIGHTCLUB: [
-        "WCS", "NC2S", "Lindy", "Merengue", "Blues", "Salsa",
-        "Argentine", "Hustle", "Bachata", "Polka",
-        "Country 2-Step", "Country Swing",
+        "WCS",
+        "NC2S",
+        "Lindy",
+        "Merengue",
+        "Blues",
+        "Salsa",
+        "Argentine",
+        "Hustle",
+        "Bachata",
+        "Polka",
+        "Country 2-Step",
+        "Country Swing",
     ],
 }
 

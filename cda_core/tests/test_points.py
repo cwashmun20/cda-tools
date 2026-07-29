@@ -75,5 +75,5 @@ class TestPoints(unittest.TestCase):
         self.assertEqual(pts.open_data[0][0], 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

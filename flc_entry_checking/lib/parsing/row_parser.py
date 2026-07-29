@@ -11,6 +11,7 @@ from typing import Optional
 @dataclass
 class EntryData:
     """Structured data extracted from a single competition entry row."""
+
     style: str
     dance_name: str
     level: str

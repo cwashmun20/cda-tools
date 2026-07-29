@@ -4,14 +4,18 @@ Provides functions for reading competition entry data from CSV files,
 validating required columns, and normalizing column name variations.
 """
 
-from typing import Optional
-
 import pandas as pd
 
-
 # Required columns for a valid competition entry spreadsheet
-REQUIRED_COLUMNS = ["Style", "Dance", "Skill", "Lead First", "Lead Last",
-                    "Follow First", "Follow Last"]
+REQUIRED_COLUMNS = [
+    "Style",
+    "Dance",
+    "Skill",
+    "Lead First",
+    "Lead Last",
+    "Follow First",
+    "Follow Last",
+]
 
 # Optional columns that may appear
 OPTIONAL_COLUMNS = ["O2CM Name", "Heat", "O2CM Div"]

@@ -22,6 +22,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
+    "black>=24.0",
+    "flake8>=7.0",
 ]
 
 [project.scripts]
@@ -30,3 +32,6 @@ entry-checker = "flc_entry_checking.lib.entry_checker:main"
 [tool.setuptools.packages.find]
 include = ["cda_core*", "flc_entry_checking*", "flc_points*"]
 exclude = ["*.tests", "*.tests.*"]
+
+[tool.black]
+line-length = 100

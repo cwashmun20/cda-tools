@@ -1,0 +1,15 @@
+[flake8]
+max-line-length = 100
+# E203/W503 conflict with black's formatting choices (whitespace before ':'
+# in slices, line breaks before binary operators) - ignore both, per black's
+# own recommendation for flake8 compatibility.
+extend-ignore = E203, W503
+# cda_core/lib/api/config.py is gitignored (holds a real API key) and not
+# part of the linted codebase.
+exclude = __pycache__,*.egg-info,cda_core/lib/api/config.py
+
+# points.py's __repr__ builds an ASCII-art table via an aligned triple-quoted
+# f-string; several lines exceed max-line-length by design, and a `# noqa`
+# comment can't be appended without corrupting the string content itself.
+per-file-ignores =
+    cda_core/lib/points.py: E501

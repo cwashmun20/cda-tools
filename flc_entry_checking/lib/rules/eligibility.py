@@ -41,7 +41,10 @@ class EligibilityChecker:
             An EligibilityResult with the outcome and any violation details.
         """
         # Everyone is always eligible for int./adv. Nightclub and Championship
-        if dance_obj.level == constants.NC_LEVELS[-1] or dance_obj.level == constants.OPEN_LEVELS[-1]:
+        if (
+            dance_obj.level == constants.NC_LEVELS[-1]
+            or dance_obj.level == constants.OPEN_LEVELS[-1]
+        ):
             return EligibilityResult(eligible=True)
 
         # Check eligibility for Beginner Nightclub
@@ -65,8 +68,7 @@ class EligibilityChecker:
                 eligible=False,
                 violation_type=ViolationType.NEWCOMER,
                 detail_message=(
-                    f"NEWCOMER VIOLATION: '{partnership.names}' "
-                    f"ineligible for '{dance_obj}'."
+                    f"NEWCOMER VIOLATION: '{partnership.names}' " f"ineligible for '{dance_obj}'."
                 ),
             )
 
@@ -82,9 +84,11 @@ class EligibilityChecker:
 
         # Check proficiency (Split-Level Exception and Pointing Out)
         lead_level = ProficiencyCalculator.compute_proficiency_level(
-            partnership.lead, dance_obj.style, dance_obj.dance)
+            partnership.lead, dance_obj.style, dance_obj.dance
+        )
         follow_level = ProficiencyCalculator.compute_proficiency_level(
-            partnership.follow, dance_obj.style, dance_obj.dance)
+            partnership.follow, dance_obj.style, dance_obj.dance
+        )
         event_level = constants.FLC_LEVELS.index(dance_obj.level)
 
         # Check for Split-Level Exception
@@ -125,9 +129,11 @@ class EligibilityChecker:
         curr_style = dance_obj.style
 
         if dance_obj.level == constants.RookieVetLevel.ROOKIE_LEAD:
-            if (partnership.lead.is_newcomer()
-                    and not partnership.follow.is_registered_newcomer(curr_style)
-                    and not partnership.follow.is_registered_bronze(curr_style)):
+            if (
+                partnership.lead.is_newcomer()
+                and not partnership.follow.is_registered_newcomer(curr_style)
+                and not partnership.follow.is_registered_bronze(curr_style)
+            ):
                 return EligibilityResult(eligible=True)
             return EligibilityResult(
                 eligible=False,
@@ -141,9 +147,11 @@ class EligibilityChecker:
             )
 
         if dance_obj.level == constants.RookieVetLevel.ROOKIE_FOLLOW:
-            if (partnership.follow.is_newcomer()
-                    and not partnership.lead.is_registered_newcomer(curr_style)
-                    and not partnership.lead.is_registered_bronze(curr_style)):
+            if (
+                partnership.follow.is_newcomer()
+                and not partnership.lead.is_registered_newcomer(curr_style)
+                and not partnership.lead.is_registered_bronze(curr_style)
+            ):
                 return EligibilityResult(eligible=True)
             return EligibilityResult(
                 eligible=False,

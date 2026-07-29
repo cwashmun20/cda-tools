@@ -1,4 +1,5 @@
 """Dance tests are in test_constants.py (Dance class tested via conversion functions)."""
+
 import unittest
 from cda_core.lib.models.dance import Dance, convert_dance, convert_level
 
@@ -66,5 +67,5 @@ class TestDance(unittest.TestCase):
         self.assertEqual(convert_dance("Standard", "Waltz"), "Waltz")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -11,6 +11,7 @@ from typing import Optional
 
 class ViolationType(StrEnum):
     """Types of FLC rule violations."""
+
     NEWCOMER = "newcomer"
     NIGHTCLUB_BEGINNER = "nightclub_beginner"
     ROOKIE_LEAD = "rookie_lead"
@@ -27,6 +28,7 @@ class EligibilityResult:
     This replaces print() side effects in the eligibility logic with a
     dataclass that can be consumed programmatically (e.g., by a web UI).
     """
+
     eligible: bool
     violation_type: Optional[ViolationType] = None
     detail_message: Optional[str] = None
@@ -41,6 +43,7 @@ class LevelViolation:
     Used to report when a dancer registers for too many levels or
     non-consecutive levels within the same style.
     """
+
     dancer_name: str
     style: str
     violation_type: str  # "too_many_levels" or "non_consecutive"

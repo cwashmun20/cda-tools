@@ -14,8 +14,14 @@ import pandas as pd
 class Competition:
     """Representation of a CDA competition."""
 
-    def __init__(self, comp_name: str, comp_date: date, rv_ruleset: str,
-                 flc_level_limit: int, raw_data: pd.DataFrame):
+    def __init__(
+        self,
+        comp_name: str,
+        comp_date: date,
+        rv_ruleset: str,
+        flc_level_limit: int,
+        raw_data: pd.DataFrame,
+    ):
         """Create a Competition.
 
         Args:

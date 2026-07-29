@@ -26,7 +26,10 @@ class Partnership:
     #             ignore Newcomer if dancers are ineligible.
 
     def add(self, entry_obj):
-        """Adds a competition entry for a couple. Should only be called within the Entry constructor."""
+        """Adds a competition entry for a couple.
+
+        Should only be called within the Entry constructor.
+        """
         self.entries.add(entry_obj)
         self.lead.add(entry_obj)
         self.follow.add(entry_obj)

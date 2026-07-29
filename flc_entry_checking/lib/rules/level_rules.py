@@ -44,22 +44,23 @@ class LevelRulesChecker:
 
             # Check for too many levels registered
             if len(level_set) > flc_level_limit:
-                level_names = [constants.FLC_LEVELS[i] for i in sorted_levels]
-                violations.append(LevelViolation(
-                    dancer_name=dancer.name,
-                    style=style,
-                    violation_type="too_many_levels",
-                    levels=sorted_levels,
-                    detail_message=(
-                        f"CONSECUTIVE LEVEL VIOLATION: {dancer.name} is registered "
-                        f"for more than {flc_level_limit} level(s) of {style}:\n" +
-                        "\n".join(
-                            f"\t{dancer.name} is registered for at least one dance "
-                            f"in '{constants.FLC_LEVELS[i]} {style}'."
-                            for i in sorted_levels
-                        )
-                    ),
-                ))
+                violations.append(
+                    LevelViolation(
+                        dancer_name=dancer.name,
+                        style=style,
+                        violation_type="too_many_levels",
+                        levels=sorted_levels,
+                        detail_message=(
+                            f"CONSECUTIVE LEVEL VIOLATION: {dancer.name} is registered "
+                            f"for more than {flc_level_limit} level(s) of {style}:\n"
+                            + "\n".join(
+                                f"\t{dancer.name} is registered for at least one dance "
+                                f"in '{constants.FLC_LEVELS[i]} {style}'."
+                                for i in sorted_levels
+                            )
+                        ),
+                    )
+                )
 
             # Check for non-consecutive levels registered
             else:
@@ -68,18 +69,20 @@ class LevelRulesChecker:
                     if sorted_levels[next_idx] - sorted_levels[curr_idx] != 1:
                         level_name_1 = constants.FLC_LEVELS[sorted_levels[curr_idx]]
                         level_name_2 = constants.FLC_LEVELS[sorted_levels[next_idx]]
-                        violations.append(LevelViolation(
-                            dancer_name=dancer.name,
-                            style=style,
-                            violation_type="non_consecutive",
-                            levels=[sorted_levels[curr_idx], sorted_levels[next_idx]],
-                            detail_message=(
-                                f"CONSECUTIVE LEVEL VIOLATION: {dancer.name} is "
-                                f"registered for at least one event in both "
-                                f"'{level_name_1} {style}' and "
-                                f"'{level_name_2} {style}'."
-                            ),
-                        ))
+                        violations.append(
+                            LevelViolation(
+                                dancer_name=dancer.name,
+                                style=style,
+                                violation_type="non_consecutive",
+                                levels=[sorted_levels[curr_idx], sorted_levels[next_idx]],
+                                detail_message=(
+                                    f"CONSECUTIVE LEVEL VIOLATION: {dancer.name} is "
+                                    f"registered for at least one event in both "
+                                    f"'{level_name_1} {style}' and "
+                                    f"'{level_name_2} {style}'."
+                                ),
+                            )
+                        )
                     curr_idx += 1
                     next_idx += 1
 

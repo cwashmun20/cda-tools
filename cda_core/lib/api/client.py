@@ -15,8 +15,8 @@ import requests
 from cda_core.lib.api import config
 
 # JSON field names from the CDA API response for indexing into fairlevelPoints
-SYLLABUS_KEYS = ['newcomer_points', 'bronze_points', 'silver_points', 'gold_points']
-OPEN_KEYS = ['novice_points', 'prechamp_points', 'champ_points']
+SYLLABUS_KEYS = ["newcomer_points", "bronze_points", "silver_points", "gold_points"]
+OPEN_KEYS = ["novice_points", "prechamp_points", "champ_points"]
 
 
 class DancerLookupError(Exception):
@@ -30,6 +30,7 @@ class DancerRecord:
 
     This replaces the raw dictionary returned by the original lookup_dancer function.
     """
+
     cda_id: Optional[int]
     first: str
     last: str
@@ -42,9 +43,9 @@ class DancerRecord:
 def _build_empty_record(first: str, last: str) -> DancerRecord:
     """Build a DancerRecord for a dancer not yet in the database."""
     utc_dt = datetime.datetime.now(pytz.utc)
-    loc_dt = utc_dt.astimezone(pytz.timezone('US/Pacific'))
-    created_dt = loc_dt.strftime('%Y-%m-%dT%H:%M:%S%z')
-    created_dt = created_dt[:-2] + ':' + created_dt[-2:]
+    loc_dt = utc_dt.astimezone(pytz.timezone("US/Pacific"))
+    created_dt = loc_dt.strftime("%Y-%m-%dT%H:%M:%S%z")
+    created_dt = created_dt[:-2] + ":" + created_dt[-2:]
 
     return DancerRecord(
         cda_id=None,
@@ -59,13 +60,13 @@ def _build_empty_record(first: str, last: str) -> DancerRecord:
 
 def _parse_points(profile_points) -> tuple[np.ndarray, np.ndarray]:
     """Parse syllabus and open points from the API response's fairlevelPoints field."""
-    if profile_points == False:
+    if profile_points is False:
         return np.zeros((4, 19), dtype=int), np.zeros((3, 4), dtype=int)
 
-    syllabus_pts = [[int(pt) for pt in profile_points[key][1:-1].split(',')]
-                    for key in SYLLABUS_KEYS]
-    open_pts = [[int(pt) for pt in profile_points[key][1:-1].split(',')]
-                for key in OPEN_KEYS]
+    syllabus_pts = [
+        [int(pt) for pt in profile_points[key][1:-1].split(",")] for key in SYLLABUS_KEYS
+    ]
+    open_pts = [[int(pt) for pt in profile_points[key][1:-1].split(",")] for key in OPEN_KEYS]
     return np.array(syllabus_pts), np.array(open_pts)
 
 
@@ -83,12 +84,12 @@ def lookup_dancer(first: str, last: str) -> DancerRecord:
             doesn't match the expected shape.
     """
     HEADER = {"x-api-key": config.API_KEY}
-    parameters = {"firstName": first,
-                  "lastName": last}
+    parameters = {"firstName": first, "lastName": last}
 
     try:
-        response = requests.get("https://collegiatedancesport.org/db/namematch.php",
-                                headers=HEADER, params=parameters)
+        response = requests.get(
+            "https://collegiatedancesport.org/db/namematch.php", headers=HEADER, params=parameters
+        )
         response.raise_for_status()
         result = response.json()
     except (requests.exceptions.RequestException, ValueError) as e:
@@ -97,23 +98,23 @@ def lookup_dancer(first: str, last: str) -> DancerRecord:
         ) from e
 
     try:
-        if not result['success']:
+        if not result["success"]:
             return _build_empty_record(first, last)
 
-        profile = result['competitor']
-        profile_points = profile['fairlevelPoints']
+        profile = result["competitor"]
+        profile_points = profile["fairlevelPoints"]
 
-        yr, m, d = [int(x) for x in profile['firstCompetitionDate'].split('-')]
+        yr, m, d = [int(x) for x in profile["firstCompetitionDate"].split("-")]
         first_comp_date = datetime.date(yr, m, d)
 
         syllabus_pts, open_pts = _parse_points(profile_points)
 
         return DancerRecord(
-            cda_id=profile['cdaId'],
-            first=profile['firstName'],
-            last=profile['lastName'],
+            cda_id=profile["cdaId"],
+            first=profile["firstName"],
+            last=profile["lastName"],
             first_comp_date=first_comp_date,
-            created_date=profile['dateCreated'],
+            created_date=profile["dateCreated"],
             syllabus_pts=syllabus_pts,
             open_pts=open_pts,
         )

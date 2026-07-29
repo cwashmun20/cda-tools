@@ -4,8 +4,6 @@ Handles expanding abbreviated multi-dance events (e.g., "WTQ" → Waltz, Tango, 
 into individual dance rows for processing.
 """
 
-from typing import Optional
-
 from cda_core.lib import constants
 
 
@@ -72,14 +70,13 @@ def expand_multi_dance_events(df) -> object:
         heat = row.get("Heat") if data_has_heat else None
 
         # Handle slashes in abbreviations (e.g., "W/T/Q")
-        if '/' in dances:
-            dances = ''.join(dances.split('/'))
+        if "/" in dances:
+            dances = "".join(dances.split("/"))
 
         dance_names = expand_abbreviation(style, dances)
 
         for dance_name in dance_names:
-            curr_row = [style, dance_name, level, lead_first, lead_last,
-                        follow_first, follow_last]
+            curr_row = [style, dance_name, level, lead_first, lead_last, follow_first, follow_last]
             if data_has_o2cm_name:
                 curr_row.append(o2cm_name)
             if data_has_heat:

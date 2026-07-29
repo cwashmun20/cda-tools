@@ -60,7 +60,8 @@ class EntryChecker:
                 partners.append(full_name)
                 if full_name not in comp.competitors:
                     comp.competitors[full_name] = Dancer.from_api(
-                        curr_comp_date=comp.comp_date, first=first, last=last)
+                        curr_comp_date=comp.comp_date, first=first, last=last
+                    )
 
             partnership_name = " & ".join(partners)
             lead_obj = comp.competitors[partners[0]]
@@ -82,14 +83,14 @@ class EntryChecker:
 
         level_violations: list[LevelViolation] = []
         for dancer_obj in comp.competitors.values():
-            level_violations.extend(
-                LevelRulesChecker.check(dancer_obj, comp.flc_level_limit))
+            level_violations.extend(LevelRulesChecker.check(dancer_obj, comp.flc_level_limit))
 
         return eligibility_results, level_violations
 
 
-def _report(eligibility_results: list[EligibilityResult],
-            level_violations: list[LevelViolation]) -> None:
+def _report(
+    eligibility_results: list[EligibilityResult], level_violations: list[LevelViolation]
+) -> None:
     """Print eligibility and level-rule results to the console."""
     for result in eligibility_results:
         message = result.split_level_info if result.is_split_level else result.detail_message
@@ -116,16 +117,21 @@ def main():
         flc_level_limit = 2
     else:
         date_str = input("Please enter competition date (MM/DD/YYYY): ")
-        month, day, year = date_str.split('/')
+        month, day, year = date_str.split("/")
         comp_date = date(int(year), int(month), int(day))
 
         rv_ruleset = input("Please enter desired rookie-vet ruleset ('newcomer' or 'level'): ")
-        if rv_ruleset not in ('newcomer', 'level'):
-            raise ValueError("Rookie-vet ruleset must be either 'newcomer' or 'level' (without asterisks).")
+        if rv_ruleset not in ("newcomer", "level"):
+            raise ValueError(
+                "Rookie-vet ruleset must be either 'newcomer' or 'level' (without asterisks)."
+            )
 
-        flc_level_limit = int(input(
-            "Please enter the number of consecutive Smooth/Standard/Rhythm/Latin "
-            "levels allowed (2 is recommended): "))
+        flc_level_limit = int(
+            input(
+                "Please enter the number of consecutive Smooth/Standard/Rhythm/Latin "
+                "levels allowed (2 is recommended): "
+            )
+        )
 
     print()  # Add newline after comp setup.
 

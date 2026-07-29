@@ -2,9 +2,21 @@
 
 import unittest
 from cda_core.lib.constants import (
-    Style, SyllabusLevel, OpenLevel, NightclubLevel, RookieVetLevel,
-    STYLES, AM_STYLES, INTL_STYLES, SYLLABUS_LEVELS, OPEN_LEVELS,
-    FLC_LEVELS, NC_LEVELS, ALL_LEVELS, DANCE_NAMES, ABBREVIATION_MAPS,
+    Style,
+    SyllabusLevel,
+    OpenLevel,
+    NightclubLevel,
+    RookieVetLevel,
+    STYLES,
+    AM_STYLES,
+    INTL_STYLES,
+    SYLLABUS_LEVELS,
+    OPEN_LEVELS,
+    FLC_LEVELS,
+    NC_LEVELS,
+    ALL_LEVELS,
+    DANCE_NAMES,
+    ABBREVIATION_MAPS,
 )
 
 
@@ -105,8 +117,9 @@ class TestCompositeLists(unittest.TestCase):
         self.assertEqual(OPEN_LEVELS, ["Novice", "Prechamp", "Champ"])
 
     def test_flc_levels(self):
-        self.assertEqual(FLC_LEVELS, ["Newcomer", "Bronze", "Silver", "Gold",
-                                       "Novice", "Prechamp", "Champ"])
+        self.assertEqual(
+            FLC_LEVELS, ["Newcomer", "Bronze", "Silver", "Gold", "Novice", "Prechamp", "Champ"]
+        )
         self.assertEqual(len(FLC_LEVELS), 7)
 
     def test_nc_levels(self):
@@ -124,20 +137,18 @@ class TestDanceNames(unittest.TestCase):
     """Tests for the DANCE_NAMES dictionary."""
 
     def test_standard_dances(self):
-        self.assertEqual(DANCE_NAMES["Standard"],
-                         ["Waltz", "Tango", "Viennese", "Foxtrot", "Quickstep"])
+        self.assertEqual(
+            DANCE_NAMES["Standard"], ["Waltz", "Tango", "Viennese", "Foxtrot", "Quickstep"]
+        )
 
     def test_smooth_dances(self):
-        self.assertEqual(DANCE_NAMES["Smooth"],
-                         ["Waltz", "Tango", "Foxtrot", "Viennese"])
+        self.assertEqual(DANCE_NAMES["Smooth"], ["Waltz", "Tango", "Foxtrot", "Viennese"])
 
     def test_latin_dances(self):
-        self.assertEqual(DANCE_NAMES["Latin"],
-                         ["ChaCha", "Samba", "Rumba", "Paso", "Jive"])
+        self.assertEqual(DANCE_NAMES["Latin"], ["ChaCha", "Samba", "Rumba", "Paso", "Jive"])
 
     def test_rhythm_dances(self):
-        self.assertEqual(DANCE_NAMES["Rhythm"],
-                         ["ChaCha", "Rumba", "Swing", "Bolero", "Mambo"])
+        self.assertEqual(DANCE_NAMES["Rhythm"], ["ChaCha", "Rumba", "Swing", "Bolero", "Mambo"])
 
     def test_nightclub_dances(self):
         nc = DANCE_NAMES["Nightclub"]
@@ -186,5 +197,5 @@ class TestAbbreviationMaps(unittest.TestCase):
         self.assertEqual(m["M"], "Mambo")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

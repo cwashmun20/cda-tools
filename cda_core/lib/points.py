@@ -34,9 +34,9 @@ class Points:
             # Format Syllabus points
             if offset < 76:
                 for start, end in [(0, 5), (5, 9), (9, 14), (14, 19)]:
-                    pt_line = str(lin_data[offset + start:offset + end])[1:-1]
+                    pt_line = str(lin_data[offset + start : offset + end])[1:-1]
                     # Format segments of all single-digit numbers
-                    condensed_line = ''.join(pt_line.split())
+                    condensed_line = "".join(pt_line.split())
                     singledigit_smooth = start == 5 and len(condensed_line) == 4
                     singledigit_non_smooth = start != 5 and len(condensed_line) == 5
                     if singledigit_smooth or singledigit_non_smooth:
@@ -45,7 +45,7 @@ class Points:
             # Format Open points.
             else:
                 for i in range(4):
-                    open_pt = str(lin_data[offset + i:offset + i + 1])[1:-1]
+                    open_pt = str(lin_data[offset + i : offset + i + 1])[1:-1]
                     if len(open_pt) == 1:
                         open_pt = " " + open_pt
                     strs.append(open_pt)

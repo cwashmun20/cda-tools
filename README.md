@@ -106,7 +106,7 @@ python -m flc_entry_checking.lib.entry_checker
 # work from the repo root without this, since -m puts the repo root on sys.path)
 pip install -e .
 
-# Or, to also install test dependencies (pytest):
+# Or, to also install dev dependencies (pytest, black, flake8):
 pip install -e ".[dev]"
 ```
 
@@ -121,5 +121,15 @@ Tests are written against `unittest.TestCase` (no `pytest`-specific fixtures), s
 ```bash
 python -m unittest discover
 ```
+
+## Linting & Formatting
+
+```bash
+black .          # auto-format
+flake8           # style/unused-import checks (config in .flake8)
+```
+
+`black`'s line length is set to 100 in `pyproject.toml` (`[tool.black]`) to match `flake8`'s
+`max-line-length` in `.flake8` — the two are kept in agreement deliberately.
 
 `pytest` just gives nicer output and is the recommended way to run them.

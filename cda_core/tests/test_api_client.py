@@ -23,25 +23,27 @@ class TestLookupDancer(unittest.TestCase):
 
     @patch("cda_core.lib.api.client.requests.get")
     def test_success(self, mock_get):
-        mock_get.return_value = _mock_response({
-            "success": True,
-            "competitor": {
-                "cdaId": 42,
-                "firstName": "Priya",
-                "lastName": "Patel",
-                "firstCompetitionDate": "2020-01-15",
-                "dateCreated": "2020-01-15T00:00:00-08:00",
-                "fairlevelPoints": {
-                    "newcomer_points": "[0,0,0,0,0]",
-                    "bronze_points": "[0,0,0,0,0]",
-                    "silver_points": "[0,0,0,0,0]",
-                    "gold_points": "[0,0,0,0,0]",
-                    "novice_points": "[0,0,0,0]",
-                    "prechamp_points": "[0,0,0,0]",
-                    "champ_points": "[0,0,0,0]",
+        mock_get.return_value = _mock_response(
+            {
+                "success": True,
+                "competitor": {
+                    "cdaId": 42,
+                    "firstName": "Priya",
+                    "lastName": "Patel",
+                    "firstCompetitionDate": "2020-01-15",
+                    "dateCreated": "2020-01-15T00:00:00-08:00",
+                    "fairlevelPoints": {
+                        "newcomer_points": "[0,0,0,0,0]",
+                        "bronze_points": "[0,0,0,0,0]",
+                        "silver_points": "[0,0,0,0,0]",
+                        "gold_points": "[0,0,0,0,0]",
+                        "novice_points": "[0,0,0,0]",
+                        "prechamp_points": "[0,0,0,0]",
+                        "champ_points": "[0,0,0,0]",
+                    },
                 },
-            },
-        })
+            }
+        )
         record = lookup_dancer("Priya", "Patel")
         self.assertEqual(record.cda_id, 42)
         self.assertEqual(record.first, "Priya")
@@ -83,5 +85,5 @@ class TestLookupDancer(unittest.TestCase):
             lookup_dancer("Alex", "Rivera")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

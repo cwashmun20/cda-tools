@@ -10,8 +10,9 @@ from cda_core.lib.points import Points
 
 class Dancer:
     """Abstract representation of a dancer for FLC entry checking and point updating purposes.
-       All dates are handled using the datetime library's date object.
+    All dates are handled using the datetime library's date object.
     """
+
     name: Optional[str] = None
     cda_id: Optional[int] = None  # Dancer's CDA #
     first_comp_date: Optional[datetime.date] = None
@@ -27,7 +28,7 @@ class Dancer:
             curr_comp_date: The date of the current competition.
             dancer_record: A DancerRecord from the API client.
         """
-        self.name = ' '.join([dancer_record.first, dancer_record.last])
+        self.name = " ".join([dancer_record.first, dancer_record.last])
         self.curr_comp_date = curr_comp_date
         self.created_date = dancer_record.created_date
         self.cda_id = dancer_record.cda_id
@@ -77,7 +78,8 @@ class Dancer:
         return (self.curr_comp_date - self.first_comp_date).days // 365 < 1
 
     def is_registered_newcomer(self, curr_style: str) -> bool:
-        # Returns True if the dancer is registered for a Newcomer event in the current style; otherwise, False.
+        # Returns True if the dancer is registered for a Newcomer event in the
+        # current style; otherwise, False.
         for e in self.entries:
             entry_style = e.dance_data.style
             entry_level = e.dance_data.level
@@ -87,7 +89,8 @@ class Dancer:
         return False
 
     def is_registered_bronze(self, curr_style: str) -> bool:
-        # Returns True if the dancer is registered for a Bronze event in the current style; otherwise, False.
+        # Returns True if the dancer is registered for a Bronze event in the
+        # current style; otherwise, False.
         for e in self.entries:
             entry_style = e.dance_data.style
             entry_level = e.dance_data.level
@@ -98,11 +101,11 @@ class Dancer:
 
     def nc_beginner(self) -> bool:
         """Returns True if a dancer would be considered a beginner
-            nightclub dancer (competing < 2 years); otherwise False.
+        nightclub dancer (competing < 2 years); otherwise False.
         """
         return (self.curr_comp_date - self.first_comp_date).days // 365 < 2
 
-    def add(self, comp_entry: 'Entry'):
+    def add(self, comp_entry: "Entry"):
         """Adds a competition entry for a dancer. Should only be called from a partnership."""
         # Grab nightclub-related info.
         entry_style = comp_entry.dance_data.style
@@ -111,13 +114,18 @@ class Dancer:
             is_nightclub = True
             nc_dance = comp_entry.dance_data.dance
             nc_level = comp_entry.dance_data.level
-            other_nc_level = constants.NC_LEVELS[0] if nc_level == constants.NC_LEVELS[1] else constants.NC_LEVELS[1]
+            other_nc_level = (
+                constants.NC_LEVELS[0]
+                if nc_level == constants.NC_LEVELS[1]
+                else constants.NC_LEVELS[1]
+            )
             other_nc_dance = Dance(other_nc_level, entry_style, nc_dance)
 
         # TODO(CWA): Fix duplicate entry checking:
         # # Check for duplicate entries (currently broken but not essential).
         # if comp_entry in self.entries:
-        #     print(f"DUPLICATE ENTRY: '{self.name}' is registered for '{comp_entry.dance_data}' more than once:")
+        #     print(f"DUPLICATE ENTRY: '{self.name}' is registered for "
+        #           f"'{comp_entry.dance_data}' more than once:")
         #     print(f"As '{comp_entry}'")
         #     for existing_entry in self.entries:
         #         if existing_entry == comp_entry:
@@ -128,11 +136,14 @@ class Dancer:
 
         # Check for registration in two levels of the same Nightclub dance.
         if is_nightclub and other_nc_dance in self.entries:
-            print(f"CONSECUTIVE LEVEL VIOLATION: '{self.name}' is registered for both levels of '{nc_dance}'.")
+            print(
+                f"CONSECUTIVE LEVEL VIOLATION: '{self.name}' is registered for "
+                f"both levels of '{nc_dance}'."
+            )
         else:
             self.entries.add(comp_entry)
 
-    def drop(self, comp_entry: 'Entry'):
+    def drop(self, comp_entry: "Entry"):
         """Drops a competition entry for a couple. Should only be called from a partnership"""
         self.entries.remove(comp_entry)
 

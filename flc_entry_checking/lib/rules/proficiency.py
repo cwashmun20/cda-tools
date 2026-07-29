@@ -80,7 +80,8 @@ class ProficiencyCalculator:
             if curr_dance_name != dance_name:
                 within_style_level = max(
                     within_style_level,
-                    ProficiencyCalculator.compute_point_out_level(dancer, style, curr_dance_name) - 2,
+                    ProficiencyCalculator.compute_point_out_level(dancer, style, curr_dance_name)
+                    - 2,
                 )
 
         # Cross-Style Proficiency: never less than two levels lower than the
