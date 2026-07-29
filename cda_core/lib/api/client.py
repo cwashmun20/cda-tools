@@ -20,6 +20,11 @@ SYLLABUS_KEYS = ['newcomer_points', 'bronze_points', 'silver_points', 'gold_poin
 OPEN_KEYS = ['novice_points', 'prechamp_points', 'champ_points']
 
 
+class DancerLookupError(Exception):
+    """Raised when the CDA points database can't be reached, times out, or
+    returns a response that doesn't match the expected shape."""
+
+
 @dataclass
 class DancerRecord:
     """Typed representation of a dancer record from the CDA points database.
@@ -74,30 +79,46 @@ def lookup_dancer(first: str, last: str) -> DancerRecord:
     Returns:
         A DancerRecord with the dancer's information. For dancers not in the
         database, cda_id and first_comp_date will be None and points will be zeros.
+    Raises:
+        DancerLookupError: if the request fails, times out, or the response
+            doesn't match the expected shape.
     """
     HEADER = {"x-api-key": config.API_KEY}
     parameters = {"firstName": first,
                   "lastName": last}
-    result = requests.get("https://collegiatedancesport.org/db/namematch.php",
-                          headers=HEADER, params=parameters).json()
 
-    if not result['success']:
-        return _build_empty_record(first, last)
+    try:
+        response = requests.get("https://collegiatedancesport.org/db/namematch.php",
+                                headers=HEADER, params=parameters)
+        response.raise_for_status()
+        result = response.json()
+    except (requests.exceptions.RequestException, ValueError) as e:
+        raise DancerLookupError(
+            f"Failed to look up '{first} {last}' in the CDA points database: {e}"
+        ) from e
 
-    profile = result['competitor']
-    profile_points = profile['fairlevelPoints']
+    try:
+        if not result['success']:
+            return _build_empty_record(first, last)
 
-    yr, m, d = [int(x) for x in profile['firstCompetitionDate'].split('-')]
-    first_comp_date = datetime.date(yr, m, d)
+        profile = result['competitor']
+        profile_points = profile['fairlevelPoints']
 
-    syllabus_pts, open_pts = _parse_points(profile_points)
+        yr, m, d = [int(x) for x in profile['firstCompetitionDate'].split('-')]
+        first_comp_date = datetime.date(yr, m, d)
 
-    return DancerRecord(
-        cda_id=profile['cdaId'],
-        first=profile['firstName'],
-        last=profile['lastName'],
-        first_comp_date=first_comp_date,
-        created_date=profile['dateCreated'],
-        syllabus_pts=syllabus_pts,
-        open_pts=open_pts,
-    )
+        syllabus_pts, open_pts = _parse_points(profile_points)
+
+        return DancerRecord(
+            cda_id=profile['cdaId'],
+            first=profile['firstName'],
+            last=profile['lastName'],
+            first_comp_date=first_comp_date,
+            created_date=profile['dateCreated'],
+            syllabus_pts=syllabus_pts,
+            open_pts=open_pts,
+        )
+    except (KeyError, ValueError, TypeError) as e:
+        raise DancerLookupError(
+            f"Unexpected response shape looking up '{first} {last}' in the CDA points database: {e}"
+        ) from e
