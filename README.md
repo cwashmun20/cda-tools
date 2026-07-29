@@ -55,8 +55,7 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 ├── data/
 │   └── inputs/                   # Competition entry CSVs (gitignored)
 │
-├── pyproject.toml                # Python package configuration
-├── requirements.txt              # Pinned dependencies
+├── pyproject.toml                # Python package configuration (deps, build, entry points)
 └── README.md
 ```
 
@@ -106,6 +105,4 @@ python -m flc_entry_checking.lib.entry_checker
 # `python -m unittest discover` and `python -m flc_entry_checking.lib.entry_checker`
 # work from the repo root without this, since -m puts the repo root on sys.path)
 pip install -e .
-
-# Or install dependencies manually
-pip install -r requirements.txt
+```
