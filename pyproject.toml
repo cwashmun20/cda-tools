@@ -19,6 +19,11 @@ dependencies = [
     "pytz",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
 [project.scripts]
 entry-checker = "flc_entry_checking.lib.entry_checker:main"
 

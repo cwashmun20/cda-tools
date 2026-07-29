@@ -105,4 +105,21 @@ python -m flc_entry_checking.lib.entry_checker
 # `python -m unittest discover` and `python -m flc_entry_checking.lib.entry_checker`
 # work from the repo root without this, since -m puts the repo root on sys.path)
 pip install -e .
+
+# Or, to also install test dependencies (pytest):
+pip install -e ".[dev]"
 ```
+
+## Testing
+
+```bash
+pytest
+```
+
+Tests are written against `unittest.TestCase` (no `pytest`-specific fixtures), so they also run without installing `pytest` at all:
+
+```bash
+python -m unittest discover
+```
+
+`pytest` just gives nicer output and is the recommended way to run them.
