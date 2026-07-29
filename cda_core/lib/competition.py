@@ -3,7 +3,7 @@
 Competition is a data model: it holds a competition's identity (name, date,
 ruleset) and the raw entry data, plus the competitors/partnerships/entries
 accumulated while checking it. It does not parse input, prompt for input,
-or check eligibility — see flc_entry_checking.lib.entry_checker.EntryChecker
+or check eligibility — see entry_checking.lib.entry_checker.EntryChecker
 for that orchestration.
 """
 
@@ -23,7 +23,7 @@ class Competition:
         comp_name: str,
         comp_date: date,
         rv_ruleset: str,
-        flc_level_limit: int,
+        consecutive_level_limit: int,
         raw_data: pd.DataFrame,
     ):
         """Create a Competition.
@@ -33,7 +33,7 @@ class Competition:
             comp_date: The competition's date.
             rv_ruleset: Either "newcomer" or "level", the rookie-vet ruleset
                         this competition uses.
-            flc_level_limit: The number of allowed consecutive
+            consecutive_level_limit: The number of allowed consecutive
                               Smooth/Standard/Rhythm/Latin levels.
             raw_data: The competition's entries, already CSV-parsed and
                       multi-dance-expanded (see cda_core.lib.parsing).
@@ -41,7 +41,7 @@ class Competition:
         self.comp_name = comp_name
         self.comp_date = comp_date
         self.rv_ruleset = rv_ruleset
-        self.flc_level_limit = flc_level_limit
+        self.consecutive_level_limit = consecutive_level_limit
         self.raw_data = raw_data
 
         self.competitors: dict[str, Dancer] = {}  # Competitor name keys

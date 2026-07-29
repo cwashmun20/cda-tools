@@ -12,7 +12,7 @@ from cda_core.lib.constants import (
     INTL_STYLES,
     SYLLABUS_LEVELS,
     OPEN_LEVELS,
-    FLC_LEVELS,
+    LEVELS,
     NC_LEVELS,
     ALL_LEVELS,
     DANCE_NAMES,
@@ -30,14 +30,14 @@ class TestStyleEnum(unittest.TestCase):
         self.assertEqual(Style.RHYTHM, "Rhythm")
         self.assertEqual(Style.NIGHTCLUB, "Nightclub")
 
-    def test_flc_styles_excludes_nightclub(self):
-        flc = list(Style.flc_styles())
-        self.assertIn(Style.STANDARD, flc)
-        self.assertIn(Style.SMOOTH, flc)
-        self.assertIn(Style.LATIN, flc)
-        self.assertIn(Style.RHYTHM, flc)
-        self.assertNotIn(Style.NIGHTCLUB, flc)
-        self.assertEqual(len(flc), 4)
+    def test_points_eligible_styles_excludes_nightclub(self):
+        eligible = list(Style.points_eligible_styles())
+        self.assertIn(Style.STANDARD, eligible)
+        self.assertIn(Style.SMOOTH, eligible)
+        self.assertIn(Style.LATIN, eligible)
+        self.assertIn(Style.RHYTHM, eligible)
+        self.assertNotIn(Style.NIGHTCLUB, eligible)
+        self.assertEqual(len(eligible), 4)
 
     def test_american_styles(self):
         am = list(Style.american_styles())
@@ -116,17 +116,17 @@ class TestCompositeLists(unittest.TestCase):
     def test_open_levels(self):
         self.assertEqual(OPEN_LEVELS, ["Novice", "Prechamp", "Champ"])
 
-    def test_flc_levels(self):
+    def test_levels(self):
         self.assertEqual(
-            FLC_LEVELS, ["Newcomer", "Bronze", "Silver", "Gold", "Novice", "Prechamp", "Champ"]
+            LEVELS, ["Newcomer", "Bronze", "Silver", "Gold", "Novice", "Prechamp", "Champ"]
         )
-        self.assertEqual(len(FLC_LEVELS), 7)
+        self.assertEqual(len(LEVELS), 7)
 
     def test_nc_levels(self):
         self.assertEqual(NC_LEVELS, ["Beginner", "IntAdv"])
 
     def test_all_levels(self):
-        self.assertEqual(len(ALL_LEVELS), 11)  # 7 FLC + 2 NC + 2 RV
+        self.assertEqual(len(ALL_LEVELS), 11)  # 7 syllabus/open + 2 NC + 2 RV
         self.assertIn("Newcomer", ALL_LEVELS)
         self.assertIn("Beginner", ALL_LEVELS)
         self.assertIn("RkLead", ALL_LEVELS)

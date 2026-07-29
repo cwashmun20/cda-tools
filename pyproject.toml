@@ -31,10 +31,10 @@ dev = [
 ]
 
 [project.scripts]
-entry-checker = "flc_entry_checking.lib.entry_checker:main"
+entry-checker = "entry_checking.lib.entry_checker:main"
 
 [tool.setuptools.packages.find]
-include = ["cda_core*", "flc_entry_checking*", "flc_points*"]
+include = ["cda_core*", "entry_checking*", "points_updating*"]
 exclude = ["*.tests", "*.tests.*"]
 
 [tool.black]

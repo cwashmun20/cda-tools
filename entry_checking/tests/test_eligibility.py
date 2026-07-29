@@ -1,4 +1,4 @@
-"""Tests for flc_entry_checking.lib.rules.eligibility module."""
+"""Tests for entry_checking.lib.rules.eligibility module."""
 
 import unittest
 import datetime
@@ -7,8 +7,8 @@ from cda_core.lib.api.client import DancerRecord
 from cda_core.lib.models.dancer import Dancer
 from cda_core.lib.models.dance import Dance
 from cda_core.lib.models.partnership import Partnership
-from flc_entry_checking.lib.rules.eligibility import EligibilityChecker
-from flc_entry_checking.lib.rules.violations import ViolationType
+from entry_checking.lib.rules.eligibility import EligibilityChecker
+from entry_checking.lib.rules.violations import ViolationType
 
 
 class _MockDancer:

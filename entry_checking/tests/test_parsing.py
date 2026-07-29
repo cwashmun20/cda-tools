@@ -1,15 +1,15 @@
-"""Tests for flc_entry_checking.lib.parsing modules."""
+"""Tests for entry_checking.lib.parsing modules."""
 
 import unittest
 import pandas as pd
-from flc_entry_checking.lib.parsing.csv_reader import validate_columns, normalize_column_names
-from flc_entry_checking.lib.parsing.row_parser import (
+from entry_checking.lib.parsing.csv_reader import validate_columns, normalize_column_names
+from entry_checking.lib.parsing.row_parser import (
     is_tba_row,
     parse_dancer_names,
     extract_entry,
     EntryData,
 )
-from flc_entry_checking.lib.parsing.multi_dance_expander import (
+from entry_checking.lib.parsing.multi_dance_expander import (
     expand_abbreviation,
     expand_multi_dance_events,
 )

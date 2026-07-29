@@ -1,4 +1,4 @@
-"""Integration tests for flc_entry_checking.lib.entry_checker.
+"""Integration tests for entry_checking.lib.entry_checker.
 
 Exercises the full Competition + EntryChecker pipeline together, rather than
 each rules/parsing module in isolation.
@@ -12,7 +12,7 @@ import pandas as pd
 from cda_core.lib import competition
 from cda_core.lib.api.client import DancerRecord
 from cda_core.lib.models.dancer import Dancer
-from flc_entry_checking.lib.entry_checker import EntryChecker
+from entry_checking.lib.entry_checker import EntryChecker
 
 
 def _mock_dancer(comp_date, first, last):
@@ -49,7 +49,7 @@ class TestEntryCheckerPipeline(unittest.TestCase):
             comp_name="test",
             comp_date=self.comp_date,
             rv_ruleset="newcomer",
-            flc_level_limit=2,
+            consecutive_level_limit=2,
             raw_data=raw_data,
         )
         # Pre-populate competitors so EntryChecker never calls the live API.
@@ -81,7 +81,7 @@ class TestEntryCheckerPipeline(unittest.TestCase):
 
     def test_consecutive_level_violation_detected(self):
         """Registering for 3 distinct Smooth levels (Bronze/Silver/Gold) with
-        flc_level_limit=2 should flag both dancers for too_many_levels."""
+        consecutive_level_limit=2 should flag both dancers for too_many_levels."""
         too_many = [v for v in self.level_violations if v.violation_type == "too_many_levels"]
         self.assertEqual(len(too_many), 2)  # one per dancer (lead and follow)
         self.assertEqual({v.dancer_name for v in too_many}, {"Baris Varol", "Denise Machin"})

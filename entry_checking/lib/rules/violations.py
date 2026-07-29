@@ -1,4 +1,4 @@
-"""Violation types and structured results for FLC rule checking.
+"""Violation types and structured results for rule checking.
 
 This module defines the data structures used to represent rule-checking
 results, replacing direct print() calls with structured dataclasses.
@@ -10,7 +10,7 @@ from typing import Optional
 
 
 class ViolationType(StrEnum):
-    """Types of FLC rule violations."""
+    """Types of rule violations."""
 
     NEWCOMER = "newcomer"
     NIGHTCLUB_BEGINNER = "nightclub_beginner"

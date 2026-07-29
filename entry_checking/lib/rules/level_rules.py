@@ -5,19 +5,19 @@ for too many or non-consecutive levels within the same style.
 """
 
 from cda_core.lib import constants
-from flc_entry_checking.lib.rules.violations import LevelViolation
+from entry_checking.lib.rules.violations import LevelViolation
 
 
 class LevelRulesChecker:
     """Checks a dancer's registered entries for consecutive level violations."""
 
     @staticmethod
-    def check(dancer, flc_level_limit: int = 2) -> list[LevelViolation]:
+    def check(dancer, consecutive_level_limit: int = 2) -> list[LevelViolation]:
         """Check a dancer's entries for consecutive level violations.
 
         Args:
             dancer: A Dancer object with entries to check.
-            flc_level_limit: Maximum number of consecutive levels allowed (default 2).
+            consecutive_level_limit: Maximum number of consecutive levels allowed (default 2).
         Returns:
             A list of LevelViolation objects (empty if none found).
         """
@@ -33,8 +33,8 @@ class LevelRulesChecker:
         for entry_obj in dancer.entries:
             style = entry_obj.dance_data.style
             level = entry_obj.dance_data.level
-            if style in constants.STYLES and level in constants.FLC_LEVELS:
-                level_log[style].add(constants.FLC_LEVELS.index(level))
+            if style in constants.STYLES and level in constants.LEVELS:
+                level_log[style].add(constants.LEVELS.index(level))
 
         for style, level_set in level_log.items():
             if not level_set:
@@ -43,7 +43,7 @@ class LevelRulesChecker:
             sorted_levels = sorted(level_set)
 
             # Check for too many levels registered
-            if len(level_set) > flc_level_limit:
+            if len(level_set) > consecutive_level_limit:
                 violations.append(
                     LevelViolation(
                         dancer_name=dancer.name,
@@ -52,10 +52,10 @@ class LevelRulesChecker:
                         levels=sorted_levels,
                         detail_message=(
                             f"CONSECUTIVE LEVEL VIOLATION: {dancer.name} is registered "
-                            f"for more than {flc_level_limit} level(s) of {style}:\n"
+                            f"for more than {consecutive_level_limit} level(s) of {style}:\n"
                             + "\n".join(
                                 f"\t{dancer.name} is registered for at least one dance "
-                                f"in '{constants.FLC_LEVELS[i]} {style}'."
+                                f"in '{constants.LEVELS[i]} {style}'."
                                 for i in sorted_levels
                             )
                         ),
@@ -67,8 +67,8 @@ class LevelRulesChecker:
                 curr_idx, next_idx = 0, 1
                 while next_idx < len(sorted_levels):
                     if sorted_levels[next_idx] - sorted_levels[curr_idx] != 1:
-                        level_name_1 = constants.FLC_LEVELS[sorted_levels[curr_idx]]
-                        level_name_2 = constants.FLC_LEVELS[sorted_levels[next_idx]]
+                        level_name_1 = constants.LEVELS[sorted_levels[curr_idx]]
+                        level_name_2 = constants.LEVELS[sorted_levels[next_idx]]
                         violations.append(
                             LevelViolation(
                                 dancer_name=dancer.name,

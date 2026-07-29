@@ -1,4 +1,4 @@
-"""Tests for flc_entry_checking.lib.rules.proficiency module."""
+"""Tests for entry_checking.lib.rules.proficiency module."""
 
 import unittest
 import datetime
@@ -6,7 +6,7 @@ import numpy as np
 from cda_core.lib.api.client import DancerRecord
 from cda_core.lib.models.dancer import Dancer
 from cda_core.lib.models.dance import Dance
-from flc_entry_checking.lib.rules.proficiency import ProficiencyCalculator
+from entry_checking.lib.rules.proficiency import ProficiencyCalculator
 
 
 class TestProficiencyCalculator(unittest.TestCase):

@@ -9,7 +9,7 @@ from cda_core.lib.points import Points
 
 
 class Dancer:
-    """Abstract representation of a dancer for FLC entry checking and point updating purposes.
+    """Abstract representation of a dancer for entry checking and points-updating purposes.
     All dates are handled using the datetime library's date object.
     """
 
@@ -155,7 +155,7 @@ class Dancer:
         """
         for comp_entry in self.entries:
             style_match = comp_entry.dance_data.style == style
-            is_vet_entry = constants.FLC_LEVELS.index(comp_entry.dance_data.level) >= 2
+            is_vet_entry = constants.LEVELS.index(comp_entry.dance_data.level) >= 2
             if style_match and is_vet_entry:
                 return True
         return False
@@ -173,7 +173,7 @@ class Dancer:
         """
         for comp_entry in self.entries:
             style_match = comp_entry.dance_data.style == style
-            is_rookie_entry = constants.FLC_LEVELS.index(comp_entry.dance_data.level) <= 1
+            is_rookie_entry = constants.LEVELS.index(comp_entry.dance_data.level) <= 1
             if style_match and is_rookie_entry:
                 return True
         return False
@@ -187,11 +187,11 @@ class Dancer:
         Returns:
             the number of points the dancer has in target_dance.
         Raises:
-            ValueError: if target_dance is not eligible for FLC points
+            ValueError: if target_dance is not eligible for points
                         (e.g. nightclub dances).
         """
         if target_dance.style not in constants.STYLES[:-1]:
-            raise ValueError(f"""'{target_dance}' is not eligible for FLC points
+            raise ValueError(f"""'{target_dance}' is not eligible for points
                                  (e.g. nightclub dances).""")
 
         if target_dance.level in constants.SYLLABUS_LEVELS:
@@ -210,5 +210,5 @@ class Dancer:
             return self.points.open_data[row_idx][col_idx]
 
         raise ValueError(
-            f"'{target_dance}' has an unrecognized level and is not eligible for FLC points."
+            f"'{target_dance}' has an unrecognized level and is not eligible for points."
         )

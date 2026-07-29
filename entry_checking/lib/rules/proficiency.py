@@ -1,7 +1,7 @@
 """Proficiency level calculation for CDA Fair Level Certification.
 
 Provides a stateless calculator for determining a dancer's proficiency
-level for a given dance, following CDA FLC rules including point-out
+level for a given dance, following CDA's rules including point-out
 detection, within-style, and cross-style proficiency.
 """
 
@@ -40,10 +40,10 @@ class ProficiencyCalculator:
             style: The dance style (e.g. "Smooth", "Latin").
             dance_name: The dance name (e.g. "Tango", "Samba").
         Returns:
-            An int representing the number of FLC levels pointed out of.
+            An int representing the number of levels pointed out of.
         """
         point_out_level = 0
-        for level in constants.FLC_LEVELS:
+        for level in constants.LEVELS:
             curr_dance = Dance(level, style, dance_name)
             if ProficiencyCalculator.has_pointed_out(dancer, curr_dance):
                 point_out_level += 1
@@ -55,7 +55,7 @@ class ProficiencyCalculator:
     def compute_proficiency_level(dancer, style: str, dance_name: str) -> int:
         """Returns an int representing a dancer's proficiency level for a given dance.
 
-        Corresponds to the index of the level in constants.FLC_LEVELS:
+        Corresponds to the index of the level in constants.LEVELS:
         0 = Newcomer, 1 = Bronze, 2 = Silver, 3 = Gold, 4 = Novice,
         5 = Pre-Champ, 6 = Championship
 
@@ -66,7 +66,7 @@ class ProficiencyCalculator:
         Returns:
             An int representing the lowest level a dancer may register for.
         Raises:
-            ValueError: if style is not eligible for FLC points.
+            ValueError: if style is not eligible for points.
         """
         newcomer_level = 0 if dancer.is_newcomer() else 1
 
@@ -91,7 +91,7 @@ class ProficiencyCalculator:
         # Bolero, Mambo) get no cross-style credit.
         other_style = constants.CROSS_STYLE.get(style)
         if other_style is None:
-            raise ValueError(f"'{style}' is not eligible for FLC points (e.g. nightclub dances).")
+            raise ValueError(f"'{style}' is not eligible for points (e.g. nightclub dances).")
 
         cross_style_level = 0
         other_dance = constants.CROSS_STYLE_DANCE_PAIRS.get(dance_name)

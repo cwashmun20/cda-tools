@@ -7,8 +7,8 @@ structured EligibilityResult objects.
 
 from cda_core.lib import constants
 from cda_core.lib.models.dance import Dance
-from flc_entry_checking.lib.rules.violations import EligibilityResult, ViolationType
-from flc_entry_checking.lib.rules.proficiency import ProficiencyCalculator
+from entry_checking.lib.rules.violations import EligibilityResult, ViolationType
+from entry_checking.lib.rules.proficiency import ProficiencyCalculator
 
 
 class EligibilityChecker:
@@ -89,7 +89,7 @@ class EligibilityChecker:
         follow_level = ProficiencyCalculator.compute_proficiency_level(
             partnership.follow, dance_obj.style, dance_obj.dance
         )
-        event_level = constants.FLC_LEVELS.index(dance_obj.level)
+        event_level = constants.LEVELS.index(dance_obj.level)
 
         # Check for Split-Level Exception
         if abs(lead_level - follow_level) >= 2:
@@ -111,8 +111,8 @@ class EligibilityChecker:
             return EligibilityResult(eligible=True)
 
         # Pointed out violation
-        lead_eligibility = constants.FLC_LEVELS[lead_level]
-        follow_eligibility = constants.FLC_LEVELS[follow_level]
+        lead_eligibility = constants.LEVELS[lead_level]
+        follow_eligibility = constants.LEVELS[follow_level]
         return EligibilityResult(
             eligible=False,
             violation_type=ViolationType.POINTED_OUT,

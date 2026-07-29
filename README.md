@@ -1,4 +1,4 @@
-# cda-tools: Fair Level Certification Made Simple
+# cda-tools: Tools for Officiating DanceSport Competitions
 
 ### Authors
 Clifford Ashmun, CDA Board Member and Records Keeper
@@ -32,7 +32,7 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 │           ├── entry.py          #   Competition entry
 │           └── event.py          #   Competition event
 │
-├── flc_entry_checking/           # Entry validation: orchestration, rules, parsing
+├── entry_checking/           # Entry validation: orchestration, rules, parsing
 │   ├── __init__.py
 │   └── lib/
 │       ├── __init__.py
@@ -47,7 +47,7 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 │           ├── eligibility.py    #   EligibilityChecker
 │           └── level_rules.py    #   LevelRulesChecker
 │
-├── flc_points/                   # Points updating tool (to be implemented)
+├── points_updating/                   # Points updating tool (to be implemented)
 │   ├── __init__.py
 │   └── lib/
 │       └── __init__.py
@@ -70,7 +70,7 @@ All domain constants use Python 3.11+ `StrEnum` enums, so enum members work dire
 - `RookieVetLevel` — RkLead, RkFollow
 
 ### Rules Package
-`flc_entry_checking/lib/rules/` contains FLC validation logic (proficiency, eligibility, consecutive-level rules). It operates on `cda_core` domain objects (`Dancer`, `Partnership`, `Dance`) but lives outside `cda_core` since it's entry-checking-specific, not core domain. Validation logic returns structured `EligibilityResult` and `LevelViolation` dataclasses instead of printing directly, so results can be consumed by both the CLI and a future web UI.
+`entry_checking/lib/rules/` contains FLC validation logic (proficiency, eligibility, consecutive-level rules). It operates on `cda_core` domain objects (`Dancer`, `Partnership`, `Dance`) but lives outside `cda_core` since it's entry-checking-specific, not core domain. Validation logic returns structured `EligibilityResult` and `LevelViolation` dataclasses instead of printing directly, so results can be consumed by both the CLI and a future web UI.
 
 ### API Layer
 API communication is isolated in `cda_core/lib/api/`. The `DancerRecord` dataclass provides typed access to CDA database responses. To use the API:
@@ -78,10 +78,10 @@ API communication is isolated in `cda_core/lib/api/`. The `DancerRecord` datacla
 2. Add your API key to `config.py`
 
 ### Competition & EntryChecker
-`Competition` (`cda_core/lib/competition.py`) is a plain data model — it holds a competition's identity (name, date, ruleset) and raw entry data, nothing else. Orchestration — building `Dancer`/`Partnership`/`Entry` objects from a `Competition`'s rows, running `EligibilityChecker` and `LevelRulesChecker`, and returning structured results — lives in `EntryChecker` (`flc_entry_checking/lib/entry_checker.py`). Neither class prints; `entry_checker.main()` is the only place that prompts and prints, so the same orchestration can later be reused by a non-interactive caller (e.g. a web UI).
+`Competition` (`cda_core/lib/competition.py`) is a plain data model — it holds a competition's identity (name, date, ruleset) and raw entry data, nothing else. Orchestration — building `Dancer`/`Partnership`/`Entry` objects from a `Competition`'s rows, running `EligibilityChecker` and `LevelRulesChecker`, and returning structured results — lives in `EntryChecker` (`entry_checking/lib/entry_checker.py`). Neither class prints; `entry_checker.main()` is the only place that prompts and prints, so the same orchestration can later be reused by a non-interactive caller (e.g. a web UI).
 
 ### Import Convention
-All internal imports are absolute package paths (`from cda_core.lib.models.dance import Dance`, `from flc_entry_checking.lib.rules.eligibility import EligibilityChecker`), not `sys.path` manipulation. This means `cda_core` and `flc_entry_checking` need to be resolvable as real top-level packages — either via `pip install -e .` (see Setup), or by running from the repo root, where Python's `-m` flag adds the current directory to `sys.path` automatically.
+All internal imports are absolute package paths (`from cda_core.lib.models.dance import Dance`, `from entry_checking.lib.rules.eligibility import EligibilityChecker`), not `sys.path` manipulation. This means `cda_core` and `entry_checking` need to be resolvable as real top-level packages — either via `pip install -e .` (see Setup), or by running from the repo root, where Python's `-m` flag adds the current directory to `sys.path` automatically.
 
 ## Usage
 
@@ -91,10 +91,10 @@ All internal imports are absolute package paths (`from cda_core.lib.models.dance
 entry-checker
 
 # Or via -m, from the repo root (no install required)
-python -m flc_entry_checking.lib.entry_checker
+python -m entry_checking.lib.entry_checker
 ```
 
-> Running `flc_entry_checking/lib/entry_checker.py` directly (without `-m`) will NOT work — only the
+> Running `entry_checking/lib/entry_checker.py` directly (without `-m`) will NOT work — only the
 > script's own directory ends up on `sys.path`, not the repo root, so `cda_core` won't resolve. Use one
 > of the two forms above.
 
@@ -102,7 +102,7 @@ python -m flc_entry_checking.lib.entry_checker
 
 ```bash
 # Install in development mode (required for the `entry-checker` console script;
-# `python -m unittest discover` and `python -m flc_entry_checking.lib.entry_checker`
+# `python -m unittest discover` and `python -m entry_checking.lib.entry_checker`
 # work from the repo root without this, since -m puts the repo root on sys.path)
 pip install -e .
 
@@ -129,7 +129,7 @@ python -m unittest discover
 ```bash
 black .          # auto-format
 flake8           # style/unused-import checks (config in .flake8)
-mypy cda_core flc_entry_checking flc_points  # type checking (config in pyproject.toml)
+mypy cda_core entry_checking points_updating  # type checking (config in pyproject.toml)
 ```
 
 `black`'s line length is set to 100 in `pyproject.toml` (`[tool.black]`) to match `flake8`'s

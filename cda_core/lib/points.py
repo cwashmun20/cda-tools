@@ -1,7 +1,7 @@
 """Points representation for CDA Fair Level Certification.
 
 This module provides the Points class for storing and displaying
-a dancer's FLC point totals across all syllabus and open levels.
+a dancer's point totals across all syllabus and open levels.
 """
 
 import numpy as np

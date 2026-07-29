@@ -39,9 +39,9 @@ class TestDancerGetPoints(unittest.TestCase):
             dancer.get_points(Dance("Beginner", "Nightclub", "Salsa"))
 
     def test_rookie_vet_level_raises_value_error(self):
-        """RkLead/RkFollow are FLC-eligible styles but not a syllabus or open
-        level - get_points() should reject this explicitly rather than
-        silently returning None."""
+        """RkLead/RkFollow are valid Rookie-Vet designations but not a
+        syllabus or open level - get_points() should reject this explicitly
+        rather than silently returning None."""
         dancer = self._make_dancer()
         with self.assertRaises(ValueError):
             dancer.get_points(Dance("Rookie Leader", "Smooth", "Waltz"))

@@ -14,8 +14,8 @@ import sys
 
 CHECKS = [
     ("black", ["black", "--check", "."]),
-    ("flake8", ["flake8", "cda_core", "flc_entry_checking", "flc_points"]),
-    ("mypy", ["mypy", "cda_core", "flc_entry_checking", "flc_points"]),
+    ("flake8", ["flake8", "cda_core", "entry_checking", "points_updating"]),
+    ("mypy", ["mypy", "cda_core", "entry_checking", "points_updating"]),
     ("pytest", ["pytest"]),
 ]
 

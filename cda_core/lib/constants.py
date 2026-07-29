@@ -19,8 +19,8 @@ class Style(StrEnum):
     NIGHTCLUB = "Nightclub"
 
     @classmethod
-    def flc_styles(cls) -> list["Style"]:
-        """Returns styles eligible for FLC points (all except Nightclub)."""
+    def points_eligible_styles(cls) -> list["Style"]:
+        """Returns styles eligible for points (all except Nightclub)."""
         return [s for s in cls if s != cls.NIGHTCLUB]
 
     @classmethod
@@ -35,7 +35,7 @@ class Style(StrEnum):
 
 
 class SyllabusLevel(StrEnum):
-    """Syllabus (closed) levels eligible for FLC points."""
+    """Syllabus (closed) levels eligible for points."""
 
     NEWCOMER = "Newcomer"
     BRONZE = "Bronze"
@@ -44,7 +44,7 @@ class SyllabusLevel(StrEnum):
 
 
 class OpenLevel(StrEnum):
-    """Open levels eligible for FLC points."""
+    """Open levels eligible for points."""
 
     NOVICE = "Novice"
     PRECHAMP = "Prechamp"
@@ -85,11 +85,11 @@ INTL_STYLES: list[str] = [Style.STANDARD, Style.LATIN]
 
 SYLLABUS_LEVELS: list[str] = list(SyllabusLevel)
 OPEN_LEVELS: list[str] = list(OpenLevel)
-FLC_LEVELS: list[str] = SYLLABUS_LEVELS + OPEN_LEVELS
+LEVELS: list[str] = SYLLABUS_LEVELS + OPEN_LEVELS
 NC_LEVELS: list[str] = list(NightclubLevel)
 
 ALL_LEVELS: list[str] = (
-    FLC_LEVELS + NC_LEVELS + [RookieVetLevel.ROOKIE_LEAD, RookieVetLevel.ROOKIE_FOLLOW]
+    LEVELS + NC_LEVELS + [RookieVetLevel.ROOKIE_LEAD, RookieVetLevel.ROOKIE_FOLLOW]
 )
 
 ROUNDS: list[str] = list(Round)
@@ -162,7 +162,7 @@ ABBREVIATION_MAPS: dict[str, dict[str, str]] = {
 
 
 # --- Cross-style proficiency pairings ---
-# Maps each FLC style to its cross-style counterpart (Standard<->Smooth,
+# Maps each points-eligible style to its cross-style counterpart (Standard<->Smooth,
 # Latin<->Rhythm).
 
 CROSS_STYLE: dict[str, str] = {
