@@ -1,8 +1,9 @@
-"""Tests for cda_core.lib.rules.proficiency module."""
+"""Tests for flc_entry_checking.lib.rules.proficiency module."""
 
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'cda_core', 'lib'))
 
 import unittest
 import datetime

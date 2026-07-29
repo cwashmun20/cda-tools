@@ -25,12 +25,18 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 │       ├── api/                  # CDA points database API client
 │       │   ├── client.py         #   DancerRecord, lookup_dancer()
 │       │   └── config.py.example #   API key template
-│       ├── models/               # Domain model classes
-│       │   ├── dance.py          #   Dance representation & conversion
-│       │   ├── dancer.py         #   Dancer (points, registration state)
-│       │   ├── partnership.py    #   Partnership (registration state)
-│       │   ├── entry.py          #   Competition entry
-│       │   └── event.py          #   Competition event
+│       └── models/               # Domain model classes
+│           ├── dance.py          #   Dance representation & conversion
+│           ├── dancer.py         #   Dancer (points, registration state)
+│           ├── partnership.py    #   Partnership (registration state)
+│           ├── entry.py          #   Competition entry
+│           └── event.py          #   Competition event
+│
+├── flc_entry_checking/           # Entry validation: orchestration, rules, parsing
+│   ├── __init__.py
+│   └── lib/
+│       ├── __init__.py
+│       ├── entry_checker.py      # EntryChecker orchestration + CLI entry point
 │       ├── parsing/              # Input parsing (CSV, multi-dance)
 │       │   ├── csv_reader.py     #   CSV reading & column validation
 │       │   ├── row_parser.py     #   Per-row data extraction
@@ -40,12 +46,6 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 │           ├── proficiency.py    #   ProficiencyCalculator
 │           ├── eligibility.py    #   EligibilityChecker
 │           └── level_rules.py    #   LevelRulesChecker
-│
-├── flc_entry_checking/           # CLI tool for entry validation
-│   ├── __init__.py
-│   └── lib/
-│       ├── __init__.py
-│       └── entry_checker.py      # EntryChecker orchestration + CLI entry point
 │
 ├── flc_points/                   # Points updating tool (to be implemented)
 │   ├── __init__.py
@@ -71,7 +71,7 @@ All domain constants use Python 3.11+ `StrEnum` enums, so enum members work dire
 - `RookieVetLevel` — RkLead, RkFollow
 
 ### Rules Package
-Validation logic returns structured `EligibilityResult` and `LevelViolation` dataclasses instead of printing directly. This allows results to be consumed by both the CLI and future web UI.
+`flc_entry_checking/lib/rules/` contains FLC validation logic (proficiency, eligibility, consecutive-level rules). It operates on `cda_core` domain objects (`Dancer`, `Partnership`, `Dance`) but lives outside `cda_core` since it's entry-checking-specific, not core domain. Validation logic returns structured `EligibilityResult` and `LevelViolation` dataclasses instead of printing directly, so results can be consumed by both the CLI and a future web UI.
 
 ### API Layer
 API communication is isolated in `cda_core/lib/api/`. The `DancerRecord` dataclass provides typed access to CDA database responses. To use the API:

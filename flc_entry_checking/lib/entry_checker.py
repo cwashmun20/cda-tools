@@ -9,7 +9,11 @@ Usage:
 import sys
 import os
 
-# Allow imports from cda_core/lib when running as script
+# Allow bare imports of rules.*/parsing.* siblings and cda_core/lib modules
+# regardless of invocation method (direct script, `-m`, or installed
+# console script — only direct script execution puts this file's own
+# directory on sys.path automatically).
+sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'cda_core', 'lib'))
 
 from datetime import date  # noqa: E402
