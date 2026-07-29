@@ -66,8 +66,8 @@ All domain constants use Python 3.11+ `StrEnum` enums, so enum members work dire
 - `Style` — Standard, Smooth, Latin, Rhythm, Nightclub
 - `SyllabusLevel` — Newcomer, Bronze, Silver, Gold
 - `OpenLevel` — Novice, Prechamp, Champ
-- `NightclubLevel` — Beginner, IntAdv
-- `RookieVetLevel` — RkLead, RkFollow
+- `NightclubLevel` — Beginner, Intermediate/Advanced
+- `RookieVetLevel` — Rookie Lead, Rookie Follow
 
 ### Rules Package
 `entry_checking/lib/rules/` contains FLC validation logic (proficiency, eligibility, consecutive-level rules). It operates on `cda_core` domain objects (`Dancer`, `Partnership`, `Dance`) but lives outside `cda_core` since it's entry-checking-specific, not core domain. Validation logic returns structured `EligibilityResult` and `LevelViolation` dataclasses instead of printing directly, so results can be consumed by both the CLI and a future web UI.

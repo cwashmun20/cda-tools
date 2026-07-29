@@ -132,19 +132,19 @@ class TestMultiDanceExpander(unittest.TestCase):
 
     def test_expand_abbreviation_fv(self):
         result = expand_abbreviation("Standard", "FV")
-        self.assertEqual(result, ["Foxtrot", "Viennese"])
+        self.assertEqual(result, ["Foxtrot", "Viennese Waltz"])
 
     def test_expand_abbreviation_csr(self):
         result = expand_abbreviation("Latin", "CSR")
-        self.assertEqual(result, ["ChaCha", "Samba", "Rumba"])
+        self.assertEqual(result, ["Cha Cha", "Samba", "Rumba"])
 
     def test_expand_abbreviation_pj(self):
         result = expand_abbreviation("Latin", "PJ")
-        self.assertEqual(result, ["Paso", "Jive"])
+        self.assertEqual(result, ["Paso Doble", "Jive"])
 
     def test_expand_abbreviation_crs(self):
         result = expand_abbreviation("Rhythm", "CRS")
-        self.assertEqual(result, ["ChaCha", "Rumba", "Swing"])
+        self.assertEqual(result, ["Cha Cha", "Rumba", "East Coast Swing"])
 
     def test_expand_abbreviation_bm(self):
         result = expand_abbreviation("Rhythm", "BM")
@@ -197,7 +197,7 @@ class TestMultiDanceExpander(unittest.TestCase):
         df = pd.DataFrame(data)
         result = expand_multi_dance_events(df)
         self.assertEqual(len(result), 3)
-        self.assertEqual(result["Dance"].tolist(), ["ChaCha", "Samba", "Rumba"])
+        self.assertEqual(result["Dance"].tolist(), ["Cha Cha", "Samba", "Rumba"])
 
 
 if __name__ == "__main__":

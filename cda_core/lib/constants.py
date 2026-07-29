@@ -2,8 +2,6 @@
 
 This module centralizes all domain constants used across the cda-tools codebase,
 including dance styles, levels, dance names, and abbreviation mappings.
-
-Uses Python 3.11+ StrEnum for streamlined syntax (no .value calls needed).
 """
 
 from enum import StrEnum
@@ -55,14 +53,14 @@ class NightclubLevel(StrEnum):
     """Nightclub competition levels."""
 
     BEGINNER = "Beginner"
-    INT_ADV = "IntAdv"
+    INT_ADV = "Intermediate/Advanced"
 
 
 class RookieVetLevel(StrEnum):
     """Rookie-Vet special level designations."""
 
-    ROOKIE_LEAD = "RkLead"
-    ROOKIE_FOLLOW = "RkFollow"
+    ROOKIE_LEAD = "Rookie Lead"
+    ROOKIE_FOLLOW = "Rookie Follow"
 
 
 class Round(StrEnum):
@@ -77,7 +75,6 @@ class Round(StrEnum):
 
 
 # --- Composite lists (for backward compatibility and sequential access) ---
-# StrEnum members work directly as strings, so no .value needed.
 
 STYLES: list[str] = list(Style)
 AM_STYLES: list[str] = [Style.SMOOTH, Style.RHYTHM]
@@ -96,25 +93,24 @@ ROUNDS: list[str] = list(Round)
 
 
 # --- Dance names per style ---
-# StrEnum members as dict keys work identically to their string values.
 
 DANCE_NAMES: dict[str, list[str]] = {
-    Style.STANDARD: ["Waltz", "Tango", "Viennese", "Foxtrot", "Quickstep"],
-    Style.SMOOTH: ["Waltz", "Tango", "Foxtrot", "Viennese"],
-    Style.LATIN: ["ChaCha", "Samba", "Rumba", "Paso", "Jive"],
-    Style.RHYTHM: ["ChaCha", "Rumba", "Swing", "Bolero", "Mambo"],
+    Style.STANDARD: ["Waltz", "Tango", "Viennese Waltz", "Foxtrot", "Quickstep"],
+    Style.SMOOTH: ["Waltz", "Tango", "Foxtrot", "Viennese Waltz"],
+    Style.LATIN: ["Cha Cha", "Samba", "Rumba", "Paso Doble", "Jive"],
+    Style.RHYTHM: ["Cha Cha", "Rumba", "East Coast Swing", "Bolero", "Mambo"],
     Style.NIGHTCLUB: [
-        "WCS",
-        "NC2S",
-        "Lindy",
+        "West Coast Swing",
+        "Nightclub Two-Step",
+        "Lindy Hop",
         "Merengue",
         "Blues",
         "Salsa",
-        "Argentine",
+        "Argentine Tango",
         "Hustle",
         "Bachata",
         "Polka",
-        "Country 2-Step",
+        "Country Two-Step",
         "Country Swing",
     ],
 }
@@ -125,7 +121,7 @@ DANCE_NAMES: dict[str, list[str]] = {
 _STANDARD_MAP: dict[str, str] = {
     "W": "Waltz",
     "T": "Tango",
-    "V": "Viennese",
+    "V": "Viennese Waltz",
     "F": "Foxtrot",
     "Q": "Quickstep",
 }
@@ -134,21 +130,21 @@ _SMOOTH_MAP: dict[str, str] = {
     "W": "Waltz",
     "T": "Tango",
     "F": "Foxtrot",
-    "V": "Viennese",
+    "V": "Viennese Waltz",
 }
 
 _LATIN_MAP: dict[str, str] = {
-    "C": "ChaCha",
+    "C": "Cha Cha",
     "S": "Samba",
     "R": "Rumba",
-    "P": "Paso",
+    "P": "Paso Doble",
     "J": "Jive",
 }
 
 _RHYTHM_MAP: dict[str, str] = {
-    "C": "ChaCha",
+    "C": "Cha Cha",
     "R": "Rumba",
-    "S": "Swing",
+    "S": "East Coast Swing",
     "B": "Bolero",
     "M": "Mambo",
 }
@@ -174,17 +170,17 @@ CROSS_STYLE: dict[str, str] = {
 
 # Maps a dance name to the dance name it's paired with in the counterpart
 # style, for cross-style proficiency. Most pairs share a name (e.g. Waltz is
-# danced in both Standard and Smooth); Jive/Swing are the one pair that
-# doesn't. Dances with no cross-style counterpart (Quickstep, Samba, Paso,
-# Bolero, Mambo) are intentionally absent from this map.
+# danced in both Standard and Smooth); Jive/East Coast Swing are the one pair
+# that doesn't. Dances with no cross-style counterpart (Quickstep, Samba,
+# Paso Doble, Bolero, Mambo) are intentionally absent from this map.
 
 CROSS_STYLE_DANCE_PAIRS: dict[str, str] = {
     "Waltz": "Waltz",
     "Tango": "Tango",
-    "Viennese": "Viennese",
+    "Viennese Waltz": "Viennese Waltz",
     "Foxtrot": "Foxtrot",
-    "ChaCha": "ChaCha",
+    "Cha Cha": "Cha Cha",
     "Rumba": "Rumba",
-    "Jive": "Swing",
-    "Swing": "Jive",
+    "Jive": "East Coast Swing",
+    "East Coast Swing": "Jive",
 }

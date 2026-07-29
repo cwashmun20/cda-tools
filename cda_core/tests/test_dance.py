@@ -25,7 +25,7 @@ class TestDance(unittest.TestCase):
 
     def test_rookie_lead(self):
         d = Dance("Rookie Leader", "Smooth", "Waltz")
-        self.assertEqual(str(d), "RkLead Am. Waltz")
+        self.assertEqual(str(d), "Rookie Lead Am. Waltz")
 
     def test_equality(self):
         d1 = Dance("Bronze", "Smooth", "Waltz")
@@ -55,19 +55,19 @@ class TestDance(unittest.TestCase):
         self.assertEqual(convert_level("Pre-Champ"), "Prechamp")
 
     def test_convert_level_intadv(self):
-        self.assertEqual(convert_level("Int/Adv"), "IntAdv")
+        self.assertEqual(convert_level("Int/Adv"), "Intermediate/Advanced")
 
     def test_convert_level_rookie_leader(self):
-        self.assertEqual(convert_level("Rookie Leader"), "RkLead")
+        self.assertEqual(convert_level("Rookie Leader"), "Rookie Lead")
 
     def test_convert_level_rookie_follower(self):
-        self.assertEqual(convert_level("Rookie Follower"), "RkFollow")
+        self.assertEqual(convert_level("Rookie Follower"), "Rookie Follow")
 
     def test_convert_dance_west_coast(self):
-        self.assertEqual(convert_dance("Nightclub", "West Coast Swing"), "WCS")
+        self.assertEqual(convert_dance("Nightclub", "West Coast Swing"), "West Coast Swing")
 
     def test_convert_dance_viennese_waltz(self):
-        self.assertEqual(convert_dance("Smooth", "Viennese Waltz"), "Viennese")
+        self.assertEqual(convert_dance("Smooth", "Viennese Waltz"), "Viennese Waltz")
 
     def test_convert_dance_standard_name(self):
         self.assertEqual(convert_dance("Standard", "Waltz"), "Waltz")

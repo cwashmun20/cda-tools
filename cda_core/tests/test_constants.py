@@ -86,15 +86,15 @@ class TestNightclubLevelEnum(unittest.TestCase):
 
     def test_values(self):
         self.assertEqual(NightclubLevel.BEGINNER, "Beginner")
-        self.assertEqual(NightclubLevel.INT_ADV, "IntAdv")
+        self.assertEqual(NightclubLevel.INT_ADV, "Intermediate/Advanced")
 
 
 class TestRookieVetLevelEnum(unittest.TestCase):
     """Tests for the RookieVetLevel enum."""
 
     def test_values(self):
-        self.assertEqual(RookieVetLevel.ROOKIE_LEAD, "RkLead")
-        self.assertEqual(RookieVetLevel.ROOKIE_FOLLOW, "RkFollow")
+        self.assertEqual(RookieVetLevel.ROOKIE_LEAD, "Rookie Lead")
+        self.assertEqual(RookieVetLevel.ROOKIE_FOLLOW, "Rookie Follow")
 
 
 class TestCompositeLists(unittest.TestCase):
@@ -123,14 +123,14 @@ class TestCompositeLists(unittest.TestCase):
         self.assertEqual(len(LEVELS), 7)
 
     def test_nc_levels(self):
-        self.assertEqual(NC_LEVELS, ["Beginner", "IntAdv"])
+        self.assertEqual(NC_LEVELS, ["Beginner", "Intermediate/Advanced"])
 
     def test_all_levels(self):
         self.assertEqual(len(ALL_LEVELS), 11)  # 7 syllabus/open + 2 NC + 2 RV
         self.assertIn("Newcomer", ALL_LEVELS)
         self.assertIn("Beginner", ALL_LEVELS)
-        self.assertIn("RkLead", ALL_LEVELS)
-        self.assertIn("RkFollow", ALL_LEVELS)
+        self.assertIn("Rookie Lead", ALL_LEVELS)
+        self.assertIn("Rookie Follow", ALL_LEVELS)
 
 
 class TestDanceNames(unittest.TestCase):
@@ -138,21 +138,23 @@ class TestDanceNames(unittest.TestCase):
 
     def test_standard_dances(self):
         self.assertEqual(
-            DANCE_NAMES["Standard"], ["Waltz", "Tango", "Viennese", "Foxtrot", "Quickstep"]
+            DANCE_NAMES["Standard"], ["Waltz", "Tango", "Viennese Waltz", "Foxtrot", "Quickstep"]
         )
 
     def test_smooth_dances(self):
-        self.assertEqual(DANCE_NAMES["Smooth"], ["Waltz", "Tango", "Foxtrot", "Viennese"])
+        self.assertEqual(DANCE_NAMES["Smooth"], ["Waltz", "Tango", "Foxtrot", "Viennese Waltz"])
 
     def test_latin_dances(self):
-        self.assertEqual(DANCE_NAMES["Latin"], ["ChaCha", "Samba", "Rumba", "Paso", "Jive"])
+        self.assertEqual(DANCE_NAMES["Latin"], ["Cha Cha", "Samba", "Rumba", "Paso Doble", "Jive"])
 
     def test_rhythm_dances(self):
-        self.assertEqual(DANCE_NAMES["Rhythm"], ["ChaCha", "Rumba", "Swing", "Bolero", "Mambo"])
+        self.assertEqual(
+            DANCE_NAMES["Rhythm"], ["Cha Cha", "Rumba", "East Coast Swing", "Bolero", "Mambo"]
+        )
 
     def test_nightclub_dances(self):
         nc = DANCE_NAMES["Nightclub"]
-        self.assertIn("WCS", nc)
+        self.assertIn("West Coast Swing", nc)
         self.assertIn("Salsa", nc)
         self.assertIn("Bachata", nc)
         self.assertIn("Hustle", nc)
@@ -169,7 +171,7 @@ class TestAbbreviationMaps(unittest.TestCase):
         m = ABBREVIATION_MAPS["Standard"]
         self.assertEqual(m["W"], "Waltz")
         self.assertEqual(m["T"], "Tango")
-        self.assertEqual(m["V"], "Viennese")
+        self.assertEqual(m["V"], "Viennese Waltz")
         self.assertEqual(m["F"], "Foxtrot")
         self.assertEqual(m["Q"], "Quickstep")
 
@@ -178,21 +180,21 @@ class TestAbbreviationMaps(unittest.TestCase):
         self.assertEqual(m["W"], "Waltz")
         self.assertEqual(m["T"], "Tango")
         self.assertEqual(m["F"], "Foxtrot")
-        self.assertEqual(m["V"], "Viennese")
+        self.assertEqual(m["V"], "Viennese Waltz")
 
     def test_latin_map(self):
         m = ABBREVIATION_MAPS["Latin"]
-        self.assertEqual(m["C"], "ChaCha")
+        self.assertEqual(m["C"], "Cha Cha")
         self.assertEqual(m["S"], "Samba")
         self.assertEqual(m["R"], "Rumba")
-        self.assertEqual(m["P"], "Paso")
+        self.assertEqual(m["P"], "Paso Doble")
         self.assertEqual(m["J"], "Jive")
 
     def test_rhythm_map(self):
         m = ABBREVIATION_MAPS["Rhythm"]
-        self.assertEqual(m["C"], "ChaCha")
+        self.assertEqual(m["C"], "Cha Cha")
         self.assertEqual(m["R"], "Rumba")
-        self.assertEqual(m["S"], "Swing")
+        self.assertEqual(m["S"], "East Coast Swing")
         self.assertEqual(m["B"], "Bolero")
         self.assertEqual(m["M"], "Mambo")
 

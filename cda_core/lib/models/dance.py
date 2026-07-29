@@ -32,15 +32,15 @@ def convert_dance(style: str, input_name: str) -> str:
     if input_name in ("Night Club 2-Step", "Nightclub 2-Step", "Nightclub Two-Step"):
         return constants.DANCE_NAMES[constants.Style.NIGHTCLUB][1]
 
-    if input_name == "Viennese Waltz":
-        return "Viennese"
-
     # Check if dance name is the same as in the standard naming convention.
     if input_name in constants.DANCE_NAMES[style]:
         return input_name
 
-    # Check if dance is abbreviated in standard naming convention.
-    for dance_name in constants.DANCE_NAMES[style]:
+    # Check if dance is abbreviated in standard naming convention. Longer
+    # names are checked first so a more specific name (e.g. "Viennese Waltz")
+    # is matched before a shorter one that happens to be its substring
+    # (e.g. "Waltz").
+    for dance_name in sorted(constants.DANCE_NAMES[style], key=len, reverse=True):
         if dance_name in input_name:
             return dance_name
 
