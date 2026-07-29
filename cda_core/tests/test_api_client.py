@@ -1,14 +1,10 @@
 """Tests for cda_core.lib.api.client module."""
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
-
 import unittest
 from unittest.mock import patch, MagicMock
 import requests
 
-from api.client import lookup_dancer, DancerLookupError
+from cda_core.lib.api.client import lookup_dancer, DancerLookupError
 
 
 def _mock_response(json_data, status_ok=True):
@@ -25,7 +21,7 @@ def _mock_response(json_data, status_ok=True):
 class TestLookupDancer(unittest.TestCase):
     """Tests for lookup_dancer()."""
 
-    @patch("api.client.requests.get")
+    @patch("cda_core.lib.api.client.requests.get")
     def test_success(self, mock_get):
         mock_get.return_value = _mock_response({
             "success": True,
@@ -51,26 +47,26 @@ class TestLookupDancer(unittest.TestCase):
         self.assertEqual(record.first, "Priya")
         self.assertEqual(record.last, "Patel")
 
-    @patch("api.client.requests.get")
+    @patch("cda_core.lib.api.client.requests.get")
     def test_not_found_returns_empty_record(self, mock_get):
         mock_get.return_value = _mock_response({"success": False})
         record = lookup_dancer("New", "Comer")
         self.assertIsNone(record.cda_id)
         self.assertIsNone(record.first_comp_date)
 
-    @patch("api.client.requests.get")
+    @patch("cda_core.lib.api.client.requests.get")
     def test_network_error_raises_lookup_error(self, mock_get):
         mock_get.side_effect = requests.exceptions.ConnectionError("no route to host")
         with self.assertRaises(DancerLookupError):
             lookup_dancer("Alex", "Rivera")
 
-    @patch("api.client.requests.get")
+    @patch("cda_core.lib.api.client.requests.get")
     def test_http_error_raises_lookup_error(self, mock_get):
         mock_get.return_value = _mock_response({}, status_ok=False)
         with self.assertRaises(DancerLookupError):
             lookup_dancer("Alex", "Rivera")
 
-    @patch("api.client.requests.get")
+    @patch("cda_core.lib.api.client.requests.get")
     def test_malformed_json_raises_lookup_error(self, mock_get):
         response = MagicMock()
         response.raise_for_status.return_value = None
@@ -79,7 +75,7 @@ class TestLookupDancer(unittest.TestCase):
         with self.assertRaises(DancerLookupError):
             lookup_dancer("Alex", "Rivera")
 
-    @patch("api.client.requests.get")
+    @patch("cda_core.lib.api.client.requests.get")
     def test_unexpected_shape_raises_lookup_error(self, mock_get):
         # "success": True but missing the "competitor" key entirely.
         mock_get.return_value = _mock_response({"success": True})

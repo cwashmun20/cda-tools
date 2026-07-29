@@ -1,10 +1,6 @@
 """Dance tests are in test_constants.py (Dance class tested via conversion functions)."""
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
-
 import unittest
-from models.dance import Dance, convert_dance, convert_level
+from cda_core.lib.models.dance import Dance, convert_dance, convert_level
 
 
 class TestDance(unittest.TestCase):

@@ -5,8 +5,8 @@ level for a given dance, following CDA FLC rules including point-out
 detection, within-style, and cross-style proficiency.
 """
 
-import constants
-from models.dance import Dance
+from cda_core.lib import constants
+from cda_core.lib.models.dance import Dance
 
 
 class ProficiencyCalculator:

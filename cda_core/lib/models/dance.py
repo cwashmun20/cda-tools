@@ -5,7 +5,7 @@ dance names and levels from spreadsheet input to standard naming conventions.
 All constants have been moved to cda_core.lib.constants.
 """
 
-import constants
+from cda_core.lib import constants
 
 
 def convert_dance(style: str, input_name: str) -> str:

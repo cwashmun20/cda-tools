@@ -4,20 +4,15 @@ Exercises the full Competition + EntryChecker pipeline together, rather than
 each rules/parsing module in isolation.
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'cda_core', 'lib'))
-
 import unittest
 import datetime
 import numpy as np
 import pandas as pd
 
-import competition
-from api.client import DancerRecord
-from models.dancer import Dancer
-from entry_checker import EntryChecker
+from cda_core.lib import competition
+from cda_core.lib.api.client import DancerRecord
+from cda_core.lib.models.dancer import Dancer
+from flc_entry_checking.lib.entry_checker import EntryChecker
 
 
 def _mock_dancer(comp_date, first, last):

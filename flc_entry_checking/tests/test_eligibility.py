@@ -1,19 +1,14 @@
 """Tests for flc_entry_checking.lib.rules.eligibility module."""
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'cda_core', 'lib'))
-
 import unittest
 import datetime
 import numpy as np
-from api.client import DancerRecord
-from models.dancer import Dancer
-from models.dance import Dance
-from models.partnership import Partnership
-from rules.eligibility import EligibilityChecker
-from rules.violations import ViolationType
+from cda_core.lib.api.client import DancerRecord
+from cda_core.lib.models.dancer import Dancer
+from cda_core.lib.models.dance import Dance
+from cda_core.lib.models.partnership import Partnership
+from flc_entry_checking.lib.rules.eligibility import EligibilityChecker
+from flc_entry_checking.lib.rules.violations import ViolationType
 
 
 class _MockDancer:

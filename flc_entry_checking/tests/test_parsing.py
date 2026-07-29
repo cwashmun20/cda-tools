@@ -1,15 +1,10 @@
 """Tests for flc_entry_checking.lib.parsing modules."""
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'cda_core', 'lib'))
-
 import unittest
 import pandas as pd
-from parsing.csv_reader import read_entries, validate_columns, normalize_column_names
-from parsing.row_parser import is_tba_row, parse_dancer_names, extract_entry, EntryData
-from parsing.multi_dance_expander import expand_abbreviation, expand_multi_dance_events
+from flc_entry_checking.lib.parsing.csv_reader import read_entries, validate_columns, normalize_column_names
+from flc_entry_checking.lib.parsing.row_parser import is_tba_row, parse_dancer_names, extract_entry, EntryData
+from flc_entry_checking.lib.parsing.multi_dance_expander import expand_abbreviation, expand_multi_dance_events
 
 
 class TestCsvReader(unittest.TestCase):

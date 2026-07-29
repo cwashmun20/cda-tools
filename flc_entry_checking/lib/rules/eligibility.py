@@ -5,10 +5,10 @@ is eligible to compete in a given dance at a given level, returning
 structured EligibilityResult objects.
 """
 
-import constants
-from models.dance import Dance
-from rules.violations import EligibilityResult, ViolationType
-from rules.proficiency import ProficiencyCalculator
+from cda_core.lib import constants
+from cda_core.lib.models.dance import Dance
+from flc_entry_checking.lib.rules.violations import EligibilityResult, ViolationType
+from flc_entry_checking.lib.rules.proficiency import ProficiencyCalculator
 
 
 class EligibilityChecker:

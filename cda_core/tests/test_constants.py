@@ -1,11 +1,7 @@
 """Tests for cda_core.lib.constants module."""
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
-
 import unittest
-from constants import (
+from cda_core.lib.constants import (
     Style, SyllabusLevel, OpenLevel, NightclubLevel, RookieVetLevel,
     STYLES, AM_STYLES, INTL_STYLES, SYLLABUS_LEVELS, OPEN_LEVELS,
     FLC_LEVELS, NC_LEVELS, ALL_LEVELS, DANCE_NAMES, ABBREVIATION_MAPS,

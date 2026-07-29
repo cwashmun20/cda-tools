@@ -4,8 +4,8 @@ Provides the LevelRulesChecker for validating that dancers don't register
 for too many or non-consecutive levels within the same style.
 """
 
-import constants
-from rules.violations import LevelViolation
+from cda_core.lib import constants
+from flc_entry_checking.lib.rules.violations import LevelViolation
 
 
 class LevelRulesChecker:

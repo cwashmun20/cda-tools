@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cda-tools"
+version = "0.1.0"
+description = "Fair Level Certification tools for the Collegiate Dancesport Association"
+readme = "README.md"
+authors = [
+    { name = "cwashmun20" },
+]
+requires-python = ">=3.11"
+dependencies = [
+    "flask>=3.1",
+    "numpy>=2.2",
+    "pandas>=2.2",
+    "requests>=2.32",
+    "pytz",
+]
+
+[project.scripts]
+entry-checker = "flc_entry_checking.lib.entry_checker:main"
+
+[tool.setuptools]
+packages = [
+    "cda_core",
+    "cda_core.lib",
+    "cda_core.lib.api",
+    "cda_core.lib.models",
+    "flc_entry_checking",
+    "flc_entry_checking.lib",
+    "flc_entry_checking.lib.parsing",
+    "flc_entry_checking.lib.rules",
+    "flc_points",
+    "flc_points.lib",
+]

@@ -6,7 +6,7 @@ into individual dance rows for processing.
 
 from typing import Optional
 
-import constants
+from cda_core.lib import constants
 
 
 def expand_abbreviation(style: str, abbreviation: str) -> list[str]:

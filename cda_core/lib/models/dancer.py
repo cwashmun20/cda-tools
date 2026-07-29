@@ -1,11 +1,11 @@
 import datetime
 from typing import Optional
 
-import constants
-from api.client import DancerRecord, lookup_dancer
-from models.dance import Dance
-from models.entry import Entry
-from points import Points
+from cda_core.lib import constants
+from cda_core.lib.api.client import DancerRecord, lookup_dancer
+from cda_core.lib.models.dance import Dance
+from cda_core.lib.models.entry import Entry
+from cda_core.lib.points import Points
 
 
 class Dancer:

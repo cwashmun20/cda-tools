@@ -1,4 +1,4 @@
-from models.dancer import Dancer
+from cda_core.lib.models.dancer import Dancer
 
 
 class Partnership:

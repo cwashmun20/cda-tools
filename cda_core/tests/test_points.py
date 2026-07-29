@@ -1,12 +1,8 @@
 """Tests for cda_core.lib.points module."""
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
-
 import unittest
 import numpy as np
-from points import Points
+from cda_core.lib.points import Points
 
 
 class TestPoints(unittest.TestCase):

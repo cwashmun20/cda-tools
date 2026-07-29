@@ -55,7 +55,7 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 ├── data/
 │   └── inputs/                   # Competition entry CSVs (gitignored)
 │
-├── setup.py                      # Python package configuration
+├── pyproject.toml                # Python package configuration
 ├── requirements.txt              # Pinned dependencies
 └── README.md
 ```
@@ -81,21 +81,30 @@ API communication is isolated in `cda_core/lib/api/`. The `DancerRecord` datacla
 ### Competition & EntryChecker
 `Competition` (`cda_core/lib/competition.py`) is a plain data model — it holds a competition's identity (name, date, ruleset) and raw entry data, nothing else. Orchestration — building `Dancer`/`Partnership`/`Entry` objects from a `Competition`'s rows, running `EligibilityChecker` and `LevelRulesChecker`, and returning structured results — lives in `EntryChecker` (`flc_entry_checking/lib/entry_checker.py`). Neither class prints; `entry_checker.main()` is the only place that prompts and prints, so the same orchestration can later be reused by a non-interactive caller (e.g. a web UI).
 
+### Import Convention
+All internal imports are absolute package paths (`from cda_core.lib.models.dance import Dance`, `from flc_entry_checking.lib.rules.eligibility import EligibilityChecker`), not `sys.path` manipulation. This means `cda_core` and `flc_entry_checking` need to be resolvable as real top-level packages — either via `pip install -e .` (see Setup), or by running from the repo root, where Python's `-m` flag adds the current directory to `sys.path` automatically.
+
 ## Usage
 
 ### CLI Entry Checker
 ```bash
-# Via entry point (when installed)
+# Via entry point (requires `pip install -e .`)
 entry-checker
 
-# Or directly
+# Or via -m, from the repo root (no install required)
 python -m flc_entry_checking.lib.entry_checker
 ```
+
+> Running `flc_entry_checking/lib/entry_checker.py` directly (without `-m`) will NOT work — only the
+> script's own directory ends up on `sys.path`, not the repo root, so `cda_core` won't resolve. Use one
+> of the two forms above.
 
 ## Setup
 
 ```bash
-# Install in development mode
+# Install in development mode (required for the `entry-checker` console script;
+# `python -m unittest discover` and `python -m flc_entry_checking.lib.entry_checker`
+# work from the repo root without this, since -m puts the repo root on sys.path)
 pip install -e .
 
 # Or install dependencies manually

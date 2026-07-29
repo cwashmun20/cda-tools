@@ -12,8 +12,7 @@ import numpy as np
 import pytz
 import requests
 
-import api.config as config
-import constants
+from cda_core.lib.api import config
 
 # JSON field names from the CDA API response for indexing into fairlevelPoints
 SYLLABUS_KEYS = ['newcomer_points', 'bronze_points', 'silver_points', 'gold_points']

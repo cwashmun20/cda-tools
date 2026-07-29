@@ -6,29 +6,19 @@ Usage:
     (or via installed entry point: entry-checker)
 """
 
-import sys
-import os
+from datetime import date
 
-# Allow bare imports of rules.*/parsing.* siblings and cda_core/lib modules
-# regardless of invocation method (direct script, `-m`, or installed
-# console script — only direct script execution puts this file's own
-# directory on sys.path automatically).
-sys.path.insert(0, os.path.dirname(__file__))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'cda_core', 'lib'))
-
-from datetime import date  # noqa: E402
-
-import competition  # type: ignore  # noqa: E402
-from models.dance import Dance  # noqa: E402
-from models.dancer import Dancer  # noqa: E402
-from models.entry import Entry  # noqa: E402
-from models.partnership import Partnership  # noqa: E402
-from parsing.csv_reader import read_entries  # noqa: E402
-from parsing.multi_dance_expander import expand_multi_dance_events  # noqa: E402
-from parsing.row_parser import is_tba_row  # noqa: E402
-from rules.eligibility import EligibilityChecker  # noqa: E402
-from rules.level_rules import LevelRulesChecker  # noqa: E402
-from rules.violations import EligibilityResult, LevelViolation  # noqa: E402
+from cda_core.lib import competition
+from cda_core.lib.models.dance import Dance
+from cda_core.lib.models.dancer import Dancer
+from cda_core.lib.models.entry import Entry
+from cda_core.lib.models.partnership import Partnership
+from flc_entry_checking.lib.parsing.csv_reader import read_entries
+from flc_entry_checking.lib.parsing.multi_dance_expander import expand_multi_dance_events
+from flc_entry_checking.lib.parsing.row_parser import is_tba_row
+from flc_entry_checking.lib.rules.eligibility import EligibilityChecker
+from flc_entry_checking.lib.rules.level_rules import LevelRulesChecker
+from flc_entry_checking.lib.rules.violations import EligibilityResult, LevelViolation
 
 
 class EntryChecker:

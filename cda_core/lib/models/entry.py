@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING
-from models.dance import Dance
+from cda_core.lib.models.dance import Dance
 
 if TYPE_CHECKING:
-    from models.partnership import Partnership
+    from cda_core.lib.models.partnership import Partnership
 
 
 class Entry:
