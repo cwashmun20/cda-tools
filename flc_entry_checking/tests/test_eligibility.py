@@ -63,6 +63,25 @@ class _MockPartnership:
         self.entries = set()
 
 
+def _make_dancer(name_first, name_last, syllabus_pts=None, open_pts=None):
+    """Helper to create a real Dancer with controlled points, for exercising
+    the proficiency-check fallthrough in EligibilityChecker (Split-Level
+    Exception / Pointed-Out violations), which now calls ProficiencyCalculator
+    directly rather than a mockable Dancer method."""
+    if syllabus_pts is None:
+        syllabus_pts = np.zeros((4, 19), dtype=int)
+    if open_pts is None:
+        open_pts = np.zeros((3, 4), dtype=int)
+    record = DancerRecord(
+        cda_id=1, first=name_first, last=name_last,
+        first_comp_date=datetime.date(2020, 1, 1),  # >1 year ago - not a newcomer
+        created_date="2020-01-01",
+        syllabus_pts=syllabus_pts,
+        open_pts=open_pts,
+    )
+    return Dancer.from_data(datetime.date(2026, 1, 1), record)
+
+
 class TestEligibilityChecker(unittest.TestCase):
     """Tests for the EligibilityChecker class."""
 
@@ -192,6 +211,68 @@ class TestEligibilityChecker(unittest.TestCase):
         result = self.level_checker.check(partnership, dance)
         self.assertFalse(result.eligible)
         self.assertEqual(result.violation_type, ViolationType.ROOKIE_FOLLOW)
+
+    def test_split_level_exception(self):
+        """Lead pointed out to Gold (3), follow at the Bronze floor (1): the
+        gap is >=2 levels, and combined_level (max-1 = 2) equals the Silver
+        event they're entering, so the split-level exception applies."""
+        syllabus = np.zeros((4, 19), dtype=int)
+        # Smooth Waltz (col 5): pointed out at Newcomer/Bronze/Silver, not Gold.
+        syllabus[0][5] = syllabus[1][5] = syllabus[2][5] = 7
+        lead = _make_dancer("Lead", "Dancer", syllabus)
+        follow = _make_dancer("Follow", "Dancer")  # zero points -> floor of Bronze (1)
+        partnership = Partnership(lead, follow)
+        dance = Dance("Silver", "Smooth", "Waltz")
+
+        result = self.checker.check(partnership, dance)
+        self.assertTrue(result.eligible)
+        self.assertTrue(result.is_split_level)
+        self.assertIsNotNone(result.split_level_info)
+
+    def test_split_level_exception_not_triggered_when_combined_mismatches_event(self):
+        """Same >=2 level gap as above, but registered for a level where
+        combined_level doesn't match the event - falls through to a normal
+        eligibility check instead of the split-level exception."""
+        syllabus = np.zeros((4, 19), dtype=int)
+        syllabus[0][5] = syllabus[1][5] = syllabus[2][5] = 7  # lead -> Gold (3)
+        lead = _make_dancer("Lead", "Dancer", syllabus)
+        follow = _make_dancer("Follow", "Dancer")  # Bronze (1)
+        partnership = Partnership(lead, follow)
+        # combined_level = 3 - 1 = 2 (Silver); registering for Bronze (1) instead.
+        dance = Dance("Bronze", "Smooth", "Waltz")
+
+        result = self.checker.check(partnership, dance)
+        self.assertFalse(result.is_split_level)
+        self.assertFalse(result.eligible)
+        self.assertEqual(result.violation_type, ViolationType.POINTED_OUT)
+
+    def test_pointed_out_violation(self):
+        """Both partners pointed out to Silver (2) in Smooth Waltz; registering
+        for Bronze (1) - below their proficiency - is a Pointed-Out violation."""
+        syllabus = np.zeros((4, 19), dtype=int)
+        syllabus[0][5] = syllabus[1][5] = 7  # Newcomer/Bronze pointed out, not Silver
+        lead = _make_dancer("Lead", "Dancer", syllabus)
+        follow = _make_dancer("Follow", "Dancer", syllabus.copy())
+        partnership = Partnership(lead, follow)
+        dance = Dance("Bronze", "Smooth", "Waltz")
+
+        result = self.checker.check(partnership, dance)
+        self.assertFalse(result.eligible)
+        self.assertEqual(result.violation_type, ViolationType.POINTED_OUT)
+        self.assertIn("POINTED OUT VIOLATION", result.detail_message)
+
+    def test_pointed_out_eligible_at_or_above_proficiency(self):
+        """A dancer may always register at or above their proficiency level -
+        pointing out only raises the floor, it doesn't cap the ceiling."""
+        syllabus = np.zeros((4, 19), dtype=int)
+        syllabus[0][5] = syllabus[1][5] = 7  # both pointed out to Silver (2)
+        lead = _make_dancer("Lead", "Dancer", syllabus)
+        follow = _make_dancer("Follow", "Dancer", syllabus.copy())
+        partnership = Partnership(lead, follow)
+        dance = Dance("Gold", "Smooth", "Waltz")  # above their floor - fine
+
+        result = self.checker.check(partnership, dance)
+        self.assertTrue(result.eligible)
 
 
 if __name__ == '__main__':

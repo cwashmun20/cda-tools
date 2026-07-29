@@ -105,6 +105,56 @@ class TestProficiencyCalculator(unittest.TestCase):
         level = ProficiencyCalculator.compute_proficiency_level(dancer, "Smooth", "Waltz")
         self.assertEqual(level, 1)  # Not newcomer since first comp >1 year ago
 
+    def test_within_style_proficiency(self):
+        """Pointing out of one dance in a style raises proficiency in others
+        in that style (never more than 2 levels lower than the pointed-out dance)."""
+        syllabus = np.zeros((4, 19), dtype=int)
+        # Standard Tango (col 1) pointed out at Newcomer/Bronze/Silver/Gold.
+        syllabus[0][1] = syllabus[1][1] = syllabus[2][1] = syllabus[3][1] = 7
+        dancer = self._make_dancer(syllabus)
+        # Standard Waltz (col 0) itself has zero points.
+        level = ProficiencyCalculator.compute_proficiency_level(dancer, "Standard", "Waltz")
+        self.assertEqual(level, 2)  # Tango point-out level (4) - 2 = Silver
+
+    def test_within_style_does_not_affect_other_styles(self):
+        """Within-style proficiency only looks at dances in the same style."""
+        syllabus = np.zeros((4, 19), dtype=int)
+        # Standard Tango (col 1) fully pointed out.
+        syllabus[0][1] = syllabus[1][1] = syllabus[2][1] = syllabus[3][1] = 7
+        dancer = self._make_dancer(syllabus)
+        # Rhythm Rumba is a different style entirely - unaffected.
+        level = ProficiencyCalculator.compute_proficiency_level(dancer, "Rhythm", "Rumba")
+        self.assertEqual(level, 1)  # Just the experienced-dancer floor
+
+    def test_cross_style_same_name_pair(self):
+        """Pointing out of Standard Waltz raises Smooth Waltz proficiency (same-name pair)."""
+        syllabus = np.zeros((4, 19), dtype=int)
+        # Standard Waltz (col 0) pointed out at Newcomer/Bronze/Silver/Gold.
+        syllabus[0][0] = syllabus[1][0] = syllabus[2][0] = syllabus[3][0] = 7
+        dancer = self._make_dancer(syllabus)
+        # Smooth Waltz (col 5) itself has zero points.
+        level = ProficiencyCalculator.compute_proficiency_level(dancer, "Smooth", "Waltz")
+        self.assertEqual(level, 2)  # Standard Waltz point-out level (4) - 2 = Silver
+
+    def test_cross_style_jive_swing_pair(self):
+        """Jive (Latin) and Swing (Rhythm) are cross-style paired despite the name mismatch."""
+        syllabus = np.zeros((4, 19), dtype=int)
+        # Rhythm Swing (col 16 = 14 + DANCE_NAMES['Rhythm'].index('Swing')=2) fully pointed out.
+        syllabus[0][16] = syllabus[1][16] = syllabus[2][16] = syllabus[3][16] = 7
+        dancer = self._make_dancer(syllabus)
+        level = ProficiencyCalculator.compute_proficiency_level(dancer, "Latin", "Jive")
+        self.assertEqual(level, 2)  # Rhythm Swing point-out level (4) - 2 = Silver
+
+    def test_quickstep_has_no_cross_style_pair(self):
+        """Quickstep has no American-style counterpart, so mastery elsewhere in
+        Smooth doesn't raise Standard Quickstep proficiency."""
+        syllabus = np.zeros((4, 19), dtype=int)
+        # Smooth Waltz (col 5) fully pointed out - should have zero bearing on Quickstep.
+        syllabus[0][5] = syllabus[1][5] = syllabus[2][5] = syllabus[3][5] = 7
+        dancer = self._make_dancer(syllabus)
+        level = ProficiencyCalculator.compute_proficiency_level(dancer, "Standard", "Quickstep")
+        self.assertEqual(level, 1)  # Just the experienced-dancer floor - no cross-style credit
+
 
 if __name__ == '__main__':
     unittest.main()
