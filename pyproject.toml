@@ -22,16 +22,6 @@ dependencies = [
 [project.scripts]
 entry-checker = "flc_entry_checking.lib.entry_checker:main"
 
-[tool.setuptools]
-packages = [
-    "cda_core",
-    "cda_core.lib",
-    "cda_core.lib.api",
-    "cda_core.lib.models",
-    "flc_entry_checking",
-    "flc_entry_checking.lib",
-    "flc_entry_checking.lib.parsing",
-    "flc_entry_checking.lib.rules",
-    "flc_points",
-    "flc_points.lib",
-]
+[tool.setuptools.packages.find]
+include = ["cda_core*", "flc_entry_checking*", "flc_points*"]
+exclude = ["*.tests", "*.tests.*"]
