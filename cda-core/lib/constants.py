@@ -146,3 +146,32 @@ ABBREVIATION_MAPS: dict[str, dict[str, str]] = {
     Style.LATIN: _LATIN_MAP,
     Style.RHYTHM: _RHYTHM_MAP,
 }
+
+
+# --- Cross-style proficiency pairings ---
+# Maps each FLC style to its cross-style counterpart (Standard<->Smooth,
+# Latin<->Rhythm).
+
+CROSS_STYLE: dict[str, str] = {
+    Style.STANDARD: Style.SMOOTH,
+    Style.SMOOTH: Style.STANDARD,
+    Style.LATIN: Style.RHYTHM,
+    Style.RHYTHM: Style.LATIN,
+}
+
+# Maps a dance name to the dance name it's paired with in the counterpart
+# style, for cross-style proficiency. Most pairs share a name (e.g. Waltz is
+# danced in both Standard and Smooth); Jive/Swing are the one pair that
+# doesn't. Dances with no cross-style counterpart (Quickstep, Samba, Paso,
+# Bolero, Mambo) are intentionally absent from this map.
+
+CROSS_STYLE_DANCE_PAIRS: dict[str, str] = {
+    "Waltz": "Waltz",
+    "Tango": "Tango",
+    "Viennese": "Viennese",
+    "Foxtrot": "Foxtrot",
+    "ChaCha": "ChaCha",
+    "Rumba": "Rumba",
+    "Jive": "Swing",
+    "Swing": "Jive",
+}

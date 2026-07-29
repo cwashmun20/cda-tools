@@ -83,35 +83,18 @@ class ProficiencyCalculator:
                     ProficiencyCalculator.compute_point_out_level(dancer, style, curr_dance_name) - 2,
                 )
 
-        # Cross-Style Proficiency
-        cross_style_level = 0
-        if style == constants.Style.STANDARD:
-            other_style = constants.Style.SMOOTH
-        elif style == constants.Style.SMOOTH:
-            other_style = constants.Style.STANDARD
-        elif style == constants.Style.LATIN:
-            other_style = constants.Style.RHYTHM
-        elif style == constants.Style.RHYTHM:
-            other_style = constants.Style.LATIN
-        else:
+        # Cross-Style Proficiency: never less than two levels lower than the
+        # dancer's point-out level in the paired dance of the counterpart style
+        # (e.g. Standard Waltz <-> Smooth Waltz, Latin Jive <-> Rhythm Swing).
+        # Dances with no cross-style counterpart (Quickstep, Samba, Paso,
+        # Bolero, Mambo) get no cross-style credit.
+        other_style = constants.CROSS_STYLE.get(style)
+        if other_style is None:
             raise ValueError(f"'{style}' is not eligible for FLC points (e.g. nightclub dances).")
 
-        # Cross-Style: Dances where their corresponding dance has the same name.
-        if (style in [constants.Style.STANDARD, constants.Style.SMOOTH]
-                or dance_name in ["ChaCha", "Rumba"]) and dance_name != "Quickstep":
-            cross_style_level = max(
-                cross_style_level,
-                ProficiencyCalculator.compute_point_out_level(dancer, other_style, dance_name) - 2,
-            )
-        # Cross-Style: Swing and Jive Handling
-        elif dance_name == "Jive":
-            other_dance = "Swing"
-            cross_style_level = max(
-                cross_style_level,
-                ProficiencyCalculator.compute_point_out_level(dancer, other_style, other_dance) - 2,
-            )
-        elif dance_name == "Swing":
-            other_dance = "Jive"
+        cross_style_level = 0
+        other_dance = constants.CROSS_STYLE_DANCE_PAIRS.get(dance_name)
+        if other_dance is not None:
             cross_style_level = max(
                 cross_style_level,
                 ProficiencyCalculator.compute_point_out_level(dancer, other_style, other_dance) - 2,
