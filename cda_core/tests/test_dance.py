@@ -37,6 +37,12 @@ class TestDance(unittest.TestCase):
         d2 = Dance("Silver", "Smooth", "Waltz")
         self.assertNotEqual(d1, d2)
 
+    def test_eq_non_dance_returns_false(self):
+        """Comparing a Dance to an unrelated type should be False, not None."""
+        d = Dance("Bronze", "Smooth", "Waltz")
+        self.assertFalse(d == "Bronze Am. Waltz")
+        self.assertNotEqual(d, 42)
+
     def test_hash(self):
         d1 = Dance("Bronze", "Smooth", "Waltz")
         d2 = Dance("Bronze", "Smooth", "Waltz")

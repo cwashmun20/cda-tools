@@ -106,7 +106,7 @@ python -m flc_entry_checking.lib.entry_checker
 # work from the repo root without this, since -m puts the repo root on sys.path)
 pip install -e .
 
-# Or, to also install dev dependencies (pytest, black, flake8):
+# Or, to also install dev dependencies (pytest, black, flake8, mypy):
 pip install -e ".[dev]"
 ```
 
@@ -122,14 +122,24 @@ Tests are written against `unittest.TestCase` (no `pytest`-specific fixtures), s
 python -m unittest discover
 ```
 
-## Linting & Formatting
+`pytest` just gives nicer output and is the recommended way to run them.
+
+## Linting, Formatting & Type Checking
 
 ```bash
 black .          # auto-format
 flake8           # style/unused-import checks (config in .flake8)
+mypy cda_core flc_entry_checking flc_points  # type checking (config in pyproject.toml)
 ```
 
 `black`'s line length is set to 100 in `pyproject.toml` (`[tool.black]`) to match `flake8`'s
 `max-line-length` in `.flake8` — the two are kept in agreement deliberately.
 
-`pytest` just gives nicer output and is the recommended way to run them.
+## Running All Checks
+
+```bash
+python scripts/check.py
+```
+
+Runs `black --check`, `flake8`, `mypy`, and `pytest` in sequence, printing a pass/fail summary at
+the end. Doesn't stop at the first failure, so one run surfaces everything that needs fixing.

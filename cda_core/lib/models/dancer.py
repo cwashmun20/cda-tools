@@ -13,14 +13,6 @@ class Dancer:
     All dates are handled using the datetime library's date object.
     """
 
-    name: Optional[str] = None
-    cda_id: Optional[int] = None  # Dancer's CDA #
-    first_comp_date: Optional[datetime.date] = None
-    curr_comp_date: Optional[datetime.date] = None
-    created_date: Optional[str] = None
-    points: Optional[Points] = None
-    entries: set = set()
-
     def __init__(self, curr_comp_date: datetime.date, dancer_record: DancerRecord):
         """Construct a Dancer from a DancerRecord (typed API response).
 
@@ -28,18 +20,21 @@ class Dancer:
             curr_comp_date: The date of the current competition.
             dancer_record: A DancerRecord from the API client.
         """
-        self.name = " ".join([dancer_record.first, dancer_record.last])
-        self.curr_comp_date = curr_comp_date
-        self.created_date = dancer_record.created_date
-        self.cda_id = dancer_record.cda_id
-        self.points = Points(dancer_record.syllabus_pts, dancer_record.open_pts)
-        self.entries = set()
+        self.name: str = " ".join([dancer_record.first, dancer_record.last])
+        self.curr_comp_date: datetime.date = curr_comp_date
+        self.created_date: str = dancer_record.created_date
+        self.cda_id: Optional[int] = dancer_record.cda_id
+        self.points: Points = Points(dancer_record.syllabus_pts, dancer_record.open_pts)
+        self.entries: set["Entry"] = set()
 
+        self.first_comp_date: datetime.date
         # New Dancers (not yet in database)
         if dancer_record.cda_id is None:
             self.first_comp_date = curr_comp_date
-        # Existing Dancers in the Database
+        # Existing Dancers in the Database - the API always populates
+        # first_comp_date alongside cda_id, so this is never None here.
         else:
+            assert dancer_record.first_comp_date is not None
             self.first_comp_date = dancer_record.first_comp_date
 
     @classmethod
@@ -213,3 +208,7 @@ class Dancer:
             row_idx = constants.OPEN_LEVELS.index(target_dance.level)
             col_idx = constants.STYLES.index(target_dance.style)
             return self.points.open_data[row_idx][col_idx]
+
+        raise ValueError(
+            f"'{target_dance}' has an unrecognized level and is not eligible for FLC points."
+        )

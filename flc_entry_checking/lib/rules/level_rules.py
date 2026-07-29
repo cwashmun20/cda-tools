@@ -23,7 +23,7 @@ class LevelRulesChecker:
         """
         violations: list[LevelViolation] = []
 
-        level_log = {
+        level_log: dict[str, set[int]] = {
             "Smooth": set(),
             "Standard": set(),
             "Rhythm": set(),

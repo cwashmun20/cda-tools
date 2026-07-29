@@ -10,9 +10,6 @@ import numpy as np
 class Points:
     """Representation of a Dancer's point totals."""
 
-    syllabus_data: np.ndarray = None
-    open_data: np.ndarray = None
-
     def __init__(self, syllabus_pts: np.ndarray, open_pts: np.ndarray):
         """Create a table of points from existing arrays of data.
 
@@ -20,8 +17,8 @@ class Points:
             syllabus_pts: 4x19 numpy array of syllabus points (Newcomer through Gold)
             open_pts: 3x4 numpy array of open points (Novice through Champ)
         """
-        self.syllabus_data = syllabus_pts
-        self.open_data = open_pts
+        self.syllabus_data: np.ndarray = syllabus_pts
+        self.open_data: np.ndarray = open_pts
 
     def __repr__(self) -> str:
         """String representation of points modeled after CDA points database UI.

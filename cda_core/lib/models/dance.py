@@ -94,14 +94,10 @@ def convert_level(input_name: str) -> str:
 class Dance:
     """Represents a dance style at a certain level."""
 
-    level = None
-    style = None
-    dance = None
-
     def __init__(self, level: str, style: str, dance: str):
-        self.level = convert_level(level)
-        self.style = style
-        self.dance = convert_dance(style, dance)
+        self.level: str = convert_level(level)
+        self.style: str = style
+        self.dance: str = convert_dance(style, dance)
 
     def __repr__(self) -> str:
         designation = ""
@@ -121,3 +117,4 @@ class Dance:
     def __eq__(self, other) -> bool:
         if isinstance(other, Dance):
             return self.__key() == other.__key()
+        return False

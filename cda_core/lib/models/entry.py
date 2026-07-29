@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from cda_core.lib.models.dance import Dance
 
 if TYPE_CHECKING:
@@ -8,16 +8,13 @@ if TYPE_CHECKING:
 class Entry:
     """Representation of a competition entry."""
 
-    dance_data = None
-    event_name = ""
-    partnership = None
-    heat = ""
-
-    def __init__(self, dance_obj: Dance, partnership_obj: "Partnership", heat=None):
-        self.dance_data = dance_obj
-        self.event_name = str(dance_obj)
-        self.partnership = partnership_obj
-        self.heat = heat
+    def __init__(
+        self, dance_obj: Dance, partnership_obj: "Partnership", heat: Optional[str] = None
+    ):
+        self.dance_data: Dance = dance_obj
+        self.event_name: str = str(dance_obj)
+        self.partnership: "Partnership" = partnership_obj
+        self.heat: Optional[str] = heat
         self.partnership.add(self)
 
     def __repr__(self):
@@ -33,6 +30,7 @@ class Entry:
         # You can also check equality between Entries and Dances.
         elif isinstance(other, Dance):
             return self.dance_data == other
+        return False
 
     def __hash__(self):
         """Hashing is based only on the entry's dance (not its partnership)."""

@@ -1,4 +1,5 @@
 from cda_core.lib.models.dancer import Dancer
+from cda_core.lib.models.entry import Entry
 
 
 class Partnership:
@@ -12,7 +13,7 @@ class Partnership:
         self.follow = follower
         self.newcomers = leader.is_newcomer() and follower.is_newcomer()
         self.nc_beginners = leader.nc_beginner() and follower.nc_beginner()
-        self.entries = set()
+        self.entries: set[Entry] = set()
 
     def __repr__(self) -> str:
         """String representation of a partnership with registration-relevant

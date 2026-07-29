@@ -24,6 +24,10 @@ dev = [
     "pytest>=8.0",
     "black>=24.0",
     "flake8>=7.0",
+    "mypy>=1.10",
+    "pandas-stubs",
+    "types-pytz",
+    "types-requests",
 ]
 
 [project.scripts]
@@ -35,3 +39,8 @@ exclude = ["*.tests", "*.tests.*"]
 
 [tool.black]
 line-length = 100
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_configs = true
+warn_redundant_casts = true

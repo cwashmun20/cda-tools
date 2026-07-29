@@ -10,6 +10,10 @@ for that orchestration.
 from datetime import date
 import pandas as pd
 
+from cda_core.lib.models.dancer import Dancer
+from cda_core.lib.models.entry import Entry
+from cda_core.lib.models.partnership import Partnership
+
 
 class Competition:
     """Representation of a CDA competition."""
@@ -40,6 +44,6 @@ class Competition:
         self.flc_level_limit = flc_level_limit
         self.raw_data = raw_data
 
-        self.competitors = {}  # Competitor name keys, Dancer object values
-        self.partnerships = {}  # Partnership name keys, Partnership object values.
-        self.entries = set()
+        self.competitors: dict[str, Dancer] = {}  # Competitor name keys
+        self.partnerships: dict[str, Partnership] = {}  # Partnership name keys
+        self.entries: set[Entry] = set()
