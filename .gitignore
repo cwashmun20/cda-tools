@@ -168,7 +168,7 @@ test.ipynb
 
 # Ignore config (contains secrets)
 config.py
-cda-core/lib/api/config.py
+cda_core/lib/api/config.py
 
 # Agent working files (notes, task lists, design docs)
 agents/

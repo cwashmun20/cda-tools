@@ -9,8 +9,8 @@ Usage:
 import sys
 import os
 
-# Allow imports from cda-core/lib when running as script
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'cda-core', 'lib'))
+# Allow imports from cda_core/lib when running as script
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'cda_core', 'lib'))
 
 from datetime import date  # noqa: E402
 

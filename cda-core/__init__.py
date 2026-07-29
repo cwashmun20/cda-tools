@@ -1,1 +1,0 @@
-"""cda-core package."""

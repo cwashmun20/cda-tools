@@ -1,7 +1,7 @@
 """Setup script for cda-tools.
 
-Packages the cda-core, flc-entry-checking, and flc-points modules.
-Uses package_dir to map underscore import names to hyphenated directory paths.
+Packages the cda_core, flc_entry_checking, and flc_points modules. Directory
+names match import names, so no package_dir remapping is needed.
 """
 
 from setuptools import setup
@@ -25,18 +25,6 @@ setup(
         "flc_points",
         "flc_points.lib",
     ],
-    package_dir={
-        "cda_core": "cda-core",
-        "cda_core.lib": "cda-core/lib",
-        "cda_core.lib.api": "cda-core/lib/api",
-        "cda_core.lib.models": "cda-core/lib/models",
-        "cda_core.lib.parsing": "cda-core/lib/parsing",
-        "cda_core.lib.rules": "cda-core/lib/rules",
-        "flc_entry_checking": "flc-entry-checking",
-        "flc_entry_checking.lib": "flc-entry-checking/lib",
-        "flc_points": "flc-points",
-        "flc_points.lib": "flc-points/lib",
-    },
     install_requires=[
         "flask>=3.1",
         "numpy>=2.2",
