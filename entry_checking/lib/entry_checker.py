@@ -81,7 +81,12 @@ class EntryChecker:
         for dancer_obj in (partnership_obj.lead, partnership_obj.follow):
             seen = self._seen_level_violations.setdefault(dancer_obj.name, set())
             for violation in LevelRulesChecker.check(dancer_obj, self.comp.consecutive_level_limit):
-                key = (violation.style, violation.violation_type, tuple(violation.levels))
+                key = (
+                    violation.style,
+                    violation.dance,
+                    violation.violation_type,
+                    tuple(violation.levels),
+                )
                 if key not in seen:
                     seen.add(key)
                     new_violations.append(violation)

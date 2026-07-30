@@ -199,6 +199,26 @@ class TestCheckEntryAndRegisterEntry(unittest.TestCase):
         # set) - the violation already surfaced, so nothing new is reported.
         self.assertEqual(fourth, [])
 
+    def test_register_entry_reports_violation_separately_per_dance(self):
+        """Two different dances hitting the identical too_many_levels shape
+        (same style, same levels) should each be reported - the dedup key
+        has to include the dance, not just style/type/levels."""
+        for level in ("Bronze", "Silver", "Gold"):
+            _, waltz_violations = self.checker.register_entry(
+                self.partnership, Dance(level, "Smooth", "Waltz")
+            )
+        self.assertEqual(len(waltz_violations), 2)
+        for violation in waltz_violations:
+            self.assertEqual(violation.dance, "Waltz")
+
+        for level in ("Bronze", "Silver", "Gold"):
+            _, tango_violations = self.checker.register_entry(
+                self.partnership, Dance(level, "Smooth", "Tango")
+            )
+        self.assertEqual(len(tango_violations), 2)
+        for violation in tango_violations:
+            self.assertEqual(violation.dance, "Tango")
+
 
 if __name__ == "__main__":
     unittest.main()

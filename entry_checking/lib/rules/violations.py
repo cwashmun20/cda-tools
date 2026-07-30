@@ -39,14 +39,19 @@ class EligibilityResult:
 
 @dataclass
 class LevelViolation:
-    """A consecutive level violation for a dancer.
+    """A consecutive-level-limit violation for a dancer.
 
-    Used to report when a dancer registers for too many levels or
-    non-consecutive levels within the same style.
+    CDA measures consecutive-level eligibility per dance: a dancer may be
+    registered across more distinct levels within a style than the allowed
+    limit, as long as no single dance exceeds that limit. "too_many_levels"
+    and "non_consecutive" are reported per dance (dance is set); the one
+    style-wide check is "span_too_wide", reported when the overall range of
+    levels registered anywhere in the style is too broad (dance is None).
     """
 
     dancer_name: str
     style: str
-    violation_type: str  # "too_many_levels" or "non_consecutive"
+    violation_type: str  # "too_many_levels", "non_consecutive", or "span_too_wide"
     levels: list[int] = field(default_factory=list)
+    dance: Optional[str] = None
     detail_message: Optional[str] = None
