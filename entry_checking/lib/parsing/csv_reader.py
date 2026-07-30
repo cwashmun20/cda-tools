@@ -30,7 +30,14 @@ COLUMN_ALIASES = {
     "Lead 1 Last": "Lead Last",
     "Follow 1 First": "Follow First",
     "Follow 1 Last": "Follow Last",
+    "Dances": "Dance",
+    "Level": "Skill",
 }
+
+# Style values that indicate a spreadsheet artifact row rather than a real
+# entry - e.g. Excel exporting a deleted/blank row as a CSV row filled with
+# "-" or "#REF!" instead of leaving it empty.
+_PLACEHOLDER_STYLE_VALUES = {"-", "#REF!"}
 
 
 def read_entries(path: str) -> pd.DataFrame:
@@ -47,6 +54,7 @@ def read_entries(path: str) -> pd.DataFrame:
     df = pd.read_csv(path)
     df = normalize_column_names(df)
     validate_columns(df)
+    df = drop_placeholder_rows(df)
     return df
 
 
@@ -86,3 +94,16 @@ def normalize_column_names(df: pd.DataFrame) -> pd.DataFrame:
     if rename_map:
         df = df.rename(columns=rename_map)
     return df
+
+
+def drop_placeholder_rows(df: pd.DataFrame) -> pd.DataFrame:
+    """Drops rows that are spreadsheet artifacts rather than real entries.
+
+    Args:
+        df: DataFrame with potentially placeholder rows (see
+            _PLACEHOLDER_STYLE_VALUES).
+    Returns:
+        DataFrame with placeholder rows removed and the index reset.
+    """
+    is_placeholder = df["Style"].isin(_PLACEHOLDER_STYLE_VALUES)
+    return df[~is_placeholder].reset_index(drop=True)

@@ -2,7 +2,11 @@
 
 import unittest
 import pandas as pd
-from entry_checking.lib.parsing.csv_reader import validate_columns, normalize_column_names
+from entry_checking.lib.parsing.csv_reader import (
+    validate_columns,
+    normalize_column_names,
+    drop_placeholder_rows,
+)
 from entry_checking.lib.parsing.row_parser import (
     is_tba_row,
     parse_dancer_names,
@@ -49,6 +53,45 @@ class TestCsvReader(unittest.TestCase):
         result = normalize_column_names(df)
         self.assertEqual(list(result.columns), ["Style", "Dance", "Lead First"])
 
+    def test_normalize_column_names_dances_and_level(self):
+        df = pd.DataFrame(columns=["Style", "Dances", "Level"])
+        result = normalize_column_names(df)
+        self.assertIn("Dance", result.columns)
+        self.assertIn("Skill", result.columns)
+        self.assertNotIn("Dances", result.columns)
+        self.assertNotIn("Level", result.columns)
+
+    def test_drop_placeholder_rows_dash(self):
+        """Excel sometimes exports a deleted/blank row as all-dashes."""
+        df = pd.DataFrame(
+            {
+                "Style": ["Standard", "-"],
+                "Dance": ["Waltz", "-"],
+                "Skill": ["Bronze", "-"],
+            }
+        )
+        result = drop_placeholder_rows(df)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result["Style"].tolist(), ["Standard"])
+
+    def test_drop_placeholder_rows_ref_error(self):
+        """Excel sometimes exports a deleted/blank row as all-#REF! errors."""
+        df = pd.DataFrame(
+            {
+                "Style": ["Standard", "#REF!"],
+                "Dance": ["Waltz", "#REF!"],
+                "Skill": ["Bronze", "#REF!"],
+            }
+        )
+        result = drop_placeholder_rows(df)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result["Style"].tolist(), ["Standard"])
+
+    def test_drop_placeholder_rows_no_placeholders(self):
+        df = pd.DataFrame({"Style": ["Standard", "Smooth"]})
+        result = drop_placeholder_rows(df)
+        self.assertEqual(len(result), 2)
+
 
 class TestRowParser(unittest.TestCase):
     """Tests for parsing.row_parser."""
@@ -82,6 +125,30 @@ class TestRowParser(unittest.TestCase):
                 "Lead Last": "Lowe",
                 "Follow First": float("nan"),
                 "Follow Last": float("nan"),
+            }
+        )
+        self.assertTrue(is_tba_row(row))
+
+    def test_is_tba_row_null_string(self):
+        """Some organizers write the literal string "NULL" instead of leaving
+        the cell blank."""
+        row = pd.Series(
+            {
+                "Lead First": "NULL",
+                "Lead Last": "NULL",
+                "Follow First": "Alyx",
+                "Follow Last": "Quiroga",
+            }
+        )
+        self.assertTrue(is_tba_row(row))
+
+    def test_is_tba_row_null_string_lowercase(self):
+        row = pd.Series(
+            {
+                "Lead First": "null",
+                "Lead Last": "null",
+                "Follow First": "Alyx",
+                "Follow Last": "Quiroga",
             }
         )
         self.assertTrue(is_tba_row(row))
@@ -198,6 +265,52 @@ class TestMultiDanceExpander(unittest.TestCase):
         result = expand_multi_dance_events(df)
         self.assertEqual(len(result), 3)
         self.assertEqual(result["Dance"].tolist(), ["Cha Cha", "Samba", "Rumba"])
+
+    def test_expand_multi_dance_comma_separated_full_names(self):
+        data = {
+            "Style": ["Standard"],
+            "Dance": ["Waltz,Tango,Foxtrot,Viennese Waltz"],
+            "Skill": ["Prechamp"],
+            "Lead First": ["Weston"],
+            "Lead Last": ["Beebe"],
+            "Follow First": ["Jessica"],
+            "Follow Last": ["Lacy"],
+        }
+        df = pd.DataFrame(data)
+        result = expand_multi_dance_events(df)
+        self.assertEqual(len(result), 4)
+        self.assertEqual(result["Dance"].tolist(), ["Waltz", "Tango", "Foxtrot", "Viennese Waltz"])
+
+    def test_expand_multi_dance_style_alias_normalized_before_expansion(self):
+        """The style alias for the abbreviation-map lookup ("Ballroom" ->
+        "Standard") has to be resolved before expand_abbreviation runs, not
+        just later when the Dance object gets constructed."""
+        data = {
+            "Style": ["Ballroom"],
+            "Dance": ["WQ"],
+            "Skill": ["Gold"],
+            "Lead First": ["Yannik"],
+            "Lead Last": ["Cadin"],
+            "Follow First": ["Yuni"],
+            "Follow Last": ["Jho"],
+        }
+        df = pd.DataFrame(data)
+        result = expand_multi_dance_events(df)
+        self.assertEqual(result["Dance"].tolist(), ["Waltz", "Quickstep"])
+
+    def test_expand_multi_dance_comma_separated_strips_whitespace(self):
+        data = {
+            "Style": ["Rhythm"],
+            "Dance": ["Cha Cha, Rumba, East Coast Swing"],
+            "Skill": ["Gold"],
+            "Lead First": ["Yannik"],
+            "Lead Last": ["Cadin"],
+            "Follow First": ["Moani"],
+            "Follow Last": ["Ackbar"],
+        }
+        df = pd.DataFrame(data)
+        result = expand_multi_dance_events(df)
+        self.assertEqual(result["Dance"].tolist(), ["Cha Cha", "Rumba", "East Coast Swing"])
 
 
 if __name__ == "__main__":

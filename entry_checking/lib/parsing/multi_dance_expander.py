@@ -5,6 +5,7 @@ into individual dance rows for processing.
 """
 
 from cda_core.lib import constants
+from cda_core.lib.models.dance import convert_style
 
 
 def expand_abbreviation(style: str, abbreviation: str) -> list[str]:
@@ -38,8 +39,9 @@ def expand_abbreviation(style: str, abbreviation: str) -> list[str]:
 def expand_multi_dance_events(df) -> object:
     """Replaces multi-dance event rows in a DataFrame with one row per dance.
 
-    Identifies multi-dance events by checking if the "Dance" field is
-    all uppercase (indicating an abbreviation like "WTQ" or "CSRJ").
+    Identifies multi-dance events in either of two formats:
+    - Letter abbreviations, e.g. "WTQ" or "CSRJ" (detected via all-uppercase).
+    - Comma-separated full names, e.g. "Waltz,Tango,Foxtrot,Viennese Waltz".
 
     Args:
         df: A pandas DataFrame with competition entry data.
@@ -54,9 +56,32 @@ def expand_multi_dance_events(df) -> object:
 
     for _, row in df.iterrows():
         dances = row["Dance"]
+        if isinstance(dances, str):
+            dances = dances.strip()
 
-        # Leave non-multi-dance rows as-is
-        if not isinstance(dances, str) or not dances.isupper():
+        normalized_style = (
+            convert_style(row["Style"]) if isinstance(row["Style"], str) else row["Style"]
+        )
+
+        if isinstance(dances, str) and "," in dances:
+            # Already full names (e.g. "Cha Cha,Rumba,East Coast Swing");
+            # no abbreviation expansion needed, just split them out.
+            dance_names = [d.strip() for d in dances.split(",")]
+        elif (
+            isinstance(dances, str)
+            and dances.isupper()
+            and normalized_style in constants.ABBREVIATION_MAPS
+        ):
+            # Styles with no abbreviation map (e.g. Nightclub) never have a
+            # multi-dance notation - an all-caps value there is a single
+            # dance's own abbreviated name (e.g. "WCS", "NC2S"), not a
+            # multi-dance code, so it falls through to the pass-through
+            # branch below and gets resolved by convert_dance()'s aliases.
+            if "/" in dances:
+                dances = "".join(dances.split("/"))
+            dance_names = expand_abbreviation(normalized_style, dances)
+        else:
+            # Leave non-multi-dance rows as-is
             row_list.append(row.tolist())
             continue
 
@@ -68,12 +93,6 @@ def expand_multi_dance_events(df) -> object:
         follow_last = row["Follow Last"]
         o2cm_name = row.get("O2CM Name") if data_has_o2cm_name else None
         heat = row.get("Heat") if data_has_heat else None
-
-        # Handle slashes in abbreviations (e.g., "W/T/Q")
-        if "/" in dances:
-            dances = "".join(dances.split("/"))
-
-        dance_names = expand_abbreviation(style, dances)
 
         for dance_name in dance_names:
             curr_row = [style, dance_name, level, lead_first, lead_last, follow_first, follow_last]
