@@ -29,11 +29,64 @@ class EntryChecker:
     level violations. Registers eligible entries onto the competition's
     dancers/partnerships/entries as a side effect. Does not print directly —
     returns structured results for the caller to format.
+
+    check_entry() and register_entry() operate on a single partnership/dance
+    pair and are the building blocks check() is written in terms of — they're
+    also what a future live-registration caller (checking one entry at a time
+    against entries already registered so far) would call directly.
     """
 
     def __init__(self, comp: "competition.Competition"):
         self.comp = comp
         self.eligibility_checker = EligibilityChecker(comp.rv_ruleset)
+        # Level violations already surfaced for a dancer, keyed by
+        # (style, violation_type, levels) — lets register_entry() report each
+        # violation once, at the entry that first causes it, instead of again
+        # on every later entry that happens to still trigger it.
+        self._seen_level_violations: dict[str, set[tuple]] = {}
+
+    def check_entry(self, partnership_obj: Partnership, dance_obj: Dance) -> EligibilityResult:
+        """Check whether a partnership would be eligible for a dance, without
+        registering the entry. Read-only: does not modify the competition,
+        partnership, or dancer state.
+        """
+        return self.eligibility_checker.check(partnership_obj, dance_obj)
+
+    def register_entry(
+        self, partnership_obj: Partnership, dance_obj: Dance, heat: str | None = None
+    ) -> tuple[EligibilityResult, list[LevelViolation]]:
+        """Check whether a partnership is eligible for a dance and, if so,
+        register the entry and check the lead and follow for any new
+        consecutive-level violations.
+
+        Args:
+            partnership_obj: The partnership entering the dance.
+            dance_obj: The dance being entered.
+            heat: The heat number/label, if known.
+        Returns:
+            A tuple of (eligibility_result, new_level_violations).
+            new_level_violations contains only violations for the lead/follow
+            that weren't already surfaced by an earlier entry — a caller
+            doing live registration sees exactly what this entry changed.
+            Nothing is registered, and no new level violations are returned,
+            if the entry is ineligible.
+        """
+        result = self.eligibility_checker.check(partnership_obj, dance_obj)
+        if not result.eligible:
+            return result, []
+
+        self.comp.entries.add(Entry(dance_obj, partnership_obj, heat))
+
+        new_violations: list[LevelViolation] = []
+        for dancer_obj in (partnership_obj.lead, partnership_obj.follow):
+            seen = self._seen_level_violations.setdefault(dancer_obj.name, set())
+            for violation in LevelRulesChecker.check(dancer_obj, self.comp.consecutive_level_limit):
+                key = (violation.style, violation.violation_type, tuple(violation.levels))
+                if key not in seen:
+                    seen.add(key)
+                    new_violations.append(violation)
+
+        return result, new_violations
 
     def check(self) -> tuple[list[EligibilityResult], list[LevelViolation]]:
         """Check all of the competition's entries.
@@ -46,6 +99,7 @@ class EntryChecker:
         """
         comp = self.comp
         eligibility_results: list[EligibilityResult] = []
+        level_violations: list[LevelViolation] = []
 
         for _, row in comp.raw_data.iterrows():
             if is_tba_row(row):
@@ -74,18 +128,11 @@ class EntryChecker:
             heat = row["Heat"] if "Heat" in comp.raw_data.columns else None
 
             dance_obj = Dance(level, style, dance_name)
-            result = self.eligibility_checker.check(partnership_obj, dance_obj)
+            result, new_violations = self.register_entry(partnership_obj, dance_obj, heat)
 
-            if result.eligible:
-                comp.entries.add(Entry(dance_obj, partnership_obj, heat))
             if not result.eligible or result.is_split_level:
                 eligibility_results.append(result)
-
-        level_violations: list[LevelViolation] = []
-        for dancer_obj in comp.competitors.values():
-            level_violations.extend(
-                LevelRulesChecker.check(dancer_obj, comp.consecutive_level_limit)
-            )
+            level_violations.extend(new_violations)
 
         return eligibility_results, level_violations
 
