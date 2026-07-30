@@ -74,6 +74,43 @@ class Round(StrEnum):
     THIRTY_SECOND_FINAL = "1/32 Final"
 
 
+class DanceName(StrEnum):
+    """Individual dance names. Some dances (e.g. Waltz) are danced in more
+    than one style; Dance.style is what disambiguates those, not the name
+    itself."""
+
+    # Standard / Smooth
+    WALTZ = "Waltz"
+    TANGO = "Tango"
+    VIENNESE_WALTZ = "Viennese Waltz"
+    FOXTROT = "Foxtrot"
+    QUICKSTEP = "Quickstep"
+
+    # Latin / Rhythm
+    CHA_CHA = "Cha Cha"
+    RUMBA = "Rumba"
+    EAST_COAST_SWING = "East Coast Swing"
+    BOLERO = "Bolero"
+    MAMBO = "Mambo"
+    SAMBA = "Samba"
+    PASO_DOBLE = "Paso Doble"
+    JIVE = "Jive"
+
+    # Nightclub
+    WEST_COAST_SWING = "West Coast Swing"
+    NIGHTCLUB_TWO_STEP = "Nightclub Two-Step"
+    LINDY_HOP = "Lindy Hop"
+    MERENGUE = "Merengue"
+    BLUES = "Blues"
+    SALSA = "Salsa"
+    ARGENTINE_TANGO = "Argentine Tango"
+    HUSTLE = "Hustle"
+    BACHATA = "Bachata"
+    POLKA = "Polka"
+    COUNTRY_TWO_STEP = "Country Two-Step"
+    COUNTRY_SWING = "Country Swing"
+
+
 # --- Composite lists (for backward compatibility and sequential access) ---
 
 STYLES: list[str] = list(Style)
@@ -95,23 +132,41 @@ ROUNDS: list[str] = list(Round)
 # --- Dance names per style ---
 
 DANCE_NAMES: dict[str, list[str]] = {
-    Style.STANDARD: ["Waltz", "Tango", "Viennese Waltz", "Foxtrot", "Quickstep"],
-    Style.SMOOTH: ["Waltz", "Tango", "Foxtrot", "Viennese Waltz"],
-    Style.LATIN: ["Cha Cha", "Samba", "Rumba", "Paso Doble", "Jive"],
-    Style.RHYTHM: ["Cha Cha", "Rumba", "East Coast Swing", "Bolero", "Mambo"],
+    Style.STANDARD: [
+        DanceName.WALTZ,
+        DanceName.TANGO,
+        DanceName.VIENNESE_WALTZ,
+        DanceName.FOXTROT,
+        DanceName.QUICKSTEP,
+    ],
+    Style.SMOOTH: [DanceName.WALTZ, DanceName.TANGO, DanceName.FOXTROT, DanceName.VIENNESE_WALTZ],
+    Style.LATIN: [
+        DanceName.CHA_CHA,
+        DanceName.SAMBA,
+        DanceName.RUMBA,
+        DanceName.PASO_DOBLE,
+        DanceName.JIVE,
+    ],
+    Style.RHYTHM: [
+        DanceName.CHA_CHA,
+        DanceName.RUMBA,
+        DanceName.EAST_COAST_SWING,
+        DanceName.BOLERO,
+        DanceName.MAMBO,
+    ],
     Style.NIGHTCLUB: [
-        "West Coast Swing",
-        "Nightclub Two-Step",
-        "Lindy Hop",
-        "Merengue",
-        "Blues",
-        "Salsa",
-        "Argentine Tango",
-        "Hustle",
-        "Bachata",
-        "Polka",
-        "Country Two-Step",
-        "Country Swing",
+        DanceName.WEST_COAST_SWING,
+        DanceName.NIGHTCLUB_TWO_STEP,
+        DanceName.LINDY_HOP,
+        DanceName.MERENGUE,
+        DanceName.BLUES,
+        DanceName.SALSA,
+        DanceName.ARGENTINE_TANGO,
+        DanceName.HUSTLE,
+        DanceName.BACHATA,
+        DanceName.POLKA,
+        DanceName.COUNTRY_TWO_STEP,
+        DanceName.COUNTRY_SWING,
     ],
 }
 
@@ -119,34 +174,34 @@ DANCE_NAMES: dict[str, list[str]] = {
 # --- Abbreviation maps (letter → full name for multi-dance events) ---
 
 _STANDARD_MAP: dict[str, str] = {
-    "W": "Waltz",
-    "T": "Tango",
-    "V": "Viennese Waltz",
-    "F": "Foxtrot",
-    "Q": "Quickstep",
+    "W": DanceName.WALTZ,
+    "T": DanceName.TANGO,
+    "V": DanceName.VIENNESE_WALTZ,
+    "F": DanceName.FOXTROT,
+    "Q": DanceName.QUICKSTEP,
 }
 
 _SMOOTH_MAP: dict[str, str] = {
-    "W": "Waltz",
-    "T": "Tango",
-    "F": "Foxtrot",
-    "V": "Viennese Waltz",
+    "W": DanceName.WALTZ,
+    "T": DanceName.TANGO,
+    "F": DanceName.FOXTROT,
+    "V": DanceName.VIENNESE_WALTZ,
 }
 
 _LATIN_MAP: dict[str, str] = {
-    "C": "Cha Cha",
-    "S": "Samba",
-    "R": "Rumba",
-    "P": "Paso Doble",
-    "J": "Jive",
+    "C": DanceName.CHA_CHA,
+    "S": DanceName.SAMBA,
+    "R": DanceName.RUMBA,
+    "P": DanceName.PASO_DOBLE,
+    "J": DanceName.JIVE,
 }
 
 _RHYTHM_MAP: dict[str, str] = {
-    "C": "Cha Cha",
-    "R": "Rumba",
-    "S": "East Coast Swing",
-    "B": "Bolero",
-    "M": "Mambo",
+    "C": DanceName.CHA_CHA,
+    "R": DanceName.RUMBA,
+    "S": DanceName.EAST_COAST_SWING,
+    "B": DanceName.BOLERO,
+    "M": DanceName.MAMBO,
 }
 
 ABBREVIATION_MAPS: dict[str, dict[str, str]] = {
@@ -175,12 +230,12 @@ CROSS_STYLE: dict[str, str] = {
 # Paso Doble, Bolero, Mambo) are intentionally absent from this map.
 
 CROSS_STYLE_DANCE_PAIRS: dict[str, str] = {
-    "Waltz": "Waltz",
-    "Tango": "Tango",
-    "Viennese Waltz": "Viennese Waltz",
-    "Foxtrot": "Foxtrot",
-    "Cha Cha": "Cha Cha",
-    "Rumba": "Rumba",
-    "Jive": "East Coast Swing",
-    "East Coast Swing": "Jive",
+    DanceName.WALTZ: DanceName.WALTZ,
+    DanceName.TANGO: DanceName.TANGO,
+    DanceName.VIENNESE_WALTZ: DanceName.VIENNESE_WALTZ,
+    DanceName.FOXTROT: DanceName.FOXTROT,
+    DanceName.CHA_CHA: DanceName.CHA_CHA,
+    DanceName.RUMBA: DanceName.RUMBA,
+    DanceName.JIVE: DanceName.EAST_COAST_SWING,
+    DanceName.EAST_COAST_SWING: DanceName.JIVE,
 }

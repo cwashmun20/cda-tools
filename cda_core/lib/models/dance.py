@@ -26,10 +26,14 @@ def convert_dance(style: str, input_name: str) -> str:
         raise ValueError(f"""Unrecognized style.
                          Please add support for '{style}' to convert_dance in dance.py""")
 
-    if input_name == "West Coast Swing":
+    if input_name == constants.DanceName.WEST_COAST_SWING:
         return constants.DANCE_NAMES[constants.Style.NIGHTCLUB][0]
 
-    if input_name in ("Night Club 2-Step", "Nightclub 2-Step", "Nightclub Two-Step"):
+    if input_name in (
+        constants.DanceName.NIGHTCLUB_TWO_STEP,
+        "Night Club 2-Step",
+        "Nightclub 2-Step",
+    ):
         return constants.DANCE_NAMES[constants.Style.NIGHTCLUB][1]
 
     # Check if dance name is the same as in the standard naming convention.
