@@ -42,8 +42,9 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 │       │   ├── row_parser.py     #   Per-row data extraction
 │       │   └── multi_dance_expander.py  # Multi-dance abbreviation expansion
 │       └── rules/                # FLC rule checking
-│           ├── violations.py     #   ViolationType, EligibilityResult
+│           ├── violations.py     #   ViolationType, EligibilityResult, LevelViolation
 │           ├── proficiency.py    #   ProficiencyCalculator
+│           ├── recommended_levels.py  # RecommendedLevelsCalculator
 │           ├── eligibility.py    #   EligibilityChecker
 │           └── level_rules.py    #   LevelRulesChecker
 │
@@ -70,7 +71,7 @@ All domain constants use Python 3.11+ `StrEnum` enums, so enum members work dire
 - `RookieVetLevel` — Rookie Lead, Rookie Follow
 
 ### Rules Package
-`entry_checking/lib/rules/` contains FLC validation logic (proficiency, eligibility, consecutive-level rules). It operates on `cda_core` domain objects (`Dancer`, `Partnership`, `Dance`) but lives outside `cda_core` since it's entry-checking-specific, not core domain. Validation logic returns structured `EligibilityResult` and `LevelViolation` dataclasses instead of printing directly, so results can be consumed by both the CLI and a future web UI.
+`entry_checking/lib/rules/` contains FLC validation logic: proficiency/point-out calculations, partnership eligibility (including duplicate-entry and Nightclub consecutive-level checks), consecutive-level rules, and recommended-level suggestions. It operates on `cda_core` domain objects (`Dancer`, `Partnership`, `Dance`) but lives outside `cda_core` since it's entry-checking-specific, not core domain. Validation logic returns structured `EligibilityResult` and `LevelViolation` dataclasses instead of printing directly, so results can be consumed by both the CLI and a future web UI.
 
 ### API Layer
 API communication is isolated in `cda_core/lib/api/`. The `DancerRecord` dataclass provides typed access to CDA database responses. To use the API:
@@ -78,7 +79,7 @@ API communication is isolated in `cda_core/lib/api/`. The `DancerRecord` datacla
 2. Add your API key to `config.py`
 
 ### Competition & EntryChecker
-`Competition` (`cda_core/lib/competition.py`) is a plain data model — it holds a competition's identity (name, date, ruleset) and raw entry data, nothing else. Orchestration — building `Dancer`/`Partnership`/`Entry` objects from a `Competition`'s rows, running `EligibilityChecker` and `LevelRulesChecker`, and returning structured results — lives in `EntryChecker` (`entry_checking/lib/entry_checker.py`). Neither class prints; `entry_checker.main()` is the only place that prompts and prints, so the same orchestration can later be reused by a non-interactive caller (e.g. a web UI).
+`Competition` (`cda_core/lib/competition.py`) is a plain data model — it holds a competition's identity (name, date, rookie-vet ruleset, consecutive-level limit, and the Rookie's max regular-event level under the "newcomer" ruleset) and raw entry data, nothing else. Orchestration — building `Dancer`/`Partnership`/`Entry` objects from a `Competition`'s rows, running `EligibilityChecker` and `LevelRulesChecker`, and returning structured results — lives in `EntryChecker` (`entry_checking/lib/entry_checker.py`). Neither class prints; `entry_checker.main()` is the only place that prompts and prints, so the same orchestration can later be reused by a non-interactive caller (e.g. a web UI).
 
 ### Import Convention
 All internal imports are absolute package paths (`from cda_core.lib.models.dance import Dance`, `from entry_checking.lib.rules.eligibility import EligibilityChecker`), not `sys.path` manipulation. This means `cda_core` and `entry_checking` need to be resolvable as real top-level packages — either via `pip install -e .` (see Setup), or by running from the repo root, where Python's `-m` flag adds the current directory to `sys.path` automatically.
