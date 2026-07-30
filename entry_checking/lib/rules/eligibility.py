@@ -53,7 +53,30 @@ class EligibilityChecker:
                         f"DUPLICATE ENTRY: '{dancer_obj.name}' is already "
                         f"registered for '{dance_obj}'."
                     ),
+                    subject_name=dancer_obj.name,
                 )
+
+        # A dancer already registered for the OTHER level of this same
+        # Nightclub dance is a consecutive-level violation - checked before
+        # the int./adv. shortcut below since it should override it too.
+        if dance_obj.style == constants.Style.NIGHTCLUB:
+            other_nc_level = (
+                constants.NC_LEVELS[0]
+                if dance_obj.level == constants.NC_LEVELS[1]
+                else constants.NC_LEVELS[1]
+            )
+            other_dance = Dance(other_nc_level, dance_obj.style, dance_obj.dance)
+            for dancer_obj in (partnership.lead, partnership.follow):
+                if other_dance in dancer_obj.entries:
+                    return EligibilityResult(
+                        eligible=False,
+                        violation_type=ViolationType.NIGHTCLUB_CONSECUTIVE_LEVEL,
+                        detail_message=(
+                            f"CONSECUTIVE LEVEL VIOLATION: '{dancer_obj.name}' is "
+                            f"already registered for both levels of '{dance_obj.dance}'."
+                        ),
+                        subject_name=dancer_obj.name,
+                    )
 
         # Everyone is always eligible for int./adv. Nightclub and Championship
         if (
@@ -73,6 +96,7 @@ class EligibilityChecker:
                     f"NIGHTCLUB BEGINNER VIOLATION: '{partnership.names}' "
                     f"are ineligible for '{dance_obj}'."
                 ),
+                subject_name=partnership.names,
             )
 
         # Check eligibility for Newcomer
@@ -85,6 +109,7 @@ class EligibilityChecker:
                 detail_message=(
                     f"NEWCOMER VIOLATION: '{partnership.names}' " f"ineligible for '{dance_obj}'."
                 ),
+                subject_name=partnership.names,
             )
 
         # Check eligibility for Rookie/Vet
@@ -140,6 +165,7 @@ class EligibilityChecker:
                 f"\tRecommended {dance_obj.style} level(s) for this partnership: "
                 f"{' and '.join(recommended_levels)}."
             ),
+            subject_name=partnership.names,
         )
 
     def _check_rookie_vet_newcomer(self, partnership, dance_obj: Dance) -> EligibilityResult | None:
@@ -147,10 +173,12 @@ class EligibilityChecker:
         curr_style = dance_obj.style
 
         if dance_obj.level == constants.RookieVetLevel.ROOKIE_LEAD:
+            follow_registered_newcomer = partnership.follow.is_registered_newcomer(curr_style)
+            follow_registered_bronze = partnership.follow.is_registered_bronze(curr_style)
             if (
                 partnership.lead.is_newcomer()
-                and not partnership.follow.is_registered_newcomer(curr_style)
-                and not partnership.follow.is_registered_bronze(curr_style)
+                and not follow_registered_newcomer
+                and not follow_registered_bronze
             ):
                 return EligibilityResult(eligible=True)
             return EligibilityResult(
@@ -160,15 +188,22 @@ class EligibilityChecker:
                     f"ROOKIE-LEAD VIOLATION: '{partnership.names}' ineligible "
                     f"for '{dance_obj}'.\n"
                     f"\tLead ({partnership.lead}) is rookie: "
-                    f"{partnership.lead.is_newcomer()}."
+                    f"{partnership.lead.is_newcomer()}.\n"
+                    f"\tFollow ({partnership.follow}) is already registered for a "
+                    f"Newcomer {curr_style} event: {follow_registered_newcomer}.\n"
+                    f"\tFollow ({partnership.follow}) is already registered for a "
+                    f"Bronze {curr_style} event: {follow_registered_bronze}."
                 ),
+                subject_name=partnership.names,
             )
 
         if dance_obj.level == constants.RookieVetLevel.ROOKIE_FOLLOW:
+            lead_registered_newcomer = partnership.lead.is_registered_newcomer(curr_style)
+            lead_registered_bronze = partnership.lead.is_registered_bronze(curr_style)
             if (
                 partnership.follow.is_newcomer()
-                and not partnership.lead.is_registered_newcomer(curr_style)
-                and not partnership.lead.is_registered_bronze(curr_style)
+                and not lead_registered_newcomer
+                and not lead_registered_bronze
             ):
                 return EligibilityResult(eligible=True)
             return EligibilityResult(
@@ -178,8 +213,13 @@ class EligibilityChecker:
                     f"ROOKIE-FOLLOW VIOLATION: '{partnership.names}' ineligible "
                     f"for '{dance_obj}'.\n"
                     f"\tFollow ({partnership.follow}) is rookie: "
-                    f"{partnership.follow.is_newcomer()}."
+                    f"{partnership.follow.is_newcomer()}.\n"
+                    f"\tLead ({partnership.lead}) is already registered for a "
+                    f"Newcomer {curr_style} event: {lead_registered_newcomer}.\n"
+                    f"\tLead ({partnership.lead}) is already registered for a "
+                    f"Bronze {curr_style} event: {lead_registered_bronze}."
                 ),
+                subject_name=partnership.names,
             )
 
         return None
@@ -200,6 +240,7 @@ class EligibilityChecker:
                     f"\tLead ({partnership.lead}) is rookie: {rookie_lead}.\n"
                     f"\tFollow ({partnership.follow}) is vet: {vet_follow}."
                 ),
+                subject_name=partnership.names,
             )
 
         if dance_obj.level == constants.RookieVetLevel.ROOKIE_FOLLOW:
@@ -216,6 +257,7 @@ class EligibilityChecker:
                     f"\tLead ({partnership.lead}) is vet: {vet_lead}.\n"
                     f"\tFollow ({partnership.follow}) is rookie: {rookie_follow}."
                 ),
+                subject_name=partnership.names,
             )
 
         return None

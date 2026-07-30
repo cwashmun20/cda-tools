@@ -20,6 +20,7 @@ class ViolationType(StrEnum):
     CONSECUTIVE_LEVEL = "consecutive_level"
     SPLIT_LEVEL = "split_level"
     DUPLICATE_ENTRY = "duplicate_entry"
+    NIGHTCLUB_CONSECUTIVE_LEVEL = "nightclub_consecutive_level"
 
 
 @dataclass
@@ -35,6 +36,11 @@ class EligibilityResult:
     detail_message: Optional[str] = None
     is_split_level: bool = False
     split_level_info: Optional[str] = None
+    # Whoever the violation is about, for grouping a report by dancer -
+    # the partnership's combined name for couple-level violations, or an
+    # individual dancer's name for DUPLICATE_ENTRY (which is checked per
+    # dancer, not per couple).
+    subject_name: Optional[str] = None
 
 
 @dataclass

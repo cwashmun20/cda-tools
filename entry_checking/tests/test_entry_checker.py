@@ -4,6 +4,8 @@ Exercises the full Competition + EntryChecker pipeline together, rather than
 each rules/parsing module in isolation.
 """
 
+import contextlib
+import io
 import unittest
 import datetime
 import numpy as np
@@ -14,7 +16,8 @@ from cda_core.lib.api.client import DancerRecord
 from cda_core.lib.models.dance import Dance
 from cda_core.lib.models.dancer import Dancer
 from cda_core.lib.models.partnership import Partnership
-from entry_checking.lib.entry_checker import EntryChecker
+from entry_checking.lib.entry_checker import EntryChecker, _report
+from entry_checking.lib.rules.violations import EligibilityResult, LevelViolation
 
 
 def _mock_dancer(comp_date, first, last):
@@ -176,6 +179,26 @@ class TestCheckEntryAndRegisterEntry(unittest.TestCase):
         self.assertEqual(second_violations, [])
         self.assertEqual(len(self.comp.entries), 1)
 
+    def test_register_entry_nightclub_consecutive_level_not_committed(self):
+        """Registering both levels of the same Nightclub dance should block
+        the second registration entirely - not just exclude it from the
+        dancer's own entries while still counting it elsewhere. Int/Adv is
+        registered first since it's always eligible regardless of nc_beginner
+        status, so this only exercises the new consecutive-level check."""
+        first_result, _ = self.checker.register_entry(
+            self.partnership, Dance("Intermediate/Advanced", "Nightclub", "Salsa")
+        )
+        second_result, second_violations = self.checker.register_entry(
+            self.partnership, Dance("Beginner", "Nightclub", "Salsa")
+        )
+
+        self.assertTrue(first_result.eligible)
+        self.assertFalse(second_result.eligible)
+        self.assertEqual(second_result.violation_type.value, "nightclub_consecutive_level")
+        self.assertEqual(second_violations, [])
+        self.assertEqual(len(self.comp.entries), 1)
+        self.assertEqual(len(self.lead.entries), 1)
+
     def test_register_entry_reports_level_violation_once(self):
         """A consecutive-level violation should be reported as a new_violation
         only on the entry that first triggers it - not again on a later entry
@@ -218,6 +241,71 @@ class TestCheckEntryAndRegisterEntry(unittest.TestCase):
         self.assertEqual(len(tango_violations), 2)
         for violation in tango_violations:
             self.assertEqual(violation.dance, "Tango")
+
+
+class TestReport(unittest.TestCase):
+    """Tests for entry_checker._report()'s grouping/ordering."""
+
+    def _run_report(self, eligibility_results, level_violations):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            _report(eligibility_results, level_violations)
+        return buf.getvalue()
+
+    def test_split_level_notes_print_before_violations(self):
+        """Split-level exceptions aren't violations, so they print as their
+        own block up front, ahead of every grouped violation."""
+        eligibility_results = [
+            EligibilityResult(
+                eligible=False,
+                detail_message="ZZZ VIOLATION",
+                subject_name="Zed Zed",
+            ),
+            EligibilityResult(
+                eligible=True,
+                is_split_level=True,
+                split_level_info="SPLIT-LEVEL NOTE",
+            ),
+        ]
+        output = self._run_report(eligibility_results, [])
+        self.assertLess(output.index("SPLIT-LEVEL NOTE"), output.index("ZZZ VIOLATION"))
+
+    def test_violations_grouped_by_subject_and_sorted(self):
+        """A couple-level violation and an individual dancer's level
+        violation should each file under the right subject, in sorted
+        order - so an individual's own issues print adjacent to a couple
+        violation they're part of, without duplicating either message."""
+        eligibility_results = [
+            EligibilityResult(
+                eligible=False,
+                detail_message="NEWCOMER VIOLATION: couple message",
+                subject_name="Baris Varol & Denise Machin",
+            ),
+        ]
+        level_violations = [
+            LevelViolation(
+                dancer_name="Baris Varol",
+                style="Smooth",
+                violation_type="too_many_levels",
+                detail_message="LEVEL VIOLATION: Baris individual message",
+            ),
+            LevelViolation(
+                dancer_name="Adam Aardvark",
+                style="Smooth",
+                violation_type="too_many_levels",
+                detail_message="LEVEL VIOLATION: Adam individual message",
+            ),
+        ]
+        output = self._run_report(eligibility_results, level_violations)
+        adam_idx = output.index("Adam individual message")
+        baris_idx = output.index("Baris individual message")
+        couple_idx = output.index("couple message")
+        self.assertLess(adam_idx, baris_idx)
+        self.assertLess(baris_idx, couple_idx)
+
+    def test_eligible_non_split_result_not_printed(self):
+        eligibility_results = [EligibilityResult(eligible=True)]
+        self.assertEqual(self._run_report(eligibility_results, []), "")
 
 
 if __name__ == "__main__":

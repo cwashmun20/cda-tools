@@ -148,6 +148,40 @@ class TestEligibilityChecker(unittest.TestCase):
         self.assertFalse(result.eligible)
         self.assertEqual(result.violation_type, ViolationType.DUPLICATE_ENTRY)
 
+    def test_nightclub_consecutive_level_violation(self):
+        """Already registered Beginner Salsa - the otherwise-always-eligible
+        Int/Adv Salsa should be blocked as a consecutive-level conflict."""
+        lead = _MockDancer("Lead")
+        lead.entries = {Dance("Beginner", "Nightclub", "Salsa")}
+        follow = _MockDancer("Follow")
+        partnership = _MockPartnership(lead, follow)
+        result = self.checker.check(
+            partnership, Dance("Intermediate/Advanced", "Nightclub", "Salsa")
+        )
+        self.assertFalse(result.eligible)
+        self.assertEqual(result.violation_type, ViolationType.NIGHTCLUB_CONSECUTIVE_LEVEL)
+
+    def test_nightclub_consecutive_level_violation_reverse_direction(self):
+        beginner_dance = Dance("Beginner", "Nightclub", "Salsa")
+        intadv_dance = Dance("Intermediate/Advanced", "Nightclub", "Salsa")
+        lead = _MockDancer("Lead")
+        follow = _MockDancer("Follow")
+        follow.entries = {intadv_dance}
+        partnership = _MockPartnership(lead, follow)
+        result = self.checker.check(partnership, beginner_dance)
+        self.assertFalse(result.eligible)
+        self.assertEqual(result.violation_type, ViolationType.NIGHTCLUB_CONSECUTIVE_LEVEL)
+
+    def test_nightclub_consecutive_level_different_dance_not_flagged(self):
+        lead = _MockDancer("Lead")
+        lead.entries = {Dance("Beginner", "Nightclub", "Salsa")}
+        follow = _MockDancer("Follow")
+        partnership = _MockPartnership(lead, follow)
+        result = self.checker.check(
+            partnership, Dance("Intermediate/Advanced", "Nightclub", "Bachata")
+        )
+        self.assertTrue(result.eligible)
+
     def test_beginner_nightclub_both_nc_beginners(self):
         lead = _MockDancer("Lead", nc_beginner=True)
         follow = _MockDancer("Follow", nc_beginner=True)
@@ -198,6 +232,22 @@ class TestEligibilityChecker(unittest.TestCase):
         result = self.checker.check(partnership, dance)
         self.assertFalse(result.eligible)
         self.assertEqual(result.violation_type, ViolationType.ROOKIE_LEAD)
+
+    def test_rookie_lead_newcomer_ruleset_ineligible_message_explains_why(self):
+        """The violation message should state which of the vet-partner
+        conditions failed, not just that the lead is (or isn't) a rookie."""
+        lead = _MockDancer("Lead", is_newcomer=True)
+        follow = _MockDancer("Follow", is_reg_newcomer=True, is_reg_bronze=False)
+        partnership = _MockPartnership(lead, follow)
+        dance = Dance("Rookie Lead", "Smooth", "Waltz")
+        result = self.checker.check(partnership, dance)
+        self.assertFalse(result.eligible)
+        self.assertIn(
+            "is already registered for a Newcomer Smooth event: True", result.detail_message
+        )
+        self.assertIn(
+            "is already registered for a Bronze Smooth event: False", result.detail_message
+        )
 
     def test_rookie_lead_level_ruleset_eligible(self):
         lead = _MockDancer("Lead", has_vet=False)

@@ -145,16 +145,29 @@ class EntryChecker:
 def _report(
     eligibility_results: list[EligibilityResult], level_violations: list[LevelViolation]
 ) -> None:
-    """Print eligibility and level-rule results to the console."""
+    """Print split-level exception notes, then every other violation grouped
+    by whoever it's about (partnership or individual dancer).
+
+    Split-level exceptions aren't violations - they're eligible entries that
+    just need a 3x-points note - so they're printed as their own block up
+    front rather than grouped in with the real violations.
+    """
     for result in eligibility_results:
-        message = result.split_level_info if result.is_split_level else result.detail_message
-        if message:
-            print(message)
+        if result.is_split_level and result.split_level_info:
+            print(result.split_level_info)
             print()
 
+    groups: dict[str, list[str]] = {}
+    for result in eligibility_results:
+        if not result.eligible and result.detail_message and result.subject_name:
+            groups.setdefault(result.subject_name, []).append(result.detail_message)
     for violation in level_violations:
         if violation.detail_message:
-            print(violation.detail_message)
+            groups.setdefault(violation.dancer_name, []).append(violation.detail_message)
+
+    for subject_name in sorted(groups):
+        for message in groups[subject_name]:
+            print(message)
             print()
 
 

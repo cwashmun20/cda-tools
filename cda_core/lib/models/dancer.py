@@ -79,7 +79,6 @@ class Dancer:
             entry_style = e.dance_data.style
             entry_level = e.dance_data.level
             if curr_style == entry_style and entry_level == constants.SYLLABUS_LEVELS[0]:
-                print(f"{self.name} is registered for at least one Newcomer event in {curr_style}.")
                 return True
         return False
 
@@ -90,7 +89,6 @@ class Dancer:
             entry_style = e.dance_data.style
             entry_level = e.dance_data.level
             if curr_style == entry_style and entry_level == constants.SYLLABUS_LEVELS[1]:
-                print(f"{self.name} is registered for at least one Bronze event in {curr_style}.")
                 return True
         return False
 
@@ -102,28 +100,7 @@ class Dancer:
 
     def add(self, comp_entry: "Entry"):
         """Adds a competition entry for a dancer. Should only be called from a partnership."""
-        # Grab nightclub-related info.
-        entry_style = comp_entry.dance_data.style
-        is_nightclub = False
-        if entry_style == constants.Style.NIGHTCLUB:
-            is_nightclub = True
-            nc_dance = comp_entry.dance_data.dance
-            nc_level = comp_entry.dance_data.level
-            other_nc_level = (
-                constants.NC_LEVELS[0]
-                if nc_level == constants.NC_LEVELS[1]
-                else constants.NC_LEVELS[1]
-            )
-            other_nc_dance = Dance(other_nc_level, entry_style, nc_dance)
-
-        # Check for registration in two levels of the same Nightclub dance.
-        if is_nightclub and other_nc_dance in self.entries:
-            print(
-                f"CONSECUTIVE LEVEL VIOLATION: '{self.name}' is registered for "
-                f"both levels of '{nc_dance}'."
-            )
-        else:
-            self.entries.add(comp_entry)
+        self.entries.add(comp_entry)
 
     def drop(self, comp_entry: "Entry"):
         """Drops a competition entry for a couple. Should only be called from a partnership"""
