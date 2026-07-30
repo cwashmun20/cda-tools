@@ -163,6 +163,19 @@ class TestCheckEntryAndRegisterEntry(unittest.TestCase):
         self.assertEqual(new_violations, [])
         self.assertEqual(len(self.comp.entries), 0)
 
+    def test_register_entry_duplicate_not_committed(self):
+        """Registering the same dance/level twice should flag the second
+        attempt as a duplicate and not add a second entry."""
+        dance_obj = Dance("Bronze", "Smooth", "Waltz")
+        first_result, _ = self.checker.register_entry(self.partnership, dance_obj)
+        second_result, second_violations = self.checker.register_entry(self.partnership, dance_obj)
+
+        self.assertTrue(first_result.eligible)
+        self.assertFalse(second_result.eligible)
+        self.assertEqual(second_result.violation_type.value, "duplicate_entry")
+        self.assertEqual(second_violations, [])
+        self.assertEqual(len(self.comp.entries), 1)
+
     def test_register_entry_reports_level_violation_once(self):
         """A consecutive-level violation should be reported as a new_violation
         only on the entry that first triggers it - not again on a later entry

@@ -19,6 +19,7 @@ class ViolationType(StrEnum):
     POINTED_OUT = "pointed_out"
     CONSECUTIVE_LEVEL = "consecutive_level"
     SPLIT_LEVEL = "split_level"
+    DUPLICATE_ENTRY = "duplicate_entry"
 
 
 @dataclass

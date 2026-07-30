@@ -116,6 +116,38 @@ class TestEligibilityChecker(unittest.TestCase):
         result = self.checker.check(partnership, dance)
         self.assertTrue(result.eligible)
 
+    def test_duplicate_entry_for_lead(self):
+        dance = Dance("Bronze", "Smooth", "Waltz")
+        lead = _MockDancer("Lead")
+        lead.entries = {dance}
+        follow = _MockDancer("Follow")
+        partnership = _MockPartnership(lead, follow)
+        result = self.checker.check(partnership, dance)
+        self.assertFalse(result.eligible)
+        self.assertEqual(result.violation_type, ViolationType.DUPLICATE_ENTRY)
+
+    def test_duplicate_entry_for_follow(self):
+        dance = Dance("Bronze", "Smooth", "Waltz")
+        lead = _MockDancer("Lead")
+        follow = _MockDancer("Follow")
+        follow.entries = {dance}
+        partnership = _MockPartnership(lead, follow)
+        result = self.checker.check(partnership, dance)
+        self.assertFalse(result.eligible)
+        self.assertEqual(result.violation_type, ViolationType.DUPLICATE_ENTRY)
+
+    def test_duplicate_entry_takes_priority_over_always_eligible(self):
+        """Even Championship/NC Int-Adv, which are otherwise unconditionally
+        eligible, should still be flagged as a duplicate."""
+        dance = Dance("Championship", "Standard", "Waltz")
+        lead = _MockDancer("Lead")
+        lead.entries = {dance}
+        follow = _MockDancer("Follow")
+        partnership = _MockPartnership(lead, follow)
+        result = self.checker.check(partnership, dance)
+        self.assertFalse(result.eligible)
+        self.assertEqual(result.violation_type, ViolationType.DUPLICATE_ENTRY)
+
     def test_beginner_nightclub_both_nc_beginners(self):
         lead = _MockDancer("Lead", nc_beginner=True)
         follow = _MockDancer("Follow", nc_beginner=True)

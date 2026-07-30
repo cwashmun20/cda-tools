@@ -116,19 +116,6 @@ class Dancer:
             )
             other_nc_dance = Dance(other_nc_level, entry_style, nc_dance)
 
-        # TODO(CWA): Fix duplicate entry checking:
-        # # Check for duplicate entries (currently broken but not essential).
-        # if comp_entry in self.entries:
-        #     print(f"DUPLICATE ENTRY: '{self.name}' is registered for "
-        #           f"'{comp_entry.dance_data}' more than once:")
-        #     print(f"As '{comp_entry}'")
-        #     for existing_entry in self.entries:
-        #         if existing_entry == comp_entry:
-        #             print(f"As '{existing_entry}'")
-        #     print()
-        # # Check for registration in two levels of the same Nightclub dance.
-        # elif is_nightclub and other_nc_dance in self.entries:
-
         # Check for registration in two levels of the same Nightclub dance.
         if is_nightclub and other_nc_dance in self.entries:
             print(

@@ -40,6 +40,20 @@ class EligibilityChecker:
         Returns:
             An EligibilityResult with the outcome and any violation details.
         """
+        # A dancer already registered for this exact dance (regardless of
+        # partner) is a duplicate entry - checked first since it should be
+        # flagged even at levels that are otherwise always eligible.
+        for dancer_obj in (partnership.lead, partnership.follow):
+            if dance_obj in dancer_obj.entries:
+                return EligibilityResult(
+                    eligible=False,
+                    violation_type=ViolationType.DUPLICATE_ENTRY,
+                    detail_message=(
+                        f"DUPLICATE ENTRY: '{dancer_obj.name}' is already "
+                        f"registered for '{dance_obj}'."
+                    ),
+                )
+
         # Everyone is always eligible for int./adv. Nightclub and Championship
         if (
             dance_obj.level == constants.NC_LEVELS[-1]
