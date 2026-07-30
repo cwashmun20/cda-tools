@@ -299,6 +299,24 @@ class TestEligibilityChecker(unittest.TestCase):
         self.assertEqual(result.violation_type, ViolationType.POINTED_OUT)
         self.assertIn("POINTED OUT VIOLATION", result.detail_message)
 
+    def test_pointed_out_violation_includes_recommended_levels(self):
+        """A pointed-out violation's detail message should include the
+        partnership's recommended level(s) for the style, not just each
+        dancer's individual lowest allowed level."""
+        syllabus = np.zeros((4, 19), dtype=int)
+        syllabus[0][5] = syllabus[1][5] = 7  # Newcomer/Bronze pointed out, not Silver
+        lead = _make_dancer("Lead", "Dancer", syllabus)
+        follow = _make_dancer("Follow", "Dancer", syllabus.copy())
+        partnership = Partnership(lead, follow)
+        dance = Dance("Bronze", "Smooth", "Waltz")
+
+        result = self.checker.check(partnership, dance)
+        self.assertFalse(result.eligible)
+        self.assertIn(
+            "Recommended Smooth level(s) for this partnership: Silver and Gold",
+            result.detail_message,
+        )
+
     def test_pointed_out_eligible_at_or_above_proficiency(self):
         """A dancer may always register at or above their proficiency level -
         pointing out only raises the floor, it doesn't cap the ceiling."""

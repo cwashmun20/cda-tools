@@ -9,6 +9,7 @@ from cda_core.lib import constants
 from cda_core.lib.models.dance import Dance
 from entry_checking.lib.rules.violations import EligibilityResult, ViolationType
 from entry_checking.lib.rules.proficiency import ProficiencyCalculator
+from entry_checking.lib.rules.recommended_levels import RecommendedLevelsCalculator
 
 
 class EligibilityChecker:
@@ -127,6 +128,7 @@ class EligibilityChecker:
         # Pointed out violation
         lead_eligibility = constants.LEVELS[lead_level]
         follow_eligibility = constants.LEVELS[follow_level]
+        recommended_levels = RecommendedLevelsCalculator.compute(partnership, dance_obj.style)
         return EligibilityResult(
             eligible=False,
             violation_type=ViolationType.POINTED_OUT,
@@ -134,7 +136,9 @@ class EligibilityChecker:
                 f"POINTED OUT VIOLATION: '{partnership.names}' are ineligible "
                 f"for '{dance_obj}'\n"
                 f"\t{partnership.lead} lowest allowed level is {lead_eligibility}.\n"
-                f"\t{partnership.follow} lowest allowed level is {follow_eligibility}."
+                f"\t{partnership.follow} lowest allowed level is {follow_eligibility}.\n"
+                f"\tRecommended {dance_obj.style} level(s) for this partnership: "
+                f"{' and '.join(recommended_levels)}."
             ),
         )
 

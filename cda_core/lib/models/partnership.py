@@ -21,11 +21,6 @@ class Partnership:
         """
         return self.names
 
-    # TODO (CWA): Future feature: add recommended levels for each syllabus style,
-    #             AKA the lowest common level where neither dancer has pointed
-    #             out of any dances, plus the level above that. Will need to
-    #             ignore Newcomer if dancers are ineligible.
-
     def add(self, entry_obj):
         """Adds a competition entry for a couple.
 
