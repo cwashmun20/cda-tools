@@ -8,7 +8,7 @@ Usage:
 
 from datetime import date
 
-from cda_core.lib import competition
+from cda_core.lib import competition, constants
 from cda_core.lib.models.dance import Dance
 from cda_core.lib.models.dancer import Dancer
 from cda_core.lib.models.entry import Entry
@@ -33,12 +33,17 @@ class EntryChecker:
     check_entry() and register_entry() operate on a single partnership/dance
     pair and are the building blocks check() is written in terms of — they're
     also what a future live-registration caller (checking one entry at a time
-    against entries already registered so far) would call directly.
+    against entries already registered so far) would call directly. Note
+    that the "newcomer" ruleset's Rookie/Vet checks depend on a dancer's
+    *other* entries in that style already being registered - check() handles
+    this by registering every non-Rookie/Vet entry first, but a live-
+    registration caller submitting entries one at a time would need to do
+    the same (submit Rookie/Vet entries last) to get accurate results.
     """
 
     def __init__(self, comp: "competition.Competition"):
         self.comp = comp
-        self.eligibility_checker = EligibilityChecker(comp.rv_ruleset)
+        self.eligibility_checker = EligibilityChecker(comp.rv_ruleset, comp.rookie_max_level)
         # Level violations already surfaced for a dancer, keyed by
         # (style, violation_type, levels) — lets register_entry() report each
         # violation once, at the entry that first causes it, instead of again
@@ -96,6 +101,14 @@ class EntryChecker:
     def check(self) -> tuple[list[EligibilityResult], list[LevelViolation]]:
         """Check all of the competition's entries.
 
+        Rookie/Vet entries are registered after every other entry,
+        regardless of their row order in the source data - the "newcomer"
+        ruleset's Rookie/Vet checks look at a dancer's *other* entries in
+        that style (e.g. whether the Rookie also has a regular-level entry,
+        or the Veteran is registered for a Bronze/Newcomer event), so those
+        other entries need to already be registered for the check to see
+        an accurate, order-independent picture.
+
         Returns:
             A tuple of (eligibility_results, level_violations).
             eligibility_results includes every ineligible entry and every
@@ -105,6 +118,9 @@ class EntryChecker:
         comp = self.comp
         eligibility_results: list[EligibilityResult] = []
         level_violations: list[LevelViolation] = []
+
+        regular_entries = []
+        rookie_vet_entries = []
 
         for _, row in comp.raw_data.iterrows():
             if is_tba_row(row):
@@ -133,6 +149,15 @@ class EntryChecker:
             heat = row["Heat"] if "Heat" in comp.raw_data.columns else None
 
             dance_obj = Dance(level, style, dance_name)
+            if dance_obj.level in (
+                constants.RookieVetLevel.ROOKIE_LEAD,
+                constants.RookieVetLevel.ROOKIE_FOLLOW,
+            ):
+                rookie_vet_entries.append((partnership_obj, dance_obj, heat))
+            else:
+                regular_entries.append((partnership_obj, dance_obj, heat))
+
+        for partnership_obj, dance_obj, heat in regular_entries + rookie_vet_entries:
             result, new_violations = self.register_entry(partnership_obj, dance_obj, heat)
 
             if not result.eligible or result.is_split_level:
@@ -182,6 +207,7 @@ def main():
         comp_date = date.today()
         rv_ruleset = "newcomer"
         consecutive_level_limit = 2
+        rookie_max_level = "Bronze"
     else:
         date_str = input("Please enter competition date (MM/DD/YYYY): ")
         month, day, year = date_str.split("/")
@@ -193,6 +219,21 @@ def main():
                 "Rookie-vet ruleset must be either 'newcomer' or 'level' (without asterisks)."
             )
 
+        if rv_ruleset == "newcomer":
+            rookie_max_level = input(
+                "Please enter the highest level a Rookie may also compete at in "
+                "regular events in that style ('Bronze' or 'Silver'): "
+            )
+            if rookie_max_level not in (
+                constants.SyllabusLevel.BRONZE,
+                constants.SyllabusLevel.SILVER,
+            ):
+                raise ValueError(
+                    "Rookie max level must be either 'Bronze' or 'Silver' (without asterisks)."
+                )
+        else:
+            rookie_max_level = "Bronze"  # unused under the "level" ruleset
+
         consecutive_level_limit = int(
             input(
                 "Please enter the number of consecutive Smooth/Standard/Rhythm/Latin "
@@ -203,7 +244,7 @@ def main():
     print()  # Add newline after comp setup.
 
     comp = competition.Competition(
-        comp_name, comp_date, rv_ruleset, consecutive_level_limit, raw_data
+        comp_name, comp_date, rv_ruleset, consecutive_level_limit, rookie_max_level, raw_data
     )
     eligibility_results, level_violations = EntryChecker(comp).check()
     _report(eligibility_results, level_violations)

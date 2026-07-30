@@ -142,6 +142,50 @@ class Dancer:
                 return True
         return False
 
+    def has_entry_above(self, style: str, dance: str, level_idx: int) -> bool:
+        """Returns True if the dancer has an entry for a specific dance in a
+        style at or above a given level index (see constants.LEVELS).
+
+        Args:
+            style: the dance's style/category (e.g. "Smooth", "Latin").
+            dance: the specific dance name (e.g. "Waltz").
+            level_idx: the minimum constants.LEVELS index that counts.
+        Returns:
+            True if a matching entry exists at or above level_idx.
+        """
+        for e in self.entries:
+            entry = e.dance_data
+            if (
+                entry.style == style
+                and entry.dance == dance
+                and entry.level in constants.LEVELS
+                and constants.LEVELS.index(entry.level) >= level_idx
+            ):
+                return True
+        return False
+
+    def has_entry_with_partnership(self, style: str, dance: str, partnership_obj) -> bool:
+        """Returns True if the dancer has a regular (non Rookie/Vet) entry
+        for a specific dance in a style registered with a given partnership.
+
+        Args:
+            style: the dance's style/category (e.g. "Smooth", "Latin").
+            dance: the specific dance name (e.g. "Waltz").
+            partnership_obj: the Partnership to match against.
+        Returns:
+            True if a matching entry exists with that partnership.
+        """
+        for e in self.entries:
+            entry = e.dance_data
+            if (
+                entry.style == style
+                and entry.dance == dance
+                and entry.level in constants.LEVELS
+                and e.partnership is partnership_obj
+            ):
+                return True
+        return False
+
     def get_points(self, target_dance: Dance) -> int:
         """Retrieves the points earned for a given dance at a given level,
            returning an int.

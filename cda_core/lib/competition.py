@@ -24,6 +24,7 @@ class Competition:
         comp_date: date,
         rv_ruleset: str,
         consecutive_level_limit: int,
+        rookie_max_level: str,
         raw_data: pd.DataFrame,
     ):
         """Create a Competition.
@@ -35,6 +36,10 @@ class Competition:
                         this competition uses.
             consecutive_level_limit: The number of allowed consecutive
                               Smooth/Standard/Rhythm/Latin levels.
+            rookie_max_level: Either "Bronze" or "Silver" - the highest level
+                              a Rookie may also compete at in regular events
+                              in that style, under the "newcomer" rv_ruleset.
+                              Unused under the "level" rv_ruleset.
             raw_data: The competition's entries, already CSV-parsed and
                       multi-dance-expanded (see cda_core.lib.parsing).
         """
@@ -42,6 +47,7 @@ class Competition:
         self.comp_date = comp_date
         self.rv_ruleset = rv_ruleset
         self.consecutive_level_limit = consecutive_level_limit
+        self.rookie_max_level = rookie_max_level
         self.raw_data = raw_data
 
         self.competitors: dict[str, Dancer] = {}  # Competitor name keys

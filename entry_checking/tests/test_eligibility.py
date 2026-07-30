@@ -6,6 +6,7 @@ import numpy as np
 from cda_core.lib.api.client import DancerRecord
 from cda_core.lib.models.dancer import Dancer
 from cda_core.lib.models.dance import Dance
+from cda_core.lib.models.entry import Entry
 from cda_core.lib.models.partnership import Partnership
 from entry_checking.lib.rules.eligibility import EligibilityChecker
 from entry_checking.lib.rules.violations import ViolationType
@@ -23,6 +24,9 @@ class _MockDancer:
         is_reg_bronze=False,
         has_vet=False,
         has_rookie=False,
+        points=0,
+        above_own_cap=False,
+        same_partner_entry=False,
     ):
         self.name = name
         self._is_newcomer = is_newcomer
@@ -31,6 +35,9 @@ class _MockDancer:
         self._is_reg_bronze = is_reg_bronze
         self._has_vet = has_vet
         self._has_rookie = has_rookie
+        self._points = points
+        self._above_own_cap = above_own_cap
+        self._same_partner_entry = same_partner_entry
         self.entries = set()
 
     def is_newcomer(self):
@@ -50,6 +57,15 @@ class _MockDancer:
 
     def has_rookie_entries(self, style):
         return self._has_rookie
+
+    def get_points(self, dance_obj):
+        return self._points
+
+    def has_entry_above(self, style, dance, level_idx):
+        return self._above_own_cap
+
+    def has_entry_with_partnership(self, style, dance, partnership_obj):
+        return self._same_partner_entry
 
     def __repr__(self):
         return self.name
@@ -86,6 +102,27 @@ def _make_dancer(name_first, name_last, syllabus_pts=None, open_pts=None):
         open_pts=open_pts,
     )
     return Dancer.from_data(datetime.date(2026, 1, 1), record)
+
+
+def _make_new_dancer(name_first, name_last, syllabus_pts=None, open_pts=None):
+    """Helper to create a real, time-based-newcomer Dancer with controlled
+    points, for exercising the Rookie-Lead/Follow "pointed out of Newcomer"
+    and own-entry-cap checks (which need a dancer who is_newcomer() but may
+    still have points)."""
+    if syllabus_pts is None:
+        syllabus_pts = np.zeros((4, 19), dtype=int)
+    if open_pts is None:
+        open_pts = np.zeros((3, 4), dtype=int)
+    record = DancerRecord(
+        cda_id=None,
+        first=name_first,
+        last=name_last,
+        first_comp_date=None,
+        created_date="2026-01-01",
+        syllabus_pts=syllabus_pts,
+        open_pts=open_pts,
+    )
+    return Dancer.from_data(datetime.date(2026, 6, 1), record)
 
 
 class TestEligibilityChecker(unittest.TestCase):
@@ -233,9 +270,10 @@ class TestEligibilityChecker(unittest.TestCase):
         self.assertFalse(result.eligible)
         self.assertEqual(result.violation_type, ViolationType.ROOKIE_LEAD)
 
-    def test_rookie_lead_newcomer_ruleset_ineligible_message_explains_why(self):
-        """The violation message should state which of the vet-partner
-        conditions failed, not just that the lead is (or isn't) a rookie."""
+    def test_rookie_lead_newcomer_ruleset_message_names_the_failing_vet_condition(self):
+        """The violation message should explain, in plain language, which
+        vet-partner condition failed - and only that one, not a condition
+        that didn't actually fail."""
         lead = _MockDancer("Lead", is_newcomer=True)
         follow = _MockDancer("Follow", is_reg_newcomer=True, is_reg_bronze=False)
         partnership = _MockPartnership(lead, follow)
@@ -243,11 +281,114 @@ class TestEligibilityChecker(unittest.TestCase):
         result = self.checker.check(partnership, dance)
         self.assertFalse(result.eligible)
         self.assertIn(
-            "is already registered for a Newcomer Smooth event: True", result.detail_message
+            "Follow (Follow) is already registered for a Newcomer Smooth event, "
+            "so can't act as the vet partner.",
+            result.detail_message,
         )
+        self.assertNotIn("Bronze", result.detail_message)
+        self.assertNotIn("is not a newcomer", result.detail_message)
+
+    def test_rookie_lead_newcomer_ruleset_message_names_lead_not_newcomer(self):
+        lead = _MockDancer("Lead", is_newcomer=False)
+        follow = _MockDancer("Follow", is_reg_newcomer=False, is_reg_bronze=False)
+        partnership = _MockPartnership(lead, follow)
+        dance = Dance("Rookie Lead", "Smooth", "Waltz")
+        result = self.checker.check(partnership, dance)
+        self.assertFalse(result.eligible)
         self.assertIn(
-            "is already registered for a Bronze Smooth event: False", result.detail_message
+            "Lead (Lead) is not a newcomer, so is ineligible for the Rookie " "Lead designation.",
+            result.detail_message,
         )
+
+    def test_rookie_lead_newcomer_ruleset_pointed_out_of_newcomer(self):
+        """A time-based newcomer who has already pointed out of Newcomer for
+        this specific dance shouldn't qualify as Rookie for it."""
+        syllabus = np.zeros((4, 19), dtype=int)
+        syllabus[0][5] = 7  # Newcomer Smooth Waltz pointed out
+        lead = _make_new_dancer("Lead", "Dancer", syllabus)
+        follow = _make_new_dancer("Follow", "Dancer")
+        partnership = Partnership(lead, follow)
+        dance = Dance("Rookie Lead", "Smooth", "Waltz")
+        result = self.checker.check(partnership, dance)
+        self.assertFalse(result.eligible)
+        self.assertIn(
+            "Lead (Lead Dancer) has pointed out of Newcomer Smooth Waltz, so "
+            "is ineligible for the Rookie Lead designation.",
+            result.detail_message,
+        )
+
+    def test_rookie_lead_newcomer_ruleset_above_own_cap_default_bronze(self):
+        """Under the default Bronze cap, a Rookie who also has a Silver
+        entry for this same dance in this style (with a different partner)
+        shouldn't qualify as Rookie for it."""
+        lead = _make_new_dancer("Lead", "Dancer")
+        other_partner = _make_new_dancer("Other", "Partner")
+        Entry(Dance("Silver", "Smooth", "Waltz"), Partnership(lead, other_partner))
+
+        follow = _make_new_dancer("Follow", "Dancer")
+        partnership = Partnership(lead, follow)
+        dance = Dance("Rookie Lead", "Smooth", "Waltz")
+        result = self.checker.check(partnership, dance)
+        self.assertFalse(result.eligible)
+        self.assertIn(
+            "Lead (Lead Dancer) is registered above Bronze in Smooth Waltz, "
+            "exceeding the level a Rookie may also compete at.",
+            result.detail_message,
+        )
+
+    def test_rookie_lead_newcomer_ruleset_silver_cap_allows_silver_entry(self):
+        """With rookie_max_level='Silver', a Rookie who also has a Silver
+        entry for this same dance should still qualify - only Gold+ should
+        disqualify under that cap."""
+        checker = EligibilityChecker("newcomer", rookie_max_level="Silver")
+        lead = _make_new_dancer("Lead", "Dancer")
+        other_partner = _make_new_dancer("Other", "Partner")
+        Entry(Dance("Silver", "Smooth", "Waltz"), Partnership(lead, other_partner))
+
+        follow = _make_new_dancer("Follow", "Dancer")
+        partnership = Partnership(lead, follow)
+        dance = Dance("Rookie Lead", "Smooth", "Waltz")
+        result = checker.check(partnership, dance)
+        self.assertTrue(result.eligible)
+
+    def test_rookie_lead_newcomer_ruleset_silver_cap_disqualifies_gold_entry(self):
+        checker = EligibilityChecker("newcomer", rookie_max_level="Silver")
+        lead = _make_new_dancer("Lead", "Dancer")
+        other_partner = _make_new_dancer("Other", "Partner")
+        Entry(Dance("Gold", "Smooth", "Waltz"), Partnership(lead, other_partner))
+
+        follow = _make_new_dancer("Follow", "Dancer")
+        partnership = Partnership(lead, follow)
+        dance = Dance("Rookie Lead", "Smooth", "Waltz")
+        result = checker.check(partnership, dance)
+        self.assertFalse(result.eligible)
+        self.assertIn(
+            "Lead (Lead Dancer) is registered above Silver in Smooth Waltz, "
+            "exceeding the level a Rookie may also compete at.",
+            result.detail_message,
+        )
+
+    def test_rookie_lead_newcomer_ruleset_same_partner_regular_entry(self):
+        """A Rookie who has a regular-level entry for this same dance WITH
+        THE SAME partner as this Rookie/Vet entry should be disqualified."""
+        lead = _make_new_dancer("Lead", "Dancer")
+        follow = _make_new_dancer("Follow", "Dancer")
+        partnership = Partnership(lead, follow)
+        Entry(Dance("Bronze", "Smooth", "Waltz"), partnership)
+
+        dance = Dance("Rookie Lead", "Smooth", "Waltz")
+        result = self.checker.check(partnership, dance)
+        self.assertFalse(result.eligible)
+        self.assertIn(
+            "Lead (Lead Dancer) is also registered for Smooth Waltz with "
+            "the same partner (Follow Dancer) outside the Rookie Lead "
+            "designation.",
+            result.detail_message,
+        )
+
+    def test_invalid_rookie_max_level_raises_error(self):
+        with self.assertRaises(ValueError):
+            EligibilityChecker("newcomer", rookie_max_level="Gold")
 
     def test_rookie_lead_level_ruleset_eligible(self):
         lead = _MockDancer("Lead", has_vet=False)
@@ -266,6 +407,24 @@ class TestEligibilityChecker(unittest.TestCase):
         self.assertFalse(result.eligible)
         self.assertEqual(result.violation_type, ViolationType.ROOKIE_LEAD)
 
+    def test_rookie_lead_level_ruleset_message_names_failing_conditions(self):
+        lead = _MockDancer("Lead", has_vet=True)
+        follow = _MockDancer("Follow", has_rookie=True)
+        partnership = _MockPartnership(lead, follow)
+        dance = Dance("Rookie Lead", "Smooth", "Waltz")
+        result = self.level_checker.check(partnership, dance)
+        self.assertFalse(result.eligible)
+        self.assertIn(
+            "Lead (Lead) already has Silver-or-above Smooth entries, so is "
+            "ineligible for the Rookie Lead designation.",
+            result.detail_message,
+        )
+        self.assertIn(
+            "Follow (Follow) already has Bronze-or-below Smooth entries, "
+            "so can't act as the vet partner.",
+            result.detail_message,
+        )
+
     def test_rookie_follow_newcomer_ruleset_eligible(self):
         lead = _MockDancer("Lead", is_reg_newcomer=False, is_reg_bronze=False)
         follow = _MockDancer("Follow", is_newcomer=True)
@@ -282,6 +441,21 @@ class TestEligibilityChecker(unittest.TestCase):
         result = self.checker.check(partnership, dance)
         self.assertFalse(result.eligible)
         self.assertEqual(result.violation_type, ViolationType.ROOKIE_FOLLOW)
+
+    def test_rookie_follow_newcomer_ruleset_pointed_out_of_newcomer(self):
+        syllabus = np.zeros((4, 19), dtype=int)
+        syllabus[0][5] = 7  # Newcomer Smooth Waltz pointed out
+        follow = _make_new_dancer("Follow", "Dancer", syllabus)
+        lead = _make_new_dancer("Lead", "Dancer")
+        partnership = Partnership(lead, follow)
+        dance = Dance("Rookie Follow", "Smooth", "Waltz")
+        result = self.checker.check(partnership, dance)
+        self.assertFalse(result.eligible)
+        self.assertIn(
+            "Follow (Follow Dancer) has pointed out of Newcomer Smooth "
+            "Waltz, so is ineligible for the Rookie Follow designation.",
+            result.detail_message,
+        )
 
     def test_rookie_follow_level_ruleset_eligible(self):
         lead = _MockDancer("Lead", has_rookie=False)

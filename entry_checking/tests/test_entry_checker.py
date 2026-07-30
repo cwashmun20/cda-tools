@@ -17,7 +17,7 @@ from cda_core.lib.models.dance import Dance
 from cda_core.lib.models.dancer import Dancer
 from cda_core.lib.models.partnership import Partnership
 from entry_checking.lib.entry_checker import EntryChecker, _report
-from entry_checking.lib.rules.violations import EligibilityResult, LevelViolation
+from entry_checking.lib.rules.violations import EligibilityResult, LevelViolation, ViolationType
 
 
 def _mock_dancer(comp_date, first, last):
@@ -55,6 +55,7 @@ class TestEntryCheckerPipeline(unittest.TestCase):
             comp_date=self.comp_date,
             rv_ruleset="newcomer",
             consecutive_level_limit=2,
+            rookie_max_level="Bronze",
             raw_data=raw_data,
         )
         # Pre-populate competitors so EntryChecker never calls the live API.
@@ -95,6 +96,60 @@ class TestEntryCheckerPipeline(unittest.TestCase):
             self.assertEqual(violation.levels, [1, 2, 3])  # Bronze, Silver, Gold indices
 
 
+class TestRookieVetProcessedLast(unittest.TestCase):
+    """Confirms check() registers Rookie/Vet rows after every other row,
+    regardless of their order in the source data."""
+
+    def test_rookie_lead_row_before_conflicting_regular_row(self):
+        """A Rookie-Lead row listed BEFORE its conflicting same-partner
+        regular-level row in the CSV should still be flagged - Rookie/Vet
+        rows are processed last, not in file order."""
+        comp_date = datetime.date(2026, 6, 1)
+        raw_data = pd.DataFrame(
+            {
+                "Style": ["Smooth", "Smooth"],
+                "Dance": ["Waltz", "Waltz"],
+                "Skill": ["Rookie Lead", "Bronze"],  # Rookie-Lead row listed first
+                "Lead First": ["Baris", "Baris"],
+                "Lead Last": ["Varol", "Varol"],
+                "Follow First": ["Denise", "Denise"],
+                "Follow Last": ["Machin", "Machin"],
+            }
+        )
+        comp = competition.Competition(
+            comp_name="test",
+            comp_date=comp_date,
+            rv_ruleset="newcomer",
+            consecutive_level_limit=2,
+            rookie_max_level="Bronze",
+            raw_data=raw_data,
+        )
+        # Baris is a brand-new (time-based newcomer) lead; Denise is
+        # experienced, per _mock_dancer.
+        lead_record = DancerRecord(
+            cda_id=None,
+            first="Baris",
+            last="Varol",
+            first_comp_date=None,
+            created_date="2026-01-01",
+            syllabus_pts=np.zeros((4, 19), dtype=int),
+            open_pts=np.zeros((3, 4), dtype=int),
+        )
+        comp.competitors["Baris Varol"] = Dancer.from_data(comp_date, lead_record)
+        comp.competitors["Denise Machin"] = _mock_dancer(comp_date, "Denise", "Machin")
+
+        eligibility_results, _ = EntryChecker(comp).check()
+
+        rookie_lead_results = [
+            r for r in eligibility_results if r.violation_type == ViolationType.ROOKIE_LEAD
+        ]
+        self.assertEqual(len(rookie_lead_results), 1)
+        self.assertIn(
+            "is also registered for Smooth Waltz with the same partner",
+            rookie_lead_results[0].detail_message,
+        )
+
+
 class TestCheckEntryAndRegisterEntry(unittest.TestCase):
     """Tests the single-entry building blocks check() is written in terms of."""
 
@@ -116,6 +171,7 @@ class TestCheckEntryAndRegisterEntry(unittest.TestCase):
             comp_date=self.comp_date,
             rv_ruleset="newcomer",
             consecutive_level_limit=2,
+            rookie_max_level="Bronze",
             raw_data=raw_data,
         )
         self.lead = _mock_dancer(self.comp_date, "Baris", "Varol")

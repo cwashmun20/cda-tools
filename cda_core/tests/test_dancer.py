@@ -6,6 +6,8 @@ import numpy as np
 from cda_core.lib.api.client import DancerRecord
 from cda_core.lib.models.dance import Dance
 from cda_core.lib.models.dancer import Dancer
+from cda_core.lib.models.entry import Entry
+from cda_core.lib.models.partnership import Partnership
 
 
 class TestDancerGetPoints(unittest.TestCase):
@@ -45,6 +47,57 @@ class TestDancerGetPoints(unittest.TestCase):
         dancer = self._make_dancer()
         with self.assertRaises(ValueError):
             dancer.get_points(Dance("Rookie Leader", "Smooth", "Waltz"))
+
+
+class TestDancerEntryChecks(unittest.TestCase):
+    """Tests for Dancer.has_entry_above() and has_entry_with_partnership()."""
+
+    def _make_dancer(self, first, last):
+        record = DancerRecord(
+            cda_id=1,
+            first=first,
+            last=last,
+            first_comp_date=datetime.date(2020, 1, 1),
+            created_date="2020-01-01",
+            syllabus_pts=np.zeros((4, 19), dtype=int),
+            open_pts=np.zeros((3, 4), dtype=int),
+        )
+        return Dancer.from_data(datetime.date(2026, 1, 1), record)
+
+    def test_has_entry_above_true_at_threshold(self):
+        dancer = self._make_dancer("Test", "Dancer")
+        other = self._make_dancer("Other", "Partner")
+        Entry(Dance("Silver", "Smooth", "Waltz"), Partnership(dancer, other))
+        self.assertTrue(dancer.has_entry_above("Smooth", "Waltz", 2))  # Silver index
+
+    def test_has_entry_above_false_below_threshold(self):
+        dancer = self._make_dancer("Test", "Dancer")
+        other = self._make_dancer("Other", "Partner")
+        Entry(Dance("Bronze", "Smooth", "Waltz"), Partnership(dancer, other))
+        self.assertFalse(dancer.has_entry_above("Smooth", "Waltz", 2))  # Silver index
+
+    def test_has_entry_above_ignores_other_dance(self):
+        dancer = self._make_dancer("Test", "Dancer")
+        other = self._make_dancer("Other", "Partner")
+        Entry(Dance("Gold", "Smooth", "Tango"), Partnership(dancer, other))
+        self.assertFalse(dancer.has_entry_above("Smooth", "Waltz", 2))
+
+    def test_has_entry_with_partnership_true(self):
+        dancer = self._make_dancer("Test", "Dancer")
+        other = self._make_dancer("Other", "Partner")
+        partnership = Partnership(dancer, other)
+        Entry(Dance("Bronze", "Smooth", "Waltz"), partnership)
+        self.assertTrue(dancer.has_entry_with_partnership("Smooth", "Waltz", partnership))
+
+    def test_has_entry_with_partnership_false_different_partnership(self):
+        dancer = self._make_dancer("Test", "Dancer")
+        other = self._make_dancer("Other", "Partner")
+        third = self._make_dancer("Third", "Partner")
+        Entry(Dance("Bronze", "Smooth", "Waltz"), Partnership(dancer, other))
+        different_partnership = Partnership(dancer, third)
+        self.assertFalse(
+            dancer.has_entry_with_partnership("Smooth", "Waltz", different_partnership)
+        )
 
 
 if __name__ == "__main__":
