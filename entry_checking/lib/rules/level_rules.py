@@ -6,14 +6,16 @@ range of levels overall within a style.
 """
 
 from cda_core.lib import constants
-from entry_checking.lib.rules.violations import LevelViolation
+from cda_core.lib.constants import Style
+from cda_core.lib.models.dancer import Dancer
+from entry_checking.lib.rules.violations import LevelViolation, LevelViolationType
 
 
 class LevelRulesChecker:
     """Checks a dancer's registered entries for consecutive level violations."""
 
     @staticmethod
-    def check(dancer, consecutive_level_limit: int = 2) -> list[LevelViolation]:
+    def check(dancer: Dancer, consecutive_level_limit: int = 2) -> list[LevelViolation]:
         """Check a dancer's entries for consecutive level violations.
 
         The CDA measures consecutive-level eligibility per dance, not per style:
@@ -38,8 +40,8 @@ class LevelRulesChecker:
         """
         violations: list[LevelViolation] = []
 
-        dance_levels: dict[str, dict[str, set[int]]] = {
-            style: {} for style in constants.Style.points_eligible_styles()
+        dance_levels: dict[Style, dict[str, set[int]]] = {
+            style: {} for style in Style.points_eligible_styles()
         }
 
         for entry_obj in dancer.entries:
@@ -61,7 +63,7 @@ class LevelRulesChecker:
                     LevelViolation(
                         dancer_name=dancer.name,
                         style=style,
-                        violation_type="span_too_wide",
+                        violation_type=LevelViolationType.SPAN_TOO_WIDE,
                         levels=sorted_all,
                         detail_message=(
                             f"CONSECUTIVE LEVEL VIOLATION: {dancer.name} is registered "
@@ -85,7 +87,7 @@ class LevelRulesChecker:
                         LevelViolation(
                             dancer_name=dancer.name,
                             style=style,
-                            violation_type="too_many_levels",
+                            violation_type=LevelViolationType.TOO_MANY_LEVELS,
                             levels=sorted_levels,
                             dance=dance,
                             detail_message=(
@@ -112,7 +114,7 @@ class LevelRulesChecker:
                                 LevelViolation(
                                     dancer_name=dancer.name,
                                     style=style,
-                                    violation_type="non_consecutive",
+                                    violation_type=LevelViolationType.NON_CONSECUTIVE,
                                     levels=[sorted_levels[curr_idx], sorted_levels[next_idx]],
                                     dance=dance,
                                     detail_message=(

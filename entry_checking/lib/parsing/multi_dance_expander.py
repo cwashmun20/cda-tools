@@ -7,10 +7,11 @@ into individual dance rows for processing.
 import pandas as pd
 
 from cda_core.lib import constants
+from cda_core.lib.constants import Style
 from cda_core.lib.models.dance import convert_style
 
 
-def expand_abbreviation(style: str, abbreviation: str) -> list[str]:
+def expand_abbreviation(style: Style, abbreviation: str) -> list[str]:
     """Expand a multi-dance abbreviation into individual dance names.
 
     Args:

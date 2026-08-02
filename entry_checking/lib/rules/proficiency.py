@@ -6,7 +6,9 @@ detection, within-style, and cross-style proficiency.
 """
 
 from cda_core.lib import constants
+from cda_core.lib.constants import Style
 from cda_core.lib.models.dance import Dance
+from cda_core.lib.models.dancer import Dancer
 
 
 class ProficiencyCalculator:
@@ -17,7 +19,7 @@ class ProficiencyCalculator:
     """
 
     @staticmethod
-    def has_pointed_out(dancer, dance_obj: Dance) -> bool:
+    def has_pointed_out(dancer: Dancer, dance_obj: Dance) -> bool:
         """Returns True if a dancer has pointed out of a Dance (at a certain
         level); otherwise, False.
 
@@ -31,7 +33,7 @@ class ProficiencyCalculator:
         return num_points < 0 or num_points >= 7
 
     @staticmethod
-    def compute_point_out_level(dancer, style: str, dance_name: str) -> int:
+    def compute_point_out_level(dancer: Dancer, style: Style, dance_name: str) -> int:
         """Returns an int representing how many levels a dancer has pointed out
         of for a given dance.
 
@@ -52,7 +54,7 @@ class ProficiencyCalculator:
         return point_out_level
 
     @staticmethod
-    def compute_proficiency_level(dancer, style: str, dance_name: str) -> int:
+    def compute_proficiency_level(dancer: Dancer, style: Style, dance_name: str) -> int:
         """Returns an int representing a dancer's proficiency level for a given dance.
 
         Corresponds to the index of the level in constants.LEVELS:

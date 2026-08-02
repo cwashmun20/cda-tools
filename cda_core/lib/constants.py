@@ -4,7 +4,9 @@ This module centralizes all domain constants used across the cda-tools codebase,
 including dance styles, levels, dance names, and abbreviation mappings.
 """
 
+import itertools
 from enum import StrEnum
+from typing import Literal
 
 
 class Style(StrEnum):
@@ -61,6 +63,13 @@ class RookieVetLevel(StrEnum):
 
     ROOKIE_LEAD = "Rookie Lead"
     ROOKIE_FOLLOW = "Rookie Follow"
+
+
+# Which Rookie-Vet ruleset a competition uses (see EligibilityChecker), and
+# the highest level a Rookie may also compete at in regular events under the
+# "newcomer" ruleset.
+RvRuleset = Literal["newcomer", "level"]
+RookieMaxLevel = Literal["Bronze", "Silver"]
 
 
 class Round(StrEnum):
@@ -131,7 +140,7 @@ ROUNDS: list[str] = list(Round)
 
 # --- Dance names per style ---
 
-DANCE_NAMES: dict[str, list[str]] = {
+DANCE_NAMES: dict[Style, list[str]] = {
     Style.STANDARD: [
         DanceName.WALTZ,
         DanceName.TANGO,
@@ -171,6 +180,20 @@ DANCE_NAMES: dict[str, list[str]] = {
 }
 
 
+# --- Syllabus points column layout ---
+# The CDA points database lays syllabus points out as one row per level and
+# one column per (style, dance) pair, in Standard -> Smooth -> Latin ->
+# Rhythm order (see Points.linear_data()). SYLLABUS_COLUMN_OFFSETS gives each
+# style's starting column in that layout.
+_SYLLABUS_COLUMN_STYLES: list[Style] = [Style.STANDARD, Style.SMOOTH, Style.LATIN, Style.RHYTHM]
+SYLLABUS_COLUMN_OFFSETS: dict[Style, int] = dict(
+    zip(
+        _SYLLABUS_COLUMN_STYLES,
+        itertools.accumulate((len(DANCE_NAMES[s]) for s in _SYLLABUS_COLUMN_STYLES), initial=0),
+    )
+)
+
+
 # --- Abbreviation maps (letter → full name for multi-dance events) ---
 
 _STANDARD_MAP: dict[str, str] = {
@@ -204,7 +227,7 @@ _RHYTHM_MAP: dict[str, str] = {
     "M": DanceName.MAMBO,
 }
 
-ABBREVIATION_MAPS: dict[str, dict[str, str]] = {
+ABBREVIATION_MAPS: dict[Style, dict[str, str]] = {
     Style.STANDARD: _STANDARD_MAP,
     Style.SMOOTH: _SMOOTH_MAP,
     Style.LATIN: _LATIN_MAP,
@@ -216,7 +239,7 @@ ABBREVIATION_MAPS: dict[str, dict[str, str]] = {
 # Maps each points-eligible style to its cross-style counterpart (Standard<->Smooth,
 # Latin<->Rhythm).
 
-CROSS_STYLE: dict[str, str] = {
+CROSS_STYLE: dict[Style, Style] = {
     Style.STANDARD: Style.SMOOTH,
     Style.SMOOTH: Style.STANDARD,
     Style.LATIN: Style.RHYTHM,

@@ -21,7 +21,7 @@ class Partnership:
         """
         return self.names
 
-    def add(self, entry_obj):
+    def add(self, entry_obj: Entry):
         """Adds a competition entry for a couple.
 
         Should only be called within the Entry constructor.
@@ -30,7 +30,7 @@ class Partnership:
         self.lead.add(entry_obj)
         self.follow.add(entry_obj)
 
-    def drop(self, entry_obj):
+    def drop(self, entry_obj: Entry):
         """Drops a competition entry for a couple."""
         self.entries.remove(entry_obj)
         self.lead.drop(entry_obj)

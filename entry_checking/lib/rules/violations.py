@@ -8,6 +8,8 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Optional
 
+from cda_core.lib.constants import Style
+
 
 class ViolationType(StrEnum):
     """Types of rule violations."""
@@ -21,6 +23,14 @@ class ViolationType(StrEnum):
     SPLIT_LEVEL = "split_level"
     DUPLICATE_ENTRY = "duplicate_entry"
     NIGHTCLUB_CONSECUTIVE_LEVEL = "nightclub_consecutive_level"
+
+
+class LevelViolationType(StrEnum):
+    """Types of consecutive-level violations (see LevelViolation)."""
+
+    TOO_MANY_LEVELS = "too_many_levels"
+    NON_CONSECUTIVE = "non_consecutive"
+    SPAN_TOO_WIDE = "span_too_wide"
 
 
 @dataclass
@@ -56,8 +66,8 @@ class LevelViolation:
     """
 
     dancer_name: str
-    style: str
-    violation_type: str  # "too_many_levels", "non_consecutive", or "span_too_wide"
+    style: Style
+    violation_type: LevelViolationType
     levels: list[int] = field(default_factory=list)
     dance: Optional[str] = None
     detail_message: Optional[str] = None

@@ -9,6 +9,7 @@ import difflib
 from typing import Optional
 
 from cda_core.lib import constants
+from cda_core.lib.constants import DanceName, NightclubLevel, OpenLevel, RookieVetLevel, Style
 
 # Minimum similarity ratio (see difflib.SequenceMatcher.ratio) for a spelling
 # variant to be accepted as a match. Chosen to catch case/spacing/punctuation
@@ -36,35 +37,37 @@ def _fuzzy_match(input_name: str, candidates: list[str]) -> Optional[str]:
     return normalized_to_candidate[matches[0]] if matches else None
 
 
-def convert_style(input_name: str) -> str:
+def convert_style(input_name: str) -> Style:
     """Converts input style from entry spreadsheet into standard naming convention,
-    returning a string.
+    returning a Style.
 
     Args:
         input_name: the dance's style/category from spreadsheet input (e.g. "Standard",
             "Ballroom").
     Returns:
-        a string with the style, converted to a standard naming convention.
+        the style, converted to a standard naming convention.
     Raises:
         ValueError: if input_name is not a recognized style.
     """
+    standard_style_aliases = (Style.STANDARD, "Ballroom")
+
     input_name = input_name.strip()
 
     if input_name in constants.STYLES:
-        return input_name
+        return Style(input_name)
 
-    if input_name == "Ballroom":
-        return constants.Style.STANDARD
+    if input_name in standard_style_aliases:
+        return Style.STANDARD
 
     match = _fuzzy_match(input_name, constants.STYLES)
     if match is not None:
-        return match
+        return Style(match)
 
     raise ValueError(f"""Unrecognized style.
                      Please add support for '{input_name}' to convert_style in dance.py.""")
 
 
-def convert_dance(style: str, input_name: str) -> str:
+def convert_dance(style: Style, input_name: str) -> str:
     """Converts input dance from entry spreadsheet into a standard naming convention,
     returning a string.
 
@@ -79,32 +82,37 @@ def convert_dance(style: str, input_name: str) -> str:
         ValueError: if input_name is all caps, indicating a multi-dance (e.g. "WTF").
         ValueError: if input_name is not a recognized dance.
     """
+    west_coast_swing_aliases = (DanceName.WEST_COAST_SWING, "WCS")
+    nightclub_two_step_aliases = (
+        DanceName.NIGHTCLUB_TWO_STEP,
+        "Night Club 2-Step",
+        "Nightclub 2-Step",
+        "NC2S",
+    )
+    argentine_tango_aliases = (DanceName.ARGENTINE_TANGO, "Arg. Tango")
+    # "Swing" is a common organizer shorthand for Rhythm's East Coast Swing -
+    # checked below with a style == RHYTHM guard, since "Swing" alone is too
+    # generic a word to safely alias for every style (e.g. Nightclub also
+    # has "West Coast Swing" and "Country Swing").
+    rhythm_east_coast_swing_aliases = (DanceName.EAST_COAST_SWING, "Swing")
+
     if style not in constants.STYLES:
         raise ValueError(f"""Unrecognized style.
                          Please add support for '{style}' to convert_dance in dance.py""")
 
     input_name = input_name.strip()
 
-    if input_name in (constants.DanceName.WEST_COAST_SWING, "WCS"):
-        return constants.DANCE_NAMES[constants.Style.NIGHTCLUB][0]
+    if input_name in west_coast_swing_aliases:
+        return DanceName.WEST_COAST_SWING
 
-    if input_name in (
-        constants.DanceName.NIGHTCLUB_TWO_STEP,
-        "Night Club 2-Step",
-        "Nightclub 2-Step",
-        "NC2S",
-    ):
-        return constants.DANCE_NAMES[constants.Style.NIGHTCLUB][1]
+    if input_name in nightclub_two_step_aliases:
+        return DanceName.NIGHTCLUB_TWO_STEP
 
-    if input_name == "Arg. Tango":
-        return constants.DanceName.ARGENTINE_TANGO
+    if input_name in argentine_tango_aliases:
+        return DanceName.ARGENTINE_TANGO
 
-    # "Swing" is a common organizer shorthand for Rhythm's East Coast Swing.
-    # Scoped to Rhythm specifically since "Swing" alone is
-    # too generic a word to safely alias for every style (e.g. Nightclub
-    # also has "West Coast Swing" and "Country Swing").
-    if style == constants.Style.RHYTHM and input_name == "Swing":
-        return constants.DanceName.EAST_COAST_SWING
+    if style == Style.RHYTHM and input_name in rhythm_east_coast_swing_aliases:
+        return DanceName.EAST_COAST_SWING
 
     # Check if dance name is the same as in the standard naming convention.
     if input_name in constants.DANCE_NAMES[style]:
@@ -144,6 +152,30 @@ def convert_level(input_name: str) -> str:
     Raises:
         ValueError: if input_name is not a recognized level.
     """
+    int_adv_level_aliases = (
+        NightclubLevel.INT_ADV,
+        "Intermediate/Advanced",
+        "Advanced",
+        "Intermediate/Adv.",
+        "Int/Adv",
+    )
+    rookie_lead_aliases = (
+        RookieVetLevel.ROOKIE_LEAD,
+        "Rookie Leader",
+        "Rookie Leaders",
+        "RV Rookie Lead",
+        "R/V Rookie Lead",
+    )
+    rookie_follow_aliases = (
+        RookieVetLevel.ROOKIE_FOLLOW,
+        "Rookie Follower",
+        "Rookie Followers",
+        "RV Rookie Follow",
+        "R/V Rookie Follow",
+    )
+    prechamp_aliases = (OpenLevel.PRECHAMP, "Pre-Champ", "PreChamp")
+    champ_aliases = (OpenLevel.CHAMP, "Championship")
+
     input_name = input_name.strip()
 
     # Level already matches naming convention; nothing to do here.
@@ -158,27 +190,22 @@ def convert_level(input_name: str) -> str:
             return stripped
 
     # Nightclub Levels
-    if input_name in ("Intermediate/Advanced", "Advanced", "Intermediate/Adv.", "Int/Adv"):
-        return constants.NC_LEVELS[1]
+    if input_name in int_adv_level_aliases:
+        return NightclubLevel.INT_ADV
 
     # Rookie-Vet Levels
-    if input_name in ("Rookie Leader", "Rookie Leaders", "RV Rookie Lead", "R/V Rookie Lead"):
-        return constants.RookieVetLevel.ROOKIE_LEAD
+    if input_name in rookie_lead_aliases:
+        return RookieVetLevel.ROOKIE_LEAD
 
-    if input_name in (
-        "Rookie Follower",
-        "Rookie Followers",
-        "RV Rookie Follow",
-        "R/V Rookie Follow",
-    ):
-        return constants.RookieVetLevel.ROOKIE_FOLLOW
+    if input_name in rookie_follow_aliases:
+        return RookieVetLevel.ROOKIE_FOLLOW
 
     # Open Levels
-    if input_name in ("Pre-Champ", "PreChamp"):
-        return constants.OPEN_LEVELS[1]
+    if input_name in prechamp_aliases:
+        return OpenLevel.PRECHAMP
 
-    if input_name in ("Championship",):
-        return constants.OPEN_LEVELS[2]
+    if input_name in champ_aliases:
+        return OpenLevel.CHAMP
 
     # Catch near-miss spellings/formatting not covered by an explicit alias
     # above (e.g. differing case or punctuation).
@@ -196,7 +223,7 @@ class Dance:
 
     def __init__(self, level: str, style: str, dance: str):
         self.level: str = convert_level(level)
-        self.style: str = convert_style(style)
+        self.style: Style = convert_style(style)
         self.dance: str = convert_dance(self.style, dance)
 
     def __repr__(self) -> str:

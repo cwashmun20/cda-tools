@@ -8,7 +8,8 @@ Usage:
 
 from datetime import date
 
-from cda_core.lib import competition, constants
+from cda_core.lib import competition
+from cda_core.lib.constants import RookieVetLevel, SyllabusLevel
 from cda_core.lib.models.dance import Dance
 from cda_core.lib.models.dancer import Dancer
 from cda_core.lib.models.entry import Entry
@@ -150,10 +151,7 @@ class EntryChecker:
             heat = row["Heat"] if "Heat" in comp.raw_data.columns else None
 
             dance_obj = Dance(level, style, dance_name)
-            if dance_obj.level in (
-                constants.RookieVetLevel.ROOKIE_LEAD,
-                constants.RookieVetLevel.ROOKIE_FOLLOW,
-            ):
+            if dance_obj.level in (RookieVetLevel.ROOKIE_LEAD, RookieVetLevel.ROOKIE_FOLLOW):
                 rookie_vet_entries.append((partnership_obj, dance_obj, heat))
             else:
                 regular_entries.append((partnership_obj, dance_obj, heat))
@@ -221,10 +219,7 @@ def main():
                 "Please enter the highest level a Rookie may also compete at in "
                 "regular events in that style ('Bronze' or 'Silver'): "
             )
-            if rookie_max_level not in (
-                constants.SyllabusLevel.BRONZE,
-                constants.SyllabusLevel.SILVER,
-            ):
+            if rookie_max_level not in (SyllabusLevel.BRONZE, SyllabusLevel.SILVER):
                 raise ValueError(
                     "Rookie max level must be either 'Bronze' or 'Silver' (without asterisks)."
                 )

@@ -5,8 +5,13 @@ is eligible to compete in a given dance at a given level, returning
 structured EligibilityResult objects.
 """
 
+from typing import cast
+
 from cda_core.lib import constants
+from cda_core.lib.constants import NightclubLevel, OpenLevel, RookieVetLevel, Style, SyllabusLevel
 from cda_core.lib.models.dance import Dance
+from cda_core.lib.models.dancer import Dancer
+from cda_core.lib.models.partnership import Partnership
 from entry_checking.lib.rules.violations import EligibilityResult, ViolationType
 from entry_checking.lib.rules.proficiency import ProficiencyCalculator
 from entry_checking.lib.rules.recommended_levels import RecommendedLevelsCalculator
@@ -36,12 +41,17 @@ class EligibilityChecker:
         """
         if rv_ruleset not in ("newcomer", "level"):
             raise ValueError(f"'{rv_ruleset}' is an invalid Rookie/Vet ruleset.")
-        if rookie_max_level not in (constants.SyllabusLevel.BRONZE, constants.SyllabusLevel.SILVER):
+        if rookie_max_level not in ("Bronze", "Silver"):
             raise ValueError(f"'{rookie_max_level}' is an invalid Rookie max level.")
-        self.rv_ruleset = rv_ruleset
-        self.rookie_max_level = rookie_max_level
+        # Narrowed via cast(), not an annotation alone - mypy doesn't narrow a
+        # plain `str` to a Literal from an `in (...)` runtime check above, so
+        # this documents (and enforces, via the checks above it) the actual
+        # guarantee: rv_ruleset/rookie_max_level are real str input until
+        # this exact point.
+        self.rv_ruleset = cast(constants.RvRuleset, rv_ruleset)
+        self.rookie_max_level = cast(constants.RookieMaxLevel, rookie_max_level)
 
-    def check(self, partnership, dance_obj: Dance) -> EligibilityResult:
+    def check(self, partnership: Partnership, dance_obj: Dance) -> EligibilityResult:
         """Check whether a partnership is eligible for a dance.
 
         Args:
@@ -68,11 +78,11 @@ class EligibilityChecker:
         # A dancer already registered for the OTHER level of this same
         # Nightclub dance is a consecutive-level violation - checked before
         # the int./adv. shortcut below since it should override it too.
-        if dance_obj.style == constants.Style.NIGHTCLUB:
+        if dance_obj.style == Style.NIGHTCLUB:
             other_nc_level = (
-                constants.NC_LEVELS[0]
-                if dance_obj.level == constants.NC_LEVELS[1]
-                else constants.NC_LEVELS[1]
+                NightclubLevel.BEGINNER
+                if dance_obj.level == NightclubLevel.INT_ADV
+                else NightclubLevel.INT_ADV
             )
             other_dance = Dance(other_nc_level, dance_obj.style, dance_obj.dance)
             for dancer_obj in (partnership.lead, partnership.follow):
@@ -88,14 +98,11 @@ class EligibilityChecker:
                     )
 
         # Everyone is always eligible for int./adv. Nightclub and Championship
-        if (
-            dance_obj.level == constants.NC_LEVELS[-1]
-            or dance_obj.level == constants.OPEN_LEVELS[-1]
-        ):
+        if dance_obj.level == NightclubLevel.INT_ADV or dance_obj.level == OpenLevel.CHAMP:
             return EligibilityResult(eligible=True)
 
         # Check eligibility for Beginner Nightclub
-        if dance_obj.level == constants.NC_LEVELS[0]:
+        if dance_obj.level == NightclubLevel.BEGINNER:
             if partnership.nc_beginners:
                 return EligibilityResult(eligible=True)
             return EligibilityResult(
@@ -109,7 +116,7 @@ class EligibilityChecker:
             )
 
         # Check eligibility for Newcomer
-        if dance_obj.level == constants.SYLLABUS_LEVELS[0]:
+        if dance_obj.level == SyllabusLevel.NEWCOMER:
             if partnership.newcomers:
                 return EligibilityResult(eligible=True)
             return EligibilityResult(
@@ -177,7 +184,9 @@ class EligibilityChecker:
             subject_name=partnership.names,
         )
 
-    def _check_rookie_vet_newcomer(self, partnership, dance_obj: Dance) -> EligibilityResult | None:
+    def _check_rookie_vet_newcomer(
+        self, partnership: Partnership, dance_obj: Dance
+    ) -> EligibilityResult | None:
         """Check rookie/vet eligibility under the 'newcomer' ruleset.
 
         The Rookie partner must (1) be a time-based newcomer and not have
@@ -189,203 +198,180 @@ class EligibilityChecker:
         style-wide, unlike the Rookie's own-entry checks, since the Veteran's
         floor isn't tied to one specific dance).
         """
+        if dance_obj.level == RookieVetLevel.ROOKIE_LEAD:
+            return self._check_rookie_vet_newcomer_role(
+                partnership,
+                dance_obj,
+                rookie=partnership.lead,
+                rookie_role="Lead",
+                vet=partnership.follow,
+                vet_role="Follow",
+                violation_type=ViolationType.ROOKIE_LEAD,
+            )
+
+        if dance_obj.level == RookieVetLevel.ROOKIE_FOLLOW:
+            return self._check_rookie_vet_newcomer_role(
+                partnership,
+                dance_obj,
+                rookie=partnership.follow,
+                rookie_role="Follow",
+                vet=partnership.lead,
+                vet_role="Lead",
+                violation_type=ViolationType.ROOKIE_FOLLOW,
+            )
+
+        return None
+
+    def _check_rookie_vet_newcomer_role(
+        self,
+        partnership: Partnership,
+        dance_obj: Dance,
+        rookie: Dancer,
+        rookie_role: str,
+        vet: Dancer,
+        vet_role: str,
+        violation_type: ViolationType,
+    ) -> EligibilityResult:
+        """Shared 'newcomer'-ruleset Rookie/Vet check for one role assignment.
+
+        Called once with (rookie=lead, vet=follow) and once with the roles
+        swapped, since _check_rookie_vet_newcomer's Lead and Follow checks
+        are otherwise identical.
+        """
         curr_style = dance_obj.style
         disqualifying_level_idx = constants.SYLLABUS_LEVELS.index(self.rookie_max_level) + 1
 
-        if dance_obj.level == constants.RookieVetLevel.ROOKIE_LEAD:
-            lead_is_newcomer = partnership.lead.is_newcomer()
-            lead_pointed_out_of_newcomer = ProficiencyCalculator.has_pointed_out(
-                partnership.lead,
-                Dance(constants.SyllabusLevel.NEWCOMER, curr_style, dance_obj.dance),
-            )
-            lead_above_own_cap = partnership.lead.has_entry_above(
-                curr_style, dance_obj.dance, disqualifying_level_idx
-            )
-            lead_same_partner_entry = partnership.lead.has_entry_with_partnership(
-                curr_style, dance_obj.dance, partnership
-            )
-            follow_registered_newcomer = partnership.follow.is_registered_newcomer(curr_style)
-            follow_registered_bronze = partnership.follow.is_registered_bronze(curr_style)
-            if (
-                lead_is_newcomer
-                and not lead_pointed_out_of_newcomer
-                and not lead_above_own_cap
-                and not lead_same_partner_entry
-                and not follow_registered_newcomer
-                and not follow_registered_bronze
-            ):
-                return EligibilityResult(eligible=True)
+        rookie_is_newcomer = rookie.is_newcomer()
+        rookie_pointed_out_of_newcomer = ProficiencyCalculator.has_pointed_out(
+            rookie, Dance(SyllabusLevel.NEWCOMER, curr_style, dance_obj.dance)
+        )
+        rookie_above_own_cap = rookie.has_entry_above(
+            curr_style, dance_obj.dance, disqualifying_level_idx
+        )
+        rookie_same_partner_entry = rookie.has_entry_with_partnership(
+            curr_style, dance_obj.dance, partnership
+        )
+        vet_registered_newcomer = vet.is_registered_newcomer(curr_style)
+        vet_registered_bronze = vet.is_registered_bronze(curr_style)
+        if (
+            rookie_is_newcomer
+            and not rookie_pointed_out_of_newcomer
+            and not rookie_above_own_cap
+            and not rookie_same_partner_entry
+            and not vet_registered_newcomer
+            and not vet_registered_bronze
+        ):
+            return EligibilityResult(eligible=True)
 
-            reasons = []
-            if not lead_is_newcomer:
-                reasons.append(
-                    f"Lead ({partnership.lead}) is not a newcomer, so is ineligible "
-                    f"for the Rookie Lead designation."
-                )
-            if lead_pointed_out_of_newcomer:
-                reasons.append(
-                    f"Lead ({partnership.lead}) has pointed out of Newcomer "
-                    f"{curr_style} {dance_obj.dance}, so is ineligible for the "
-                    f"Rookie Lead designation."
-                )
-            if lead_above_own_cap:
-                reasons.append(
-                    f"Lead ({partnership.lead}) is registered above "
-                    f"{self.rookie_max_level} in {curr_style} {dance_obj.dance}, "
-                    f"exceeding the level a Rookie may also compete at."
-                )
-            if lead_same_partner_entry:
-                reasons.append(
-                    f"Lead ({partnership.lead}) is also registered for "
-                    f"{curr_style} {dance_obj.dance} with the same partner "
-                    f"({partnership.follow}) outside the Rookie Lead designation."
-                )
-            if follow_registered_newcomer:
-                reasons.append(
-                    f"Follow ({partnership.follow}) is already registered for a "
-                    f"Newcomer {curr_style} event, so can't act as the vet partner."
-                )
-            if follow_registered_bronze:
-                reasons.append(
-                    f"Follow ({partnership.follow}) is already registered for a "
-                    f"Bronze {curr_style} event, so can't act as the vet partner."
-                )
-            return EligibilityResult(
-                eligible=False,
-                violation_type=ViolationType.ROOKIE_LEAD,
-                detail_message=(
-                    f"ROOKIE-LEAD VIOLATION: '{partnership.names}' ineligible "
-                    f"for '{dance_obj}'.\n" + "\n".join(f"\t{reason}" for reason in reasons)
-                ),
-                subject_name=partnership.names,
+        reasons = []
+        if not rookie_is_newcomer:
+            reasons.append(
+                f"{rookie_role} ({rookie}) is not a newcomer, so is ineligible "
+                f"for the Rookie {rookie_role} designation."
             )
+        if rookie_pointed_out_of_newcomer:
+            reasons.append(
+                f"{rookie_role} ({rookie}) has pointed out of Newcomer "
+                f"{curr_style} {dance_obj.dance}, so is ineligible for the "
+                f"Rookie {rookie_role} designation."
+            )
+        if rookie_above_own_cap:
+            reasons.append(
+                f"{rookie_role} ({rookie}) is registered above "
+                f"{self.rookie_max_level} in {curr_style} {dance_obj.dance}, "
+                f"exceeding the level a Rookie may also compete at."
+            )
+        if rookie_same_partner_entry:
+            reasons.append(
+                f"{rookie_role} ({rookie}) is also registered for "
+                f"{curr_style} {dance_obj.dance} with the same partner "
+                f"({vet}) outside the Rookie {rookie_role} designation."
+            )
+        if vet_registered_newcomer:
+            reasons.append(
+                f"{vet_role} ({vet}) is already registered for a "
+                f"Newcomer {curr_style} event, so can't act as the vet partner."
+            )
+        if vet_registered_bronze:
+            reasons.append(
+                f"{vet_role} ({vet}) is already registered for a "
+                f"Bronze {curr_style} event, so can't act as the vet partner."
+            )
+        return EligibilityResult(
+            eligible=False,
+            violation_type=violation_type,
+            detail_message=(
+                f"ROOKIE-{rookie_role.upper()} VIOLATION: '{partnership.names}' ineligible "
+                f"for '{dance_obj}'.\n" + "\n".join(f"\t{reason}" for reason in reasons)
+            ),
+            subject_name=partnership.names,
+        )
 
-        if dance_obj.level == constants.RookieVetLevel.ROOKIE_FOLLOW:
-            follow_is_newcomer = partnership.follow.is_newcomer()
-            follow_pointed_out_of_newcomer = ProficiencyCalculator.has_pointed_out(
-                partnership.follow,
-                Dance(constants.SyllabusLevel.NEWCOMER, curr_style, dance_obj.dance),
-            )
-            follow_above_own_cap = partnership.follow.has_entry_above(
-                curr_style, dance_obj.dance, disqualifying_level_idx
-            )
-            follow_same_partner_entry = partnership.follow.has_entry_with_partnership(
-                curr_style, dance_obj.dance, partnership
-            )
-            lead_registered_newcomer = partnership.lead.is_registered_newcomer(curr_style)
-            lead_registered_bronze = partnership.lead.is_registered_bronze(curr_style)
-            if (
-                follow_is_newcomer
-                and not follow_pointed_out_of_newcomer
-                and not follow_above_own_cap
-                and not follow_same_partner_entry
-                and not lead_registered_newcomer
-                and not lead_registered_bronze
-            ):
-                return EligibilityResult(eligible=True)
-
-            reasons = []
-            if not follow_is_newcomer:
-                reasons.append(
-                    f"Follow ({partnership.follow}) is not a newcomer, so is ineligible "
-                    f"for the Rookie Follow designation."
-                )
-            if follow_pointed_out_of_newcomer:
-                reasons.append(
-                    f"Follow ({partnership.follow}) has pointed out of Newcomer "
-                    f"{curr_style} {dance_obj.dance}, so is ineligible for the "
-                    f"Rookie Follow designation."
-                )
-            if follow_above_own_cap:
-                reasons.append(
-                    f"Follow ({partnership.follow}) is registered above "
-                    f"{self.rookie_max_level} in {curr_style} {dance_obj.dance}, "
-                    f"exceeding the level a Rookie may also compete at."
-                )
-            if follow_same_partner_entry:
-                reasons.append(
-                    f"Follow ({partnership.follow}) is also registered for "
-                    f"{curr_style} {dance_obj.dance} with the same partner "
-                    f"({partnership.lead}) outside the Rookie Follow designation."
-                )
-            if lead_registered_newcomer:
-                reasons.append(
-                    f"Lead ({partnership.lead}) is already registered for a "
-                    f"Newcomer {curr_style} event, so can't act as the vet partner."
-                )
-            if lead_registered_bronze:
-                reasons.append(
-                    f"Lead ({partnership.lead}) is already registered for a "
-                    f"Bronze {curr_style} event, so can't act as the vet partner."
-                )
-            return EligibilityResult(
-                eligible=False,
-                violation_type=ViolationType.ROOKIE_FOLLOW,
-                detail_message=(
-                    f"ROOKIE-FOLLOW VIOLATION: '{partnership.names}' ineligible "
-                    f"for '{dance_obj}'.\n" + "\n".join(f"\t{reason}" for reason in reasons)
-                ),
-                subject_name=partnership.names,
-            )
-
-        return None
-
-    def _check_rookie_vet_level(self, partnership, dance_obj: Dance) -> EligibilityResult | None:
+    def _check_rookie_vet_level(
+        self, partnership: Partnership, dance_obj: Dance
+    ) -> EligibilityResult | None:
         """Check rookie/vet eligibility under the 'level' ruleset."""
-        if dance_obj.level == constants.RookieVetLevel.ROOKIE_LEAD:
-            lead_has_vet_entries = partnership.lead.has_vet_entries(dance_obj.style)
-            follow_has_rookie_entries = partnership.follow.has_rookie_entries(dance_obj.style)
-            if not lead_has_vet_entries and not follow_has_rookie_entries:
-                return EligibilityResult(eligible=True)
-
-            reasons = []
-            if lead_has_vet_entries:
-                reasons.append(
-                    f"Lead ({partnership.lead}) already has Silver-or-above "
-                    f"{dance_obj.style} entries, so is ineligible for the Rookie "
-                    f"Lead designation."
-                )
-            if follow_has_rookie_entries:
-                reasons.append(
-                    f"Follow ({partnership.follow}) already has Bronze-or-below "
-                    f"{dance_obj.style} entries, so can't act as the vet partner."
-                )
-            return EligibilityResult(
-                eligible=False,
+        if dance_obj.level == RookieVetLevel.ROOKIE_LEAD:
+            return self._check_rookie_vet_level_role(
+                partnership,
+                dance_obj,
+                rookie=partnership.lead,
+                rookie_role="Lead",
+                vet=partnership.follow,
+                vet_role="Follow",
                 violation_type=ViolationType.ROOKIE_LEAD,
-                detail_message=(
-                    f"ROOKIE-LEAD VIOLATION: '{partnership.names}' ineligible "
-                    f"for '{dance_obj}'.\n" + "\n".join(f"\t{reason}" for reason in reasons)
-                ),
-                subject_name=partnership.names,
             )
 
-        if dance_obj.level == constants.RookieVetLevel.ROOKIE_FOLLOW:
-            follow_has_vet_entries = partnership.follow.has_vet_entries(dance_obj.style)
-            lead_has_rookie_entries = partnership.lead.has_rookie_entries(dance_obj.style)
-            if not follow_has_vet_entries and not lead_has_rookie_entries:
-                return EligibilityResult(eligible=True)
-
-            reasons = []
-            if follow_has_vet_entries:
-                reasons.append(
-                    f"Follow ({partnership.follow}) already has Silver-or-above "
-                    f"{dance_obj.style} entries, so is ineligible for the Rookie "
-                    f"Follow designation."
-                )
-            if lead_has_rookie_entries:
-                reasons.append(
-                    f"Lead ({partnership.lead}) already has Bronze-or-below "
-                    f"{dance_obj.style} entries, so can't act as the vet partner."
-                )
-            return EligibilityResult(
-                eligible=False,
+        if dance_obj.level == RookieVetLevel.ROOKIE_FOLLOW:
+            return self._check_rookie_vet_level_role(
+                partnership,
+                dance_obj,
+                rookie=partnership.follow,
+                rookie_role="Follow",
+                vet=partnership.lead,
+                vet_role="Lead",
                 violation_type=ViolationType.ROOKIE_FOLLOW,
-                detail_message=(
-                    f"ROOKIE-FOLLOW VIOLATION: '{partnership.names}' ineligible "
-                    f"for '{dance_obj}'.\n" + "\n".join(f"\t{reason}" for reason in reasons)
-                ),
-                subject_name=partnership.names,
             )
 
         return None
+
+    def _check_rookie_vet_level_role(
+        self,
+        partnership: Partnership,
+        dance_obj: Dance,
+        rookie: Dancer,
+        rookie_role: str,
+        vet: Dancer,
+        vet_role: str,
+        violation_type: ViolationType,
+    ) -> EligibilityResult:
+        """Shared 'level'-ruleset Rookie/Vet check for one role assignment -
+        see _check_rookie_vet_newcomer_role for why this is split out from
+        the Lead/Follow dispatch above.
+        """
+        rookie_has_vet_entries = rookie.has_vet_entries(dance_obj.style)
+        vet_has_rookie_entries = vet.has_rookie_entries(dance_obj.style)
+        if not rookie_has_vet_entries and not vet_has_rookie_entries:
+            return EligibilityResult(eligible=True)
+
+        reasons = []
+        if rookie_has_vet_entries:
+            reasons.append(
+                f"{rookie_role} ({rookie}) already has Silver-or-above "
+                f"{dance_obj.style} entries, so is ineligible for the Rookie "
+                f"{rookie_role} designation."
+            )
+        if vet_has_rookie_entries:
+            reasons.append(
+                f"{vet_role} ({vet}) already has Bronze-or-below "
+                f"{dance_obj.style} entries, so can't act as the vet partner."
+            )
+        return EligibilityResult(
+            eligible=False,
+            violation_type=violation_type,
+            detail_message=(
+                f"ROOKIE-{rookie_role.upper()} VIOLATION: '{partnership.names}' ineligible "
+                f"for '{dance_obj}'.\n" + "\n".join(f"\t{reason}" for reason in reasons)
+            ),
+            subject_name=partnership.names,
+        )

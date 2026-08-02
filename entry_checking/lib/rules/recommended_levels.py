@@ -6,6 +6,8 @@ every dance in that style.
 """
 
 from cda_core.lib import constants
+from cda_core.lib.constants import Style
+from cda_core.lib.models.partnership import Partnership
 from entry_checking.lib.rules.proficiency import ProficiencyCalculator
 
 
@@ -13,7 +15,7 @@ class RecommendedLevelsCalculator:
     """Computes recommended registration level(s) for a partnership."""
 
     @staticmethod
-    def compute(partnership, style: str) -> list[str]:
+    def compute(partnership: Partnership, style: Style) -> list[str]:
         """Computes the level(s) a partnership should be recommended to
         register at in a given style.
 

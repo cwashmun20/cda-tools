@@ -6,6 +6,9 @@ a dancer's point totals across all syllabus and open levels.
 
 import numpy as np
 
+from cda_core.lib import constants
+from cda_core.lib.constants import Style
+
 
 class Points:
     """Representation of a Dancer's point totals."""
@@ -19,6 +22,20 @@ class Points:
         """
         self.syllabus_data: np.ndarray = syllabus_pts
         self.open_data: np.ndarray = open_pts
+
+    def _syllabus_columns(self, style: Style) -> np.ndarray:
+        """Returns this style's syllabus point columns, using the same
+        constants.SYLLABUS_COLUMN_OFFSETS/DANCE_NAMES that
+        Dancer.get_points() indexes into.
+        """
+        start = constants.SYLLABUS_COLUMN_OFFSETS[style]
+        end = start + len(constants.DANCE_NAMES[style])
+        return self.syllabus_data[:, start:end]
+
+    def _open_column(self, style: Style) -> np.ndarray:
+        """Returns this style's single open-points column."""
+        idx = constants.STYLES.index(style)
+        return self.open_data[:, idx : idx + 1]
 
     def __repr__(self) -> str:
         """String representation of points modeled after CDA points database UI.
@@ -60,21 +77,21 @@ class Points:
         """
         return string
 
-    def standard(self) -> tuple:
+    def standard(self) -> tuple[np.ndarray, np.ndarray]:
         """Returns the subarrays of points corresponding to syllabus and open Standard points."""
-        return self.syllabus_data[:, :5], self.open_data[:, :1]
+        return self._syllabus_columns(Style.STANDARD), self._open_column(Style.STANDARD)
 
-    def smooth(self) -> tuple:
+    def smooth(self) -> tuple[np.ndarray, np.ndarray]:
         """Returns the subarrays of points corresponding to syllabus and open Smooth points."""
-        return self.syllabus_data[:, 5:9], self.open_data[:, 1:2]
+        return self._syllabus_columns(Style.SMOOTH), self._open_column(Style.SMOOTH)
 
-    def latin(self) -> tuple:
+    def latin(self) -> tuple[np.ndarray, np.ndarray]:
         """Returns the subarrays of points corresponding to syllabus and open Latin points."""
-        return self.syllabus_data[:, 9:14], self.open_data[:, 2:3]
+        return self._syllabus_columns(Style.LATIN), self._open_column(Style.LATIN)
 
-    def rhythm(self) -> tuple:
+    def rhythm(self) -> tuple[np.ndarray, np.ndarray]:
         """Returns the subarrays of points corresponding to syllabus and open Rhythm points."""
-        return self.syllabus_data[:, 14:19], self.open_data[:, 3:4]
+        return self._syllabus_columns(Style.RHYTHM), self._open_column(Style.RHYTHM)
 
     def linear_data(self) -> np.ndarray:
         """Returns a linear representation of a dancer's point totals in this order:
