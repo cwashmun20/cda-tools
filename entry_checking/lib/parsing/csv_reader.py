@@ -4,6 +4,8 @@ Provides functions for reading competition entry data from CSV files,
 validating required columns, and normalizing column name variations.
 """
 
+from typing import IO
+
 import pandas as pd
 
 # Required columns for a valid competition entry spreadsheet
@@ -40,18 +42,19 @@ COLUMN_ALIASES = {
 _PLACEHOLDER_STYLE_VALUES = {"-", "#REF!"}
 
 
-def read_entries(path: str) -> pd.DataFrame:
+def read_entries(source: str | IO[bytes] | IO[str]) -> pd.DataFrame:
     """Read a competition entry CSV file and return a DataFrame.
 
     Args:
-        path: Path to the CSV file.
+        source: Path to the CSV file, or a file-like object (e.g. an
+                uploaded file's stream) containing CSV content.
     Returns:
         A pandas DataFrame with the entry data.
     Raises:
-        FileNotFoundError: If the CSV file does not exist.
+        FileNotFoundError: If source is a path and the CSV file does not exist.
         ValueError: If required columns are missing.
     """
-    df = pd.read_csv(path)
+    df = pd.read_csv(source)
     df = normalize_column_names(df)
     validate_columns(df)
     df = drop_placeholder_rows(df)

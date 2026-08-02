@@ -363,6 +363,23 @@ class TestReport(unittest.TestCase):
         eligibility_results = [EligibilityResult(eligible=True)]
         self.assertEqual(self._run_report(eligibility_results, []), "")
 
+    def test_group_printed_under_subject_name_header(self):
+        """Each group prints under a header naming its subject, immediately
+        above that subject's own messages - the same per-person/couple
+        headers the web UI's results page and .txt download use."""
+        level_violations = [
+            LevelViolation(
+                dancer_name="Baris Varol",
+                style="Smooth",
+                violation_type="too_many_levels",
+                detail_message="LEVEL VIOLATION: Baris individual message",
+            ),
+        ]
+        output = self._run_report([], level_violations)
+        header_idx = output.index("Baris Varol")
+        message_idx = output.index("Baris individual message")
+        self.assertLess(header_idx, message_idx)
+
 
 if __name__ == "__main__":
     unittest.main()

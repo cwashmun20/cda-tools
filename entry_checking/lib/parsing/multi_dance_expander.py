@@ -4,6 +4,8 @@ Handles expanding abbreviated multi-dance events (e.g., "WTQ" → Waltz, Tango, 
 into individual dance rows for processing.
 """
 
+import pandas as pd
+
 from cda_core.lib import constants
 from cda_core.lib.models.dance import convert_style
 
@@ -36,7 +38,7 @@ def expand_abbreviation(style: str, abbreviation: str) -> list[str]:
     return dances
 
 
-def expand_multi_dance_events(df) -> object:
+def expand_multi_dance_events(df: pd.DataFrame) -> pd.DataFrame:
     """Replaces multi-dance event rows in a DataFrame with one row per dance.
 
     Identifies multi-dance events in either of two formats:
@@ -48,8 +50,6 @@ def expand_multi_dance_events(df) -> object:
     Returns:
         A new DataFrame with multi-dance events expanded into individual rows.
     """
-    import pandas as pd
-
     data_has_o2cm_name = "O2CM Name" in df.columns
     data_has_heat = "Heat" in df.columns
     row_list = []

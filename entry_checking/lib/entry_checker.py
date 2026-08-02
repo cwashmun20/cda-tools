@@ -16,6 +16,7 @@ from cda_core.lib.models.partnership import Partnership
 from entry_checking.lib.parsing.csv_reader import read_entries
 from entry_checking.lib.parsing.multi_dance_expander import expand_multi_dance_events
 from entry_checking.lib.parsing.row_parser import is_tba_row
+from entry_checking.lib.report_view import build_report_view
 from entry_checking.lib.rules.eligibility import EligibilityChecker
 from entry_checking.lib.rules.level_rules import LevelRulesChecker
 from entry_checking.lib.rules.violations import EligibilityResult, LevelViolation
@@ -175,23 +176,19 @@ def _report(
 
     Split-level exceptions aren't violations - they're eligible entries that
     just need a 3x-points note - so they're printed as their own block up
-    front rather than grouped in with the real violations.
+    front rather than grouped in with the real violations. Each group is
+    printed under a header naming its subject - the same per-person/couple
+    headers the web UI's results page and .txt download use.
     """
-    for result in eligibility_results:
-        if result.is_split_level and result.split_level_info:
-            print(result.split_level_info)
-            print()
+    view = build_report_view(eligibility_results, level_violations)
 
-    groups: dict[str, list[str]] = {}
-    for result in eligibility_results:
-        if not result.eligible and result.detail_message and result.subject_name:
-            groups.setdefault(result.subject_name, []).append(result.detail_message)
-    for violation in level_violations:
-        if violation.detail_message:
-            groups.setdefault(violation.dancer_name, []).append(violation.detail_message)
+    for note in view.split_level_notes:
+        print(note)
+        print()
 
-    for subject_name in sorted(groups):
-        for message in groups[subject_name]:
+    for subject_name, messages in view.groups:
+        print(subject_name)
+        for message in messages:
             print(message)
             print()
 

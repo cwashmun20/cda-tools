@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CDA Entry Checker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>CDA Entry Checker</h1>
+  <p>Upload a competition entry spreadsheet to check entries against CDA Fair Level Certification rules.</p>
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" id="check-form">
+    <div class="field">
+      <label for="comp_name">Competition Name</label>
+      <input type="text" id="comp_name" name="comp_name" value="{{ form_values.comp_name }}" required>
+    </div>
+
+    <div class="field">
+      <label for="comp_date">Competition Date</label>
+      <input type="date" id="comp_date" name="comp_date" value="{{ form_values.comp_date }}" required>
+    </div>
+
+    <div class="field">
+      <label for="rv_ruleset">Rookie/Vet Ruleset</label>
+      <select id="rv_ruleset" name="rv_ruleset">
+        <option value="newcomer" {% if form_values.rv_ruleset == "newcomer" %}selected{% endif %}>Newcomer (recommended)</option>
+        <option value="level" {% if form_values.rv_ruleset == "level" %}selected{% endif %}>Level-Based</option>
+      </select>
+    </div>
+
+    <div class="field" id="rookie-max-level-field">
+      <label for="rookie_max_level">Highest Competition Registration Level for Rookies</label>
+      <p class="field-description">The highest level dancers can register for in a style to still be eligible to dance as the Rookie in Rookie-Vet events for that style.</p>
+      <select id="rookie_max_level" name="rookie_max_level">
+        <option value="Bronze" {% if form_values.rookie_max_level == "Bronze" %}selected{% endif %}>Bronze</option>
+        <option value="Silver" {% if form_values.rookie_max_level == "Silver" %}selected{% endif %}>Silver</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="consecutive_level_limit">Consecutive Level Limit (2 for most competitions)</label>
+      <input type="number" id="consecutive_level_limit" name="consecutive_level_limit" min="0" step="1"
+             value="{{ form_values.consecutive_level_limit }}" required>
+    </div>
+
+    <div class="field">
+      <label for="entries_csv">Upload Entry Spreadsheet (CSV)</label>
+      <input type="file" id="entries_csv" name="entries_csv" accept=".csv" required>
+    </div>
+
+    <div class="button-row">
+      <button type="submit" id="check-entries-btn">Check Entries</button>
+      {% if report_view %}
+        <button type="button" id="download-results-btn">Download Results as .txt</button>
+      {% endif %}
+    </div>
+  </form>
+
+  {% if report_view %}
+    <div class="results">
+      <h2>Results</h2>
+
+      {% if not report_view.split_level_notes and not report_view.groups %}
+        <p class="all-clear">No violations found - every entry is eligible.</p>
+      {% endif %}
+
+      {% for note in report_view.split_level_notes %}
+        <div class="split-level-note">{{ note }}</div>
+      {% endfor %}
+
+      {% for subject_name, messages in report_view.groups %}
+        <div class="violation-group">
+          <h3>{{ subject_name }}</h3>
+          {% for message in messages %}
+            <pre class="violation-message">{{ message }}</pre>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <script>
+    function syncRookieMaxLevelField() {
+      var show = document.getElementById('rv_ruleset').value === 'newcomer';
+      document.getElementById('rookie-max-level-field').style.display = show ? '' : 'none';
+    }
+    document.getElementById('rv_ruleset').addEventListener('change', syncRookieMaxLevelField);
+    syncRookieMaxLevelField();
+
+    // Grey out and disable the submit button for the duration of the (full
+    // page reload) request, so it's clear a check is in progress and a
+    // second click can't fire a duplicate submission.
+    document.getElementById('check-form').addEventListener('submit', function () {
+      var checkBtn = document.getElementById('check-entries-btn');
+      checkBtn.disabled = true;
+      checkBtn.textContent = 'Checking...';
+    });
+
+    // Build the downloadable .txt report from the already-rendered results
+    // in the page, rather than a separate server round-trip - there's no
+    // server-side session/persistence to fetch the same report back from.
+    // Mirrors entry_checker._report()'s CLI format: split-level notes first,
+    // then each group under a header naming its subject.
+    var downloadBtn = document.getElementById('download-results-btn');
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', function () {
+        var blocks = [];
+        document.querySelectorAll('.split-level-note').forEach(function (el) {
+          blocks.push(el.textContent.trim());
+        });
+        document.querySelectorAll('.violation-group').forEach(function (group) {
+          var subjectName = group.querySelector('h3').textContent.trim();
+          var messages = Array.from(group.querySelectorAll('.violation-message')).map(
+            function (el) {
+              return el.textContent.trim();
+            }
+          );
+          blocks.push(subjectName + '\n' + messages.join('\n\n'));
+        });
+        var text = blocks.join('\n\n') + '\n';
+
+        var compName = document.getElementById('comp_name').value.trim();
+        var safeCompName = compName
+          ? compName.replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '-')
+          : 'entry';
+
+        var blob = new Blob([text], { type: 'text/plain' });
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = safeCompName + '-entry-check-results.txt';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
+    }
+  </script>
+</body>
+</html>

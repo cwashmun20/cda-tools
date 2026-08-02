@@ -32,6 +32,7 @@ dev = [
 
 [project.scripts]
 entry-checker = "entry_checking.lib.entry_checker:main"
+entry-checker-web = "entry_checking.webapp.lib.app:main"
 
 [tool.setuptools.packages.find]
 include = ["cda_core*", "entry_checking*", "points_updating*"]
