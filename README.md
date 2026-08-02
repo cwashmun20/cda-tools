@@ -18,19 +18,24 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 .
 ├── cda_core/                     # Core domain model & logic
 │   ├── __init__.py
-│   └── lib/
-│       ├── competition.py        # Competition data model (name, date, ruleset, raw entries)
-│       ├── constants.py          # Enums & typed constants (StrEnum)
-│       ├── points.py             # Points tracking & formatting
-│       ├── api/                  # CDA points database API client
-│       │   ├── client.py         #   DancerRecord, lookup_dancer()
-│       │   └── config.py.example #   API key template
-│       └── models/               # Domain model classes
-│           ├── dance.py          #   Dance representation & conversion
-│           ├── dancer.py         #   Dancer (points, registration state)
-│           ├── partnership.py    #   Partnership (registration state)
-│           ├── entry.py          #   Competition entry
-│           └── event.py          #   Competition event
+│   ├── lib/
+│   │   ├── competition.py        # Competition data model (name, date, ruleset, raw entries)
+│   │   ├── constants.py          # Enums & typed constants (StrEnum)
+│   │   ├── points.py             # Points tracking & formatting
+│   │   ├── api/                  # CDA points database API client
+│   │   │   ├── client.py         #   DancerRecord, lookup_dancer()
+│   │   │   └── config.py.example #   API key template
+│   │   └── models/               # Domain model classes
+│   │       ├── dance.py          #   Dance representation & conversion
+│   │       ├── dancer.py         #   Dancer (points, registration state)
+│   │       ├── partnership.py    #   Partnership (registration state)
+│   │       ├── entry.py          #   Competition entry
+│   │       └── event.py          #   Competition event
+│   └── tests/                    # Mirrors the lib/ tree above (see Test Organization below)
+│       ├── test_constants.py     #   lib/constants.py is directly under lib/, so its test is too
+│       ├── test_points.py
+│       ├── api/
+│       └── models/
 │
 ├── entry_checking/           # Entry validation: orchestration, rules, parsing
 │   ├── __init__.py
@@ -100,7 +105,7 @@ API communication is isolated in `cda_core/lib/api/`. The `DancerRecord` datacla
 All internal imports are absolute package paths (`from cda_core.lib.models.dance import Dance`, `from entry_checking.lib.rules.eligibility import EligibilityChecker`), not `sys.path` manipulation. This means `cda_core` and `entry_checking` need to be resolvable as real top-level packages — either via `pip install -e .` (see Setup), or by running from the repo root, where Python's `-m` flag adds the current directory to `sys.path` automatically.
 
 ### Test Organization
-`entry_checking/tests/` mirrors the shape of `entry_checking/lib/` — a module directly under `lib/` (e.g. `entry_checker.py`) has its test directly under `tests/` (`test_entry_checker.py`), and a subpackage under `lib/` (e.g. `rules/`, `parsing/`, `webapp/`) has a matching subdirectory under `tests/` (`tests/rules/`, `tests/parsing/`, `tests/webapp/`) holding its tests. This makes it easy to find a module's tests (and vice versa) purely from its path, without needing a naming convention to bridge the two trees.
+In both `cda_core` and `entry_checking`, `tests/` mirrors the shape of `lib/` — a module directly under `lib/` (e.g. `entry_checking/lib/entry_checker.py`) has its test directly under `tests/` (`entry_checking/tests/test_entry_checker.py`), and a subpackage under `lib/` (e.g. `cda_core/lib/models/`, `entry_checking/lib/rules/`) has a matching subdirectory under `tests/` (`cda_core/tests/models/`, `entry_checking/tests/rules/`) holding its tests. Test files are also named after the module they test - `cda_core/lib/api/client.py` is tested by `cda_core/tests/api/test_client.py`, not `test_api_client.py` - so a module covering several source files (e.g. the `parsing/` package) gets one test file per source file (`test_csv_reader.py`, `test_row_parser.py`, `test_multi_dance_expander.py`) rather than one combined file. This makes it easy to find a module's tests (and vice versa) purely from its path, without needing to guess at a naming convention.
 
 ## Usage
 
