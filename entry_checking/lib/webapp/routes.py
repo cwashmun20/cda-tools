@@ -2,7 +2,7 @@
 
 from flask import Blueprint, jsonify, render_template, request
 
-from entry_checking.webapp.lib.check_service import CheckError, run_check
+from entry_checking.lib.webapp.check_service import CheckError, run_check
 
 bp = Blueprint("entry_checker_web", __name__)
 

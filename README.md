@@ -42,20 +42,23 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 │   │   │   ├── csv_reader.py     #   CSV reading & column validation
 │   │   │   ├── row_parser.py     #   Per-row data extraction
 │   │   │   └── multi_dance_expander.py  # Multi-dance abbreviation expansion
-│   │   └── rules/                # FLC rule checking
-│   │       ├── violations.py     #   ViolationType, EligibilityResult, LevelViolation
-│   │       ├── proficiency.py    #   ProficiencyCalculator
-│   │       ├── recommended_levels.py  # RecommendedLevelsCalculator
-│   │       ├── eligibility.py    #   EligibilityChecker
-│   │       └── level_rules.py    #   LevelRulesChecker
-│   └── webapp/                   # Lightweight Flask UI, scoped to entry checking
-│       ├── __init__.py
-│       ├── lib/
-│       │   ├── app.py            #   create_app() factory + web console-script entry point
-│       │   ├── routes.py         #   HTML form/results route + JSON /api/check route
-│       │   └── check_service.py  #   Shared parse -> Competition -> EntryChecker.check() helper
-│       ├── templates/
-│       └── static/
+│   │   ├── rules/                # FLC rule checking
+│   │   │   ├── violations.py     #   ViolationType, EligibilityResult, LevelViolation
+│   │   │   ├── proficiency.py    #   ProficiencyCalculator
+│   │   │   ├── recommended_levels.py  # RecommendedLevelsCalculator
+│   │   │   ├── eligibility.py    #   EligibilityChecker
+│   │   │   └── level_rules.py    #   LevelRulesChecker
+│   │   └── webapp/               # Lightweight Flask UI, scoped to entry checking
+│   │       ├── app.py            #   create_app() factory + web console-script entry point
+│   │       ├── routes.py         #   HTML form/results route + JSON /api/check route
+│   │       ├── check_service.py  #   Shared parse -> Competition -> EntryChecker.check() helper
+│   │       ├── templates/
+│   │       └── static/
+│   └── tests/                    # Mirrors the lib/ tree above (see Test Organization below)
+│       ├── test_entry_checker.py #   lib/entry_checker.py is directly under lib/, so its test is too
+│       ├── parsing/
+│       ├── rules/
+│       └── webapp/
 │
 ├── points_updating/                   # Points updating tool (to be implemented)
 │   ├── __init__.py
@@ -91,10 +94,13 @@ API communication is isolated in `cda_core/lib/api/`. The `DancerRecord` datacla
 `Competition` (`cda_core/lib/competition.py`) is a plain data model — it holds a competition's identity (name, date, rookie-vet ruleset, consecutive-level limit, and the Rookie's max regular-event level under the "newcomer" ruleset) and raw entry data, nothing else. Orchestration — building `Dancer`/`Partnership`/`Entry` objects from a `Competition`'s rows, running `EligibilityChecker` and `LevelRulesChecker`, and returning structured results — lives in `EntryChecker` (`entry_checking/lib/entry_checker.py`). Neither class prints; `entry_checker.main()` is the only place that prompts and prints. `EntryChecker.check_entry()`/`register_entry()` operate on a single partnership/dance pair (the building blocks `check()` is written in terms of), so a future live-registration caller could check/register one entry at a time instead of requiring a full CSV.
 
 ### Report View & Web UI
-`entry_checking/lib/report_view.py`'s `build_report_view()` extracts the CLI's split-level-notes-then-grouped-violations presentation logic (previously embedded in `entry_checker._report()`'s `print()` calls) into a plain `ReportView` dataclass. `entry_checker._report()` is now a thin printer over it, and `entry_checking/webapp/` (a lightweight Flask app, see Usage below) renders the same `ReportView` in HTML and JSON — one grouping algorithm, multiple consumers. `entry_checking/webapp/` is deliberately scoped to entry checking; a more robust unified CDA app (e.g. also covering `points_updating`, possibly React/TypeScript) would be a separate top-level addition alongside it, not a replacement.
+`entry_checking/lib/report_view.py`'s `build_report_view()` extracts the CLI's split-level-notes-then-grouped-violations presentation logic (previously embedded in `entry_checker._report()`'s `print()` calls) into a plain `ReportView` dataclass. `entry_checker._report()` is now a thin printer over it, and `entry_checking/lib/webapp/` (a lightweight Flask app, see Usage below) renders the same `ReportView` in HTML and JSON — one grouping algorithm, multiple consumers. `entry_checking/lib/webapp/` is deliberately scoped to entry checking; a more robust unified CDA app (e.g. also covering `points_updating`, possibly React/TypeScript) would be a separate top-level addition alongside it, not a replacement.
 
 ### Import Convention
 All internal imports are absolute package paths (`from cda_core.lib.models.dance import Dance`, `from entry_checking.lib.rules.eligibility import EligibilityChecker`), not `sys.path` manipulation. This means `cda_core` and `entry_checking` need to be resolvable as real top-level packages — either via `pip install -e .` (see Setup), or by running from the repo root, where Python's `-m` flag adds the current directory to `sys.path` automatically.
+
+### Test Organization
+`entry_checking/tests/` mirrors the shape of `entry_checking/lib/` — a module directly under `lib/` (e.g. `entry_checker.py`) has its test directly under `tests/` (`test_entry_checker.py`), and a subpackage under `lib/` (e.g. `rules/`, `parsing/`, `webapp/`) has a matching subdirectory under `tests/` (`tests/rules/`, `tests/parsing/`, `tests/webapp/`) holding its tests. This makes it easy to find a module's tests (and vice versa) purely from its path, without needing a naming convention to bridge the two trees.
 
 ## Usage
 
@@ -118,7 +124,7 @@ entry-checker-web
 # Then open http://127.0.0.1:5000/ in a browser
 
 # Or, for auto-reload while developing templates/routes:
-flask --app entry_checking.webapp.lib.app:create_app run --debug --reload
+flask --app entry_checking.lib.webapp.app:create_app run --debug --reload
 ```
 
 Both commands work from any directory once `pip install -e .` has been run — the editable

@@ -15,7 +15,7 @@ import numpy as np
 
 from cda_core.lib.api.client import DancerLookupError, DancerRecord
 from cda_core.lib.models.dancer import Dancer
-from entry_checking.webapp.lib.app import create_app
+from entry_checking.lib.webapp.app import create_app
 
 _VALID_CSV = (
     b"Style,Dance,Skill,Lead First,Lead Last,Follow First,Follow Last\n"

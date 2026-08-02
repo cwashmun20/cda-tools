@@ -3,7 +3,7 @@
 Usage:
     entry-checker-web
 
-    (or via -m: python -m entry_checking.webapp.lib.app)
+    (or via -m: python -m entry_checking.lib.webapp.app)
 """
 
 import os
@@ -11,16 +11,16 @@ import pathlib
 
 from flask import Flask
 
-from entry_checking.webapp.lib import routes
+from entry_checking.lib.webapp import routes
 
-# webapp/ - templates/static live here, one level up from lib/.
-_PACKAGE_ROOT = pathlib.Path(__file__).resolve().parent.parent
+# templates/ and static/ are siblings of this file within webapp/.
+_PACKAGE_ROOT = pathlib.Path(__file__).resolve().parent
 
 
 def create_app() -> Flask:
     """Build and configure the entry-checker Flask app."""
     app = Flask(
-        "entry_checking.webapp",
+        "entry_checking.lib.webapp",
         template_folder=str(_PACKAGE_ROOT / "templates"),
         static_folder=str(_PACKAGE_ROOT / "static"),
     )
