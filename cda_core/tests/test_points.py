@@ -74,6 +74,47 @@ class TestPoints(unittest.TestCase):
         self.assertEqual(pts.syllabus_data[0][0], 3)
         self.assertEqual(pts.open_data[0][0], 2)
 
+    def test_add_zero_delta_is_noop(self):
+        syllabus = np.zeros((4, 19), dtype=int)
+        syllabus[1][5] = 4
+        open_pts = np.zeros((3, 4), dtype=int)
+        open_pts[0][0] = 2
+        pts = Points(syllabus.copy(), open_pts.copy())
+
+        pts.add(np.zeros((4, 19), dtype=int), np.zeros((3, 4), dtype=int))
+
+        self.assertTrue(np.array_equal(pts.syllabus_data, syllabus))
+        self.assertTrue(np.array_equal(pts.open_data, open_pts))
+
+    def test_add_accumulates_onto_existing_values(self):
+        syllabus = np.zeros((4, 19), dtype=int)
+        syllabus[1][5] = 4  # pre-existing Bronze Smooth Waltz points
+        pts = Points(syllabus, np.zeros((3, 4), dtype=int))
+
+        syllabus_delta = np.zeros((4, 19), dtype=int)
+        syllabus_delta[1][5] = 3
+        syllabus_delta[0][5] = 7
+        open_delta = np.zeros((3, 4), dtype=int)
+        open_delta[0][1] = 2
+        pts.add(syllabus_delta, open_delta)
+
+        self.assertEqual(pts.syllabus_data[1][5], 7)  # 4 + 3, accumulated not overwritten
+        self.assertEqual(pts.syllabus_data[0][5], 7)
+        self.assertEqual(pts.open_data[0][1], 2)
+
+    def test_add_does_not_mutate_delta_arrays(self):
+        syllabus_delta = np.zeros((4, 19), dtype=int)
+        syllabus_delta[0][0] = 5
+        open_delta = np.zeros((3, 4), dtype=int)
+        open_delta[0][0] = 3
+        syllabus_delta_snapshot = syllabus_delta.copy()
+        open_delta_snapshot = open_delta.copy()
+
+        self.points.add(syllabus_delta, open_delta)
+
+        self.assertTrue(np.array_equal(syllabus_delta, syllabus_delta_snapshot))
+        self.assertTrue(np.array_equal(open_delta, open_delta_snapshot))
+
 
 if __name__ == "__main__":
     unittest.main()

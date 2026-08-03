@@ -23,6 +23,17 @@ class Points:
         self.syllabus_data: np.ndarray = syllabus_pts
         self.open_data: np.ndarray = open_pts
 
+    def add(self, syllabus_delta: np.ndarray, open_delta: np.ndarray) -> None:
+        """Adds per-cell deltas (same shape as syllabus_data/open_data) to
+        this dancer's running point totals in place.
+
+        Args:
+            syllabus_delta: 4x19 array to add to syllabus_data.
+            open_delta: 3x4 array to add to open_data.
+        """
+        self.syllabus_data = self.syllabus_data + syllabus_delta
+        self.open_data = self.open_data + open_delta
+
     def _syllabus_columns(self, style: Style) -> np.ndarray:
         """Returns this style's syllabus point columns, using the same
         constants.SYLLABUS_COLUMN_OFFSETS/DANCE_NAMES that
