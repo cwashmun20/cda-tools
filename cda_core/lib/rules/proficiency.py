@@ -5,6 +5,8 @@ level for a given dance, following CDA's rules including point-out
 detection, within-style, and cross-style proficiency.
 """
 
+from typing import Optional
+
 from cda_core.lib import constants
 from cda_core.lib.constants import Style
 from cda_core.lib.models.dance import Dance
@@ -104,3 +106,22 @@ class ProficiencyCalculator:
             )
 
         return max(newcomer_level, point_out_level, within_style_level, cross_style_level)
+
+    @staticmethod
+    def compute_split_level_combined_level(lead_level: int, follow_level: int) -> Optional[int]:
+        """Returns the Split-Level Exception's combined level index if a
+        partnership's individual proficiency levels differ enough to
+        qualify; otherwise None.
+
+        Args:
+            lead_level: The lead's proficiency level index (see
+                        compute_proficiency_level).
+            follow_level: The follow's proficiency level index.
+        Returns:
+            The Split-Level Exception's combined level index (one below the
+            higher partner's level) if the two levels differ by 2 or more;
+            otherwise None.
+        """
+        if abs(lead_level - follow_level) < 2:
+            return None
+        return max(lead_level, follow_level) - 1

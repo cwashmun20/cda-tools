@@ -12,9 +12,9 @@ from cda_core.lib.constants import NightclubLevel, OpenLevel, RookieVetLevel, St
 from cda_core.lib.models.dance import Dance
 from cda_core.lib.models.dancer import Dancer
 from cda_core.lib.models.partnership import Partnership
-from entry_checking.lib.rules.violations import EligibilityResult, ViolationType
-from entry_checking.lib.rules.proficiency import ProficiencyCalculator
+from cda_core.lib.rules.proficiency import ProficiencyCalculator
 from entry_checking.lib.rules.recommended_levels import RecommendedLevelsCalculator
+from entry_checking.lib.rules.violations import EligibilityResult, ViolationType
 
 
 class EligibilityChecker:
@@ -148,19 +148,20 @@ class EligibilityChecker:
         event_level = constants.LEVELS.index(dance_obj.level)
 
         # Check for Split-Level Exception
-        if abs(lead_level - follow_level) >= 2:
-            combined_level = max(lead_level, follow_level) - 1
-            if combined_level == event_level:
-                return EligibilityResult(
-                    eligible=True,
-                    is_split_level=True,
-                    split_level_info=(
-                        f"SPLIT-LEVEL EXCEPTION: '{partnership.names}' are competing "
-                        f"'{dance_obj}' under the Split-Level Exception. Be sure to "
-                        f"award 3x points if points are awarded to this couple."
-                    ),
-                )
-        else:
+        combined_level = ProficiencyCalculator.compute_split_level_combined_level(
+            lead_level, follow_level
+        )
+        if combined_level is not None and combined_level == event_level:
+            return EligibilityResult(
+                eligible=True,
+                is_split_level=True,
+                split_level_info=(
+                    f"SPLIT-LEVEL EXCEPTION: '{partnership.names}' are competing "
+                    f"'{dance_obj}' under the Split-Level Exception. Be sure to "
+                    f"award 3x points if points are awarded to this couple."
+                ),
+            )
+        if combined_level is None:
             combined_level = max(lead_level, follow_level)
 
         if combined_level <= event_level:

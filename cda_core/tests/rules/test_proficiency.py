@@ -1,4 +1,4 @@
-"""Tests for entry_checking.lib.rules.proficiency module."""
+"""Tests for cda_core.lib.rules.proficiency module."""
 
 import unittest
 import datetime
@@ -6,7 +6,7 @@ import numpy as np
 from cda_core.lib.api.client import DancerRecord
 from cda_core.lib.models.dancer import Dancer
 from cda_core.lib.models.dance import Dance
-from entry_checking.lib.rules.proficiency import ProficiencyCalculator
+from cda_core.lib.rules.proficiency import ProficiencyCalculator
 
 
 class TestProficiencyCalculator(unittest.TestCase):
@@ -152,6 +152,24 @@ class TestProficiencyCalculator(unittest.TestCase):
         dancer = self._make_dancer(syllabus)
         level = ProficiencyCalculator.compute_proficiency_level(dancer, "Standard", "Quickstep")
         self.assertEqual(level, 1)  # Just the experienced-dancer floor - no cross-style credit
+
+    def test_split_level_combined_level_equal(self):
+        """Equal proficiency levels don't qualify for the Split-Level Exception."""
+        self.assertIsNone(ProficiencyCalculator.compute_split_level_combined_level(2, 2))
+
+    def test_split_level_combined_level_differ_by_one(self):
+        """A one-level difference doesn't qualify either - needs >= 2."""
+        self.assertIsNone(ProficiencyCalculator.compute_split_level_combined_level(3, 2))
+
+    def test_split_level_combined_level_differ_by_two_lead_higher(self):
+        self.assertEqual(ProficiencyCalculator.compute_split_level_combined_level(4, 2), 3)
+
+    def test_split_level_combined_level_differ_by_two_follow_higher(self):
+        """Symmetric regardless of which partner is higher."""
+        self.assertEqual(ProficiencyCalculator.compute_split_level_combined_level(2, 4), 3)
+
+    def test_split_level_combined_level_large_gap(self):
+        self.assertEqual(ProficiencyCalculator.compute_split_level_combined_level(6, 0), 5)
 
 
 if __name__ == "__main__":
