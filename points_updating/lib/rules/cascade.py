@@ -39,7 +39,7 @@ def build_cascade_delta(dance: Dance, award: tuple[int, int, int]) -> PointDelta
     Returns:
         A PointDelta with award cascaded into every affected cell.
     """
-    danced, one_below, two_plus = award
+    danced, one_below, two_plus_below = award
     syllabus = np.zeros((4, 19), dtype=int)
     open_ = np.zeros((3, 4), dtype=int)
 
@@ -48,11 +48,11 @@ def build_cascade_delta(dance: Dance, award: tuple[int, int, int]) -> PointDelta
         col = constants.SYLLABUS_COLUMN_OFFSETS[dance.style] + constants.DANCE_NAMES[
             dance.style
         ].index(dance.dance)
-        for r, pts in _levels_below(row, danced, one_below, two_plus):
+        for r, pts in _levels_below(row, danced, one_below, two_plus_below):
             syllabus[r][col] += pts
     else:
         unified_idx = constants.LEVELS.index(dance.level)
-        for r, pts in _levels_below(unified_idx, danced, one_below, two_plus):
+        for r, pts in _levels_below(unified_idx, danced, one_below, two_plus_below):
             if r < 4:
                 start = constants.SYLLABUS_COLUMN_OFFSETS[dance.style]
                 end = start + len(constants.DANCE_NAMES[dance.style])
@@ -64,7 +64,7 @@ def build_cascade_delta(dance: Dance, award: tuple[int, int, int]) -> PointDelta
 
 
 def _levels_below(
-    danced_idx: int, danced: int, one_below: int, two_plus: int
+    danced_idx: int, danced: int, one_below: int, two_plus_below: int
 ) -> Iterator[tuple[int, int]]:
     """Yields (level index, points) pairs for the danced level, the level
     directly below it, and every level two-or-more below it, down to 0.
@@ -73,6 +73,6 @@ def _levels_below(
         yield danced_idx, danced
     if danced_idx - 1 >= 0 and one_below:
         yield danced_idx - 1, one_below
-    if two_plus:
+    if two_plus_below:
         for r in range(danced_idx - 2, -1, -1):
-            yield r, two_plus
+            yield r, two_plus_below

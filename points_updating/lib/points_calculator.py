@@ -1,0 +1,74 @@
+"""Per-result point scoring for points_updating.
+
+Provides PointsCalculator, which scores one CompetitionResult against a
+couple's current proficiency levels: detecting the Split-Level Exception
+(which triples the award) and cascading the resulting award down through
+lower levels via cda_core's award table and cascade logic.
+"""
+
+from dataclasses import dataclass
+
+from cda_core.lib import constants
+from cda_core.lib.constants import Style
+from cda_core.lib.models.dancer import Dancer
+from cda_core.lib.rules.proficiency import ProficiencyCalculator
+from points_updating.lib.models.result import CompetitionResult
+from points_updating.lib.rules import award_table, cascade
+from points_updating.lib.rules.cascade import PointDelta
+
+
+@dataclass
+class ResultAward:
+    """Structured, non-printing result of scoring one CompetitionResult -
+    mirrors the EligibilityResult/LevelViolation convention.
+    """
+
+    result: CompetitionResult
+    is_split_level: bool
+    delta: PointDelta  # identical amount applies to both lead and follow
+
+
+class PointsCalculator:
+    """Stateless calculator that scores a single CompetitionResult."""
+
+    @staticmethod
+    def compute(result: CompetitionResult, lead: Dancer, follow: Dancer) -> ResultAward:
+        """Scores one CompetitionResult for a couple.
+
+        Args:
+            result: The CompetitionResult to score.
+            lead: The lead's current Dancer - proficiency is read from
+                their points as of immediately before this competition.
+            follow: The follow's current Dancer, same caveat.
+        Returns:
+            A ResultAward with whether the Split-Level Exception applied
+            and the resulting point delta (owed identically to both
+            partners).
+        Raises:
+            ValueError: if result.dance's style isn't eligible for points
+                (e.g. Nightclub).
+        """
+        dance = result.dance
+        if dance.style not in Style.points_eligible_styles():
+            raise ValueError(f"'{dance}' is not eligible for points.")
+
+        danced, one_below, two_plus_below = award_table.compute_award(
+            result.num_rounds, result.place
+        )
+
+        lead_level = ProficiencyCalculator.compute_proficiency_level(lead, dance.style, dance.dance)
+        follow_level = ProficiencyCalculator.compute_proficiency_level(
+            follow, dance.style, dance.dance
+        )
+        # None if the couple doesn't qualify for the Split-Level Exception.
+        combined_level = ProficiencyCalculator.compute_split_level_combined_level(
+            lead_level, follow_level
+        )
+        event_level = constants.LEVELS.index(dance.level)
+        # Only applies if they also danced at the exception's designated level.
+        is_split_level = combined_level is not None and combined_level == event_level
+        if is_split_level:
+            danced, one_below, two_plus_below = danced * 3, one_below * 3, two_plus_below * 3
+
+        delta = cascade.build_cascade_delta(dance, (danced, one_below, two_plus_below))
+        return ResultAward(result=result, is_split_level=is_split_level, delta=delta)
