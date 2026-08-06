@@ -202,6 +202,49 @@ class TestUpdateEngine(unittest.TestCase):
         self.assertEqual(totals["Alice Existing"].points.syllabus_data[1][5], 13)  # 10 + 3
         self.assertEqual(totals["Carol New"].points.syllabus_data[1][5], 3)  # 0 + 3
 
+    def test_starting_totals_unaffected_by_later_mutation(self):
+        """starting_totals() must keep reflecting each dancer's balance as
+        of before this engine processed them, even after process_competition
+        has since mutated their live Points object."""
+        existing = DancerRef(first="Alice", last="Existing")
+        new = DancerRef(first="Carol", last="New")
+        existing_syllabus = np.zeros((4, 19), dtype=int)
+        existing_syllabus[1][5] = 10  # pre-existing Bronze Smooth Waltz points
+        records = {("Alice", "Existing"): _make_record("Alice", "Existing", existing_syllabus)}
+        dance = Dance("Bronze", "Smooth", "Waltz")
+        comp_date = date(2025, 10, 4)
+        result = _make_result(dance, existing, new, place=1, num_rounds=3, comp_date=comp_date)
+
+        engine = UpdateEngine(lookup=_make_lookup(records))
+        engine.process_competition([result])
+
+        starting = engine.starting_totals()
+        self.assertEqual(starting["Alice Existing"].syllabus_data[1][5], 10)  # unchanged by +3
+        self.assertEqual(starting["Carol New"].syllabus_data[1][5], 0)  # unchanged by +3
+        # final_totals() (checked above in the prior test) already confirms
+        # the live Points objects did change - this confirms the snapshot didn't.
+
+    def test_starting_totals_reflects_balance_before_first_competition_only(self):
+        """A dancer processed across two competitions in run_backfill still
+        has only their pre-backfill balance in starting_totals(), not their
+        balance as of just before the second competition."""
+        lead = DancerRef(first="Lead", last="Dancer")
+        follow = DancerRef(first="Follow", last="Dancer")
+        dance = Dance("Bronze", "Smooth", "Waltz")
+        comp1 = [
+            _make_result(dance, lead, follow, place=1, num_rounds=3, comp_date=date(2025, 10, 4))
+        ]
+        comp2 = [
+            _make_result(dance, lead, follow, place=2, num_rounds=3, comp_date=date(2025, 11, 15))
+        ]
+
+        engine = UpdateEngine(lookup=_make_lookup({}))
+        engine.run_backfill([comp1, comp2])
+
+        starting = engine.starting_totals()
+        self.assertEqual(starting["Lead Dancer"].syllabus_data[1][5], 0)
+        self.assertEqual(starting["Follow Dancer"].syllabus_data[1][5], 0)
+
     def test_lead_and_follow_have_independent_points_objects(self):
         lead = DancerRef(first="Lead", last="Dancer")
         follow = DancerRef(first="Follow", last="Dancer")

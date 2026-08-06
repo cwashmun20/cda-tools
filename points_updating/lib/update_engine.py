@@ -15,6 +15,7 @@ from typing import Callable
 
 from cda_core.lib.api.client import DancerRecord, lookup_dancer
 from cda_core.lib.models.dancer import Dancer
+from cda_core.lib.points import Points
 from points_updating.lib.models.result import CompetitionResult, DancerRef
 from points_updating.lib.points_calculator import PointsCalculator, ResultAward
 from points_updating.lib.rules.eligibility_filter import filter_points_eligible
@@ -36,6 +37,7 @@ class UpdateEngine:
         """
         self._lookup = lookup
         self._ledger: dict[str, Dancer] = {}
+        self._starting_points: dict[str, Points] = {}
 
     def _get_or_create(self, ref: DancerRef, comp_date: date) -> Dancer:
         """Returns the ledgered Dancer for ref, fetching and ledgering one
@@ -45,6 +47,10 @@ class UpdateEngine:
         if dancer is None:
             dancer = Dancer.from_data(comp_date, self._lookup(ref.first, ref.last))
             self._ledger[ref.full_name] = dancer
+            # Take starting snapshot for comparison
+            self._starting_points[ref.full_name] = Points(
+                dancer.points.syllabus_data.copy(), dancer.points.open_data.copy()
+            )
         else:
             dancer.curr_comp_date = comp_date
         return dancer
@@ -105,13 +111,20 @@ class UpdateEngine:
         return [self.process_competition(results) for results in comps_chronological]
 
     def final_totals(self) -> dict[str, Dancer]:
-        """Every dancer touched so far, keyed by full name, with .points
+        """Every dancer processed so far, keyed by full name, with .points
         already holding their absolute new total (starting balance plus
         every delta applied) - the value a future write step would send
         per dancer, not a delta to combine with anything else at write
         time.
         """
         return dict(self._ledger)
+
+    def starting_totals(self) -> dict[str, Points]:
+        """Every dancer processed so far, keyed by full name, with their
+        points as of immediately before point updates began - the baseline
+        a report explains final_totals() against.
+        """
+        return dict(self._starting_points)
 
 
 def _competition_date(results: list[CompetitionResult]) -> date:
