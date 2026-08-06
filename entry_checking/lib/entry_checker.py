@@ -8,12 +8,6 @@ Usage:
 
 from datetime import date
 
-from cda_core.lib import competition
-from cda_core.lib.constants import RookieVetLevel, SyllabusLevel
-from cda_core.lib.models.dance import Dance
-from cda_core.lib.models.dancer import Dancer
-from cda_core.lib.models.entry import Entry
-from cda_core.lib.models.partnership import Partnership
 from entry_checking.lib.parsing.csv_reader import read_entries
 from entry_checking.lib.parsing.multi_dance_expander import expand_multi_dance_events
 from entry_checking.lib.parsing.row_parser import is_tba_row
@@ -21,6 +15,12 @@ from entry_checking.lib.report_view import build_report_view
 from entry_checking.lib.rules.eligibility_checker import EligibilityChecker
 from entry_checking.lib.rules.level_rules_checker import LevelRulesChecker
 from entry_checking.lib.rules.violations import EligibilityResult, LevelViolation
+from utils.lib import competition
+from utils.lib.constants import RookieVetLevel, SyllabusLevel
+from utils.lib.models.dance import Dance
+from utils.lib.models.dancer import Dancer
+from utils.lib.models.entry import Entry
+from utils.lib.models.partnership import Partnership
 
 
 class EntryChecker:

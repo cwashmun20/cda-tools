@@ -1,8 +1,8 @@
-"""Tests for cda_core.lib.models.entry module."""
+"""Tests for utils.lib.models.entry module."""
 
 import unittest
-from cda_core.lib.models.dance import Dance
-from cda_core.lib.models.entry import Entry
+from utils.lib.models.dance import Dance
+from utils.lib.models.entry import Entry
 
 
 class _MockPartnership:

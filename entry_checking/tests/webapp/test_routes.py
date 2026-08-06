@@ -13,9 +13,9 @@ from unittest import mock
 
 import numpy as np
 
-from cda_core.lib.api.client import DancerLookupError, DancerRecord
-from cda_core.lib.models.dancer import Dancer
 from entry_checking.lib.webapp.app import create_app
+from utils.lib.api.client import DancerLookupError, DancerRecord
+from utils.lib.models.dancer import Dancer
 
 _VALID_CSV = (
     b"Style,Dance,Skill,Lead First,Lead Last,Follow First,Follow Last\n"

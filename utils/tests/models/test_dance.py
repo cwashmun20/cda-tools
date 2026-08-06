@@ -1,7 +1,7 @@
 """Dance tests are in test_constants.py (Dance class tested via conversion functions)."""
 
 import unittest
-from cda_core.lib.models.dance import Dance, convert_dance, convert_level, convert_style
+from utils.lib.models.dance import Dance, convert_dance, convert_level, convert_style
 
 
 class TestDance(unittest.TestCase):

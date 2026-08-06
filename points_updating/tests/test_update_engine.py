@@ -5,11 +5,11 @@ from datetime import date
 
 import numpy as np
 
-from cda_core.lib.api.client import DancerRecord
-from cda_core.lib.models.dance import Dance
 from points_updating.lib.models.result import CompetitionResult, DancerRef
 from points_updating.lib.rules import cascade
 from points_updating.lib.update_engine import UpdateEngine
+from utils.lib.api.client import DancerRecord
+from utils.lib.models.dance import Dance
 
 
 def _make_record(first, last, syllabus_pts=None, open_pts=None) -> DancerRecord:

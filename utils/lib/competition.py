@@ -10,9 +10,9 @@ for that orchestration.
 from datetime import date
 import pandas as pd
 
-from cda_core.lib.models.dancer import Dancer
-from cda_core.lib.models.entry import Entry
-from cda_core.lib.models.partnership import Partnership
+from utils.lib.models.dancer import Dancer
+from utils.lib.models.entry import Entry
+from utils.lib.models.partnership import Partnership
 
 
 class Competition:
@@ -41,7 +41,7 @@ class Competition:
                               in that style, under the "newcomer" rv_ruleset.
                               Unused under the "level" rv_ruleset.
             raw_data: The competition's entries, already CSV-parsed and
-                      multi-dance-expanded (see cda_core.lib.parsing).
+                      multi-dance-expanded (see utils.lib.parsing).
         """
         self.comp_name = comp_name
         self.comp_date = comp_date

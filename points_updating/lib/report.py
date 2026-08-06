@@ -10,8 +10,8 @@ exact result that produced it.
 from collections import defaultdict
 from dataclasses import dataclass
 
-from cda_core.lib.points import Points
 from points_updating.lib.points_calculator import ResultAward
+from utils.lib.points import Points
 
 
 @dataclass

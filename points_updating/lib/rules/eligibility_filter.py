@@ -10,9 +10,9 @@ those results before they ever reach PointsCalculator, which assumes every
 result it's given is points-eligible.
 """
 
-from cda_core.lib import constants
-from cda_core.lib.constants import Style
 from points_updating.lib.models.result import CompetitionResult
+from utils.lib import constants
+from utils.lib.constants import Style
 
 
 def filter_points_eligible(results: list[CompetitionResult]) -> list[CompetitionResult]:

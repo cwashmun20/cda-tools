@@ -9,12 +9,12 @@ from dataclasses import dataclass
 from datetime import date
 from typing import IO, Union
 
-from cda_core.lib import competition
-from cda_core.lib.api.client import DancerLookupError
 from entry_checking.lib.entry_checker import EntryChecker
 from entry_checking.lib.parsing.csv_reader import read_entries
 from entry_checking.lib.parsing.multi_dance_expander import expand_multi_dance_events
 from entry_checking.lib.report_view import ReportView, build_report_view
+from utils.lib import competition
+from utils.lib.api.client import DancerLookupError
 
 
 @dataclass

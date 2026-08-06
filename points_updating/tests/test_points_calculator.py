@@ -5,17 +5,17 @@ import unittest
 
 import numpy as np
 
-from cda_core.lib.api.client import DancerRecord
-from cda_core.lib.models.dance import Dance
-from cda_core.lib.models.dancer import Dancer
 from points_updating.lib.models.result import CompetitionResult, DancerRef
 from points_updating.lib.points_calculator import PointsCalculator
 from points_updating.lib.rules import cascade
+from utils.lib.api.client import DancerRecord
+from utils.lib.models.dance import Dance
+from utils.lib.models.dancer import Dancer
 
 
 def _make_dancer(first, last, syllabus_pts=None, open_pts=None):
     """Helper to create a real Dancer with controlled points - same shape as
-    cda_core/tests/test_proficiency_calculator.py's dancer-building helper.
+    utils/tests/test_proficiency_calculator.py's dancer-building helper.
     """
     if syllabus_pts is None:
         syllabus_pts = np.zeros((4, 19), dtype=int)

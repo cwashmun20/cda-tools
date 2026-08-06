@@ -10,8 +10,8 @@ from typing import Iterator
 
 import numpy as np
 
-from cda_core.lib import constants
-from cda_core.lib.models.dance import Dance
+from utils.lib import constants
+from utils.lib.models.dance import Dance
 
 
 @dataclass

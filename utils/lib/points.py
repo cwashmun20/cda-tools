@@ -6,8 +6,8 @@ a dancer's point totals across all syllabus and open levels.
 
 import numpy as np
 
-from cda_core.lib import constants
-from cda_core.lib.constants import Style
+from utils.lib import constants
+from utils.lib.constants import Style
 
 
 class Points:

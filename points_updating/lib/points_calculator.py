@@ -3,18 +3,18 @@
 Provides PointsCalculator, which scores one CompetitionResult against a
 couple's current proficiency levels: detecting the Split-Level Exception
 (which triples the award) and cascading the resulting award down through
-lower levels via cda_core's award table and cascade logic.
+lower levels via utils's award table and cascade logic.
 """
 
 from dataclasses import dataclass
 
-from cda_core.lib import constants
-from cda_core.lib.constants import Style
-from cda_core.lib.models.dancer import Dancer
-from cda_core.lib.proficiency_calculator import ProficiencyCalculator
 from points_updating.lib.models.result import CompetitionResult
 from points_updating.lib.rules import award_table, cascade
 from points_updating.lib.rules.cascade import PointDelta
+from utils.lib import constants
+from utils.lib.constants import Style
+from utils.lib.models.dancer import Dancer
+from utils.lib.proficiency_calculator import ProficiencyCalculator
 
 
 @dataclass

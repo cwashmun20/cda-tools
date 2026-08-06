@@ -3,8 +3,8 @@
 import unittest
 from datetime import date
 
-from cda_core.lib.models.dance import Dance
 from points_updating.lib.models.result import CompetitionResult, DancerRef
+from utils.lib.models.dance import Dance
 
 
 class TestDancerRef(unittest.TestCase):

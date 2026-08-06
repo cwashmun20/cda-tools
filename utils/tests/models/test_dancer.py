@@ -1,13 +1,13 @@
-"""Tests for cda_core.lib.models.dancer module."""
+"""Tests for utils.lib.models.dancer module."""
 
 import unittest
 import datetime
 import numpy as np
-from cda_core.lib.api.client import DancerRecord
-from cda_core.lib.models.dance import Dance
-from cda_core.lib.models.dancer import Dancer
-from cda_core.lib.models.entry import Entry
-from cda_core.lib.models.partnership import Partnership
+from utils.lib.api.client import DancerRecord
+from utils.lib.models.dance import Dance
+from utils.lib.models.dancer import Dancer
+from utils.lib.models.entry import Entry
+from utils.lib.models.partnership import Partnership
 
 
 class TestDancerGetPoints(unittest.TestCase):

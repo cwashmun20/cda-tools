@@ -13,13 +13,13 @@ processed in.
 from datetime import date
 from typing import Callable
 
-from cda_core.lib.api.client import DancerRecord, lookup_dancer
-from cda_core.lib.models.dancer import Dancer
-from cda_core.lib.points import Points
 from points_updating.lib.models.result import CompetitionResult, DancerRef
 from points_updating.lib.points_calculator import PointsCalculator, ResultAward
 from points_updating.lib.rules.eligibility_filter import filter_points_eligible
 from points_updating.lib.rules.event_selection import select_points_event_results
+from utils.lib.api.client import DancerRecord, lookup_dancer
+from utils.lib.models.dancer import Dancer
+from utils.lib.points import Points
 
 
 class UpdateEngine:

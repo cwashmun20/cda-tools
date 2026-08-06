@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Optional
 
-from cda_core.lib.constants import Style
+from utils.lib.constants import Style
 
 
 class ViolationType(StrEnum):

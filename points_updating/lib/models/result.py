@@ -9,7 +9,7 @@ the raw strings.
 from dataclasses import dataclass
 from datetime import date
 
-from cda_core.lib.models.dance import Dance
+from utils.lib.models.dance import Dance
 
 
 @dataclass(frozen=True)

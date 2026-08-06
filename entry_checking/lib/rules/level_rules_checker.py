@@ -5,10 +5,10 @@ for too many or non-consecutive levels of any single dance, or too wide a
 range of levels overall within a style.
 """
 
-from cda_core.lib import constants
-from cda_core.lib.constants import Style
-from cda_core.lib.models.dancer import Dancer
 from entry_checking.lib.rules.violations import LevelViolation, LevelViolationType
+from utils.lib import constants
+from utils.lib.constants import Style
+from utils.lib.models.dancer import Dancer
 
 
 class LevelRulesChecker:

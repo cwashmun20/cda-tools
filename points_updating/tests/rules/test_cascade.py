@@ -4,8 +4,8 @@ import unittest
 
 import numpy as np
 
-from cda_core.lib.models.dance import Dance
 from points_updating.lib.rules import award_table, cascade
+from utils.lib.models.dance import Dance
 
 
 class TestBuildCascadeDelta(unittest.TestCase):

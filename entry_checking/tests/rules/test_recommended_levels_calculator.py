@@ -3,10 +3,10 @@
 import unittest
 import datetime
 import numpy as np
-from cda_core.lib.api.client import DancerRecord
-from cda_core.lib.models.dancer import Dancer
-from cda_core.lib.models.partnership import Partnership
 from entry_checking.lib.rules.recommended_levels_calculator import RecommendedLevelsCalculator
+from utils.lib.api.client import DancerRecord
+from utils.lib.models.dancer import Dancer
+from utils.lib.models.partnership import Partnership
 
 
 class TestRecommendedLevelsCalculator(unittest.TestCase):

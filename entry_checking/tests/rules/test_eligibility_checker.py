@@ -3,13 +3,13 @@
 import unittest
 import datetime
 import numpy as np
-from cda_core.lib.api.client import DancerRecord
-from cda_core.lib.models.dancer import Dancer
-from cda_core.lib.models.dance import Dance
-from cda_core.lib.models.entry import Entry
-from cda_core.lib.models.partnership import Partnership
 from entry_checking.lib.rules.eligibility_checker import EligibilityChecker
 from entry_checking.lib.rules.violations import ViolationType
+from utils.lib.api.client import DancerRecord
+from utils.lib.models.dancer import Dancer
+from utils.lib.models.dance import Dance
+from utils.lib.models.entry import Entry
+from utils.lib.models.partnership import Partnership
 
 
 class _MockDancer:

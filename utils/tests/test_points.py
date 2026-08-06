@@ -1,8 +1,8 @@
-"""Tests for cda_core.lib.points module."""
+"""Tests for utils.lib.points module."""
 
 import unittest
 import numpy as np
-from cda_core.lib.points import Points
+from utils.lib.points import Points
 
 
 class TestPoints(unittest.TestCase):

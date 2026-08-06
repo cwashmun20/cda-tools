@@ -1,4 +1,4 @@
-"""cda_core library package.
+"""utils library package.
 
 Contains domain models, API client, constants, and utility modules
 for CDA Fair Level Certification.

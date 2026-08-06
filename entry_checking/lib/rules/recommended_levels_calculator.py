@@ -5,10 +5,10 @@ to register at for a given style, based on both dancers' proficiency across
 every dance in that style.
 """
 
-from cda_core.lib import constants
-from cda_core.lib.constants import Style
-from cda_core.lib.models.partnership import Partnership
-from cda_core.lib.proficiency_calculator import ProficiencyCalculator
+from utils.lib import constants
+from utils.lib.constants import Style
+from utils.lib.models.partnership import Partnership
+from utils.lib.proficiency_calculator import ProficiencyCalculator
 
 
 class RecommendedLevelsCalculator:

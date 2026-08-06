@@ -1,15 +1,15 @@
 import datetime
 from typing import Optional, TYPE_CHECKING
 
-from cda_core.lib import constants
-from cda_core.lib.api.client import DancerRecord, lookup_dancer
-from cda_core.lib.constants import Style, SyllabusLevel
-from cda_core.lib.models.dance import Dance
-from cda_core.lib.models.entry import Entry
-from cda_core.lib.points import Points
+from utils.lib import constants
+from utils.lib.api.client import DancerRecord, lookup_dancer
+from utils.lib.constants import Style, SyllabusLevel
+from utils.lib.models.dance import Dance
+from utils.lib.models.entry import Entry
+from utils.lib.points import Points
 
 if TYPE_CHECKING:
-    from cda_core.lib.models.partnership import Partnership
+    from utils.lib.models.partnership import Partnership
 
 
 class Dancer:

@@ -7,14 +7,14 @@ structured EligibilityResult objects.
 
 from typing import cast
 
-from cda_core.lib import constants
-from cda_core.lib.constants import NightclubLevel, OpenLevel, RookieVetLevel, Style, SyllabusLevel
-from cda_core.lib.models.dance import Dance
-from cda_core.lib.models.dancer import Dancer
-from cda_core.lib.models.partnership import Partnership
-from cda_core.lib.proficiency_calculator import ProficiencyCalculator
 from entry_checking.lib.rules.recommended_levels_calculator import RecommendedLevelsCalculator
 from entry_checking.lib.rules.violations import EligibilityResult, ViolationType
+from utils.lib import constants
+from utils.lib.constants import NightclubLevel, OpenLevel, RookieVetLevel, Style, SyllabusLevel
+from utils.lib.models.dance import Dance
+from utils.lib.models.dancer import Dancer
+from utils.lib.models.partnership import Partnership
+from utils.lib.proficiency_calculator import ProficiencyCalculator
 
 
 class EligibilityChecker:

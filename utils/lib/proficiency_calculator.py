@@ -7,10 +7,10 @@ detection, within-style, and cross-style proficiency.
 
 from typing import Optional
 
-from cda_core.lib import constants
-from cda_core.lib.constants import Style
-from cda_core.lib.models.dance import Dance
-from cda_core.lib.models.dancer import Dancer
+from utils.lib import constants
+from utils.lib.constants import Style
+from utils.lib.models.dance import Dance
+from utils.lib.models.dancer import Dancer
 
 
 class ProficiencyCalculator:

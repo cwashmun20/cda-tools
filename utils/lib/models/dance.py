@@ -2,14 +2,14 @@
 
 This module provides the Dance class and functions for converting
 dance names and levels from spreadsheet input to standard naming conventions.
-All constants have been moved to cda_core.lib.constants.
+All constants have been moved to utils.lib.constants.
 """
 
 import difflib
 from typing import Optional
 
-from cda_core.lib import constants
-from cda_core.lib.constants import DanceName, NightclubLevel, OpenLevel, RookieVetLevel, Style
+from utils.lib import constants
+from utils.lib.constants import DanceName, NightclubLevel, OpenLevel, RookieVetLevel, Style
 
 # Minimum similarity ratio (see difflib.SequenceMatcher.ratio) for a spelling
 # variant to be accepted as a match. Chosen to catch case/spacing/punctuation

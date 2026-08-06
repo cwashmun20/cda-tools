@@ -11,13 +11,13 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from cda_core.lib import competition
-from cda_core.lib.api.client import DancerRecord
-from cda_core.lib.models.dance import Dance
-from cda_core.lib.models.dancer import Dancer
-from cda_core.lib.models.partnership import Partnership
 from entry_checking.lib.entry_checker import EntryChecker, _report
 from entry_checking.lib.rules.violations import EligibilityResult, LevelViolation, ViolationType
+from utils.lib import competition
+from utils.lib.api.client import DancerRecord
+from utils.lib.models.dance import Dance
+from utils.lib.models.dancer import Dancer
+from utils.lib.models.partnership import Partnership
 
 
 def _mock_dancer(comp_date, first, last):

@@ -3,11 +3,11 @@
 import unittest
 from datetime import date
 
-from cda_core.lib import constants
-from cda_core.lib.constants import Style
-from cda_core.lib.models.dance import Dance
 from points_updating.lib.models.result import CompetitionResult, DancerRef
 from points_updating.lib.rules import event_selection
+from utils.lib import constants
+from utils.lib.constants import Style
+from utils.lib.models.dance import Dance
 
 _LEAD = DancerRef(first="Jane", last="Doe")
 _FOLLOW = DancerRef(first="John", last="Smith")

@@ -5,12 +5,12 @@ from datetime import date
 
 import numpy as np
 
-from cda_core.lib.models.dance import Dance
-from cda_core.lib.points import Points
 from points_updating.lib.models.result import CompetitionResult, DancerRef
 from points_updating.lib.points_calculator import ResultAward
 from points_updating.lib.report import build_report, render_report
 from points_updating.lib.rules import award_table, cascade
+from utils.lib.models.dance import Dance
+from utils.lib.points import Points
 
 
 def _make_award(

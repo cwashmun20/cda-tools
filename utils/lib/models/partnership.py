@@ -1,5 +1,5 @@
-from cda_core.lib.models.dancer import Dancer
-from cda_core.lib.models.entry import Entry
+from utils.lib.models.dancer import Dancer
+from utils.lib.models.entry import Entry
 
 
 class Partnership:

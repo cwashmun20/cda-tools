@@ -12,10 +12,10 @@ happen, but because they don't count toward points.
 from collections import defaultdict
 from typing import Hashable
 
-from cda_core.lib import constants
-from cda_core.lib.constants import DanceName
-from cda_core.lib.models.dance import Dance
 from points_updating.lib.models.result import CompetitionResult
+from utils.lib import constants
+from utils.lib.constants import DanceName
+from utils.lib.models.dance import Dance
 
 _TIEBREAK_DANCES = (DanceName.WALTZ, DanceName.CHA_CHA)
 

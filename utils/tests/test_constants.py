@@ -1,7 +1,7 @@
-"""Tests for cda_core.lib.constants module."""
+"""Tests for utils.lib.constants module."""
 
 import unittest
-from cda_core.lib.constants import (
+from utils.lib.constants import (
     Style,
     SyllabusLevel,
     OpenLevel,
