@@ -7,36 +7,8 @@ into individual dance rows for processing.
 import pandas as pd
 
 from utils.lib import constants
-from utils.lib.constants import Style
 from utils.lib.models.dance import convert_style
-
-
-def expand_abbreviation(style: Style, abbreviation: str) -> list[str]:
-    """Expand a multi-dance abbreviation into individual dance names.
-
-    Args:
-        style: The dance style (e.g. "Standard", "Smooth").
-        abbreviation: The abbreviation string (e.g. "WTQ", "FV", "CSR").
-    Returns:
-        A list of full dance names.
-    Raises:
-        ValueError: If the style has no abbreviation map.
-    """
-    if style not in constants.ABBREVIATION_MAPS:
-        raise ValueError(
-            f"No abbreviation map found for style '{style}'. "
-            f"Supported styles: {list(constants.ABBREVIATION_MAPS.keys())}"
-        )
-
-    abbrev_map = constants.ABBREVIATION_MAPS[style]
-    dances = []
-    for char in abbreviation:
-        if char in abbrev_map:
-            dances.append(abbrev_map[char])
-        else:
-            # Keep unknown characters as-is (they may be partial names)
-            dances.append(char)
-    return dances
+from utils.lib.multi_dance import expand_abbreviation
 
 
 def expand_multi_dance_events(df: pd.DataFrame) -> pd.DataFrame:
