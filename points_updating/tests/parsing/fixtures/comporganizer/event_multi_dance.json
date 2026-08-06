@@ -1,0 +1,932 @@
+{
+  "Status": 1,
+  "Result": {
+    "Event": {
+      "ID": 93,
+      "Name": "Closed Gold Int'l Waltz & QS",
+      "Heat": 12,
+      "Type": "Couple",
+      "Ballroom": "Main Ballroom",
+      "Floor": "A",
+      "Alternates_Formula": null,
+      "JandJ": 0,
+      "First_Heat": "2/7/2026 10:09:00 AM",
+      "Rounds": [
+        {
+          "ID": 59,
+          "Name": "Semi-Final",
+          "Date_Time": "2/7/2026 10:09:00 AM",
+          "Session_ID": 1,
+          "Scoring_Method": "Prelims",
+          "Dances": [
+            {
+              "Dance_ID": "WAL",
+              "Judges": [
+                {
+                  "ID": 2,
+                  "People_ID": 437,
+                  "Judge_Letter": "B",
+                  "Name": [
+                    "Lorena",
+                    "Bravo"
+                  ],
+                  "Photo_URL": "437.jpg",
+                  "Residence": "Sherman Oaks, CA"
+                },
+                {
+                  "ID": 3,
+                  "People_ID": 693,
+                  "Judge_Letter": "C",
+                  "Name": [
+                    "Ikaika",
+                    "Dowsett"
+                  ],
+                  "Photo_URL": "693.jpeg",
+                  "Residence": "Campbell, CA"
+                },
+                {
+                  "ID": 4,
+                  "People_ID": 12514,
+                  "Judge_Letter": "D",
+                  "Name": [
+                    "Stacey",
+                    "Chuang"
+                  ],
+                  "Photo_URL": "12514.jpg",
+                  "Residence": "San Jose, CA"
+                },
+                {
+                  "ID": 5,
+                  "People_ID": 24818,
+                  "Judge_Letter": "E",
+                  "Name": [
+                    "Roberta",
+                    "Lanard"
+                  ],
+                  "Photo_URL": "24818.jpg",
+                  "Residence": "San Jose, CA"
+                },
+                {
+                  "ID": 6,
+                  "People_ID": 1000,
+                  "Judge_Letter": "F",
+                  "Name": [
+                    "Marcus",
+                    "Johnson"
+                  ],
+                  "Photo_URL": "1000.jpg",
+                  "Residence": "San Diego, CA"
+                }
+              ],
+              "Competitors": [
+                {
+                  "ID": 38,
+                  "Bib": 358,
+                  "Marks": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    0
+                  ],
+                  "Codes": [],
+                  "Average": null,
+                  "Result": null,
+                  "Participants": [
+                    {
+                      "ID": 197,
+                      "Name": [
+                        "Kaiyu",
+                        "Ren"
+                      ]
+                    },
+                    {
+                      "ID": 13,
+                      "Name": [
+                        "Kristina",
+                        "Andreyeva"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                },
+                {
+                  "ID": 98,
+                  "Bib": 368,
+                  "Marks": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                  ],
+                  "Codes": [],
+                  "Average": null,
+                  "Result": null,
+                  "Participants": [
+                    {
+                      "ID": 87,
+                      "Name": [
+                        "Eli",
+                        "Hamre"
+                      ]
+                    },
+                    {
+                      "ID": 217,
+                      "Name": [
+                        "Kai",
+                        "Seo"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                },
+                {
+                  "ID": 17,
+                  "Bib": 481,
+                  "Marks": [
+                    0,
+                    1,
+                    0,
+                    1,
+                    1
+                  ],
+                  "Codes": [],
+                  "Average": null,
+                  "Result": null,
+                  "Participants": [
+                    {
+                      "ID": 189,
+                      "Name": [
+                        "Anton",
+                        "Polishko"
+                      ]
+                    },
+                    {
+                      "ID": 244,
+                      "Name": [
+                        "Olga",
+                        "Tanaseichuk"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                }
+              ],
+              "Dance_Name": "Int'l Waltz",
+              "Dance_Abbreviation": "Wal",
+              "Penalties": null
+            },
+            {
+              "Dance_ID": "QS",
+              "Judges": [
+                {
+                  "ID": 2,
+                  "People_ID": 437,
+                  "Judge_Letter": "B",
+                  "Name": [
+                    "Lorena",
+                    "Bravo"
+                  ],
+                  "Photo_URL": "437.jpg",
+                  "Residence": "Sherman Oaks, CA"
+                },
+                {
+                  "ID": 3,
+                  "People_ID": 693,
+                  "Judge_Letter": "C",
+                  "Name": [
+                    "Ikaika",
+                    "Dowsett"
+                  ],
+                  "Photo_URL": "693.jpeg",
+                  "Residence": "Campbell, CA"
+                },
+                {
+                  "ID": 4,
+                  "People_ID": 12514,
+                  "Judge_Letter": "D",
+                  "Name": [
+                    "Stacey",
+                    "Chuang"
+                  ],
+                  "Photo_URL": "12514.jpg",
+                  "Residence": "San Jose, CA"
+                },
+                {
+                  "ID": 5,
+                  "People_ID": 24818,
+                  "Judge_Letter": "E",
+                  "Name": [
+                    "Roberta",
+                    "Lanard"
+                  ],
+                  "Photo_URL": "24818.jpg",
+                  "Residence": "San Jose, CA"
+                },
+                {
+                  "ID": 6,
+                  "People_ID": 1000,
+                  "Judge_Letter": "F",
+                  "Name": [
+                    "Marcus",
+                    "Johnson"
+                  ],
+                  "Photo_URL": "1000.jpg",
+                  "Residence": "San Diego, CA"
+                }
+              ],
+              "Competitors": [
+                {
+                  "ID": 38,
+                  "Bib": 358,
+                  "Marks": [
+                    1,
+                    0,
+                    0,
+                    1,
+                    1
+                  ],
+                  "Codes": [],
+                  "Average": null,
+                  "Result": null,
+                  "Participants": [
+                    {
+                      "ID": 197,
+                      "Name": [
+                        "Kaiyu",
+                        "Ren"
+                      ]
+                    },
+                    {
+                      "ID": 13,
+                      "Name": [
+                        "Kristina",
+                        "Andreyeva"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                },
+                {
+                  "ID": 98,
+                  "Bib": 368,
+                  "Marks": [
+                    1,
+                    1,
+                    1,
+                    0,
+                    1
+                  ],
+                  "Codes": [],
+                  "Average": null,
+                  "Result": null,
+                  "Participants": [
+                    {
+                      "ID": 87,
+                      "Name": [
+                        "Eli",
+                        "Hamre"
+                      ]
+                    },
+                    {
+                      "ID": 217,
+                      "Name": [
+                        "Kai",
+                        "Seo"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                },
+                {
+                  "ID": 17,
+                  "Bib": 481,
+                  "Marks": [
+                    0,
+                    1,
+                    1,
+                    1,
+                    1
+                  ],
+                  "Codes": [],
+                  "Average": null,
+                  "Result": null,
+                  "Participants": [
+                    {
+                      "ID": 189,
+                      "Name": [
+                        "Anton",
+                        "Polishko"
+                      ]
+                    },
+                    {
+                      "ID": 244,
+                      "Name": [
+                        "Olga",
+                        "Tanaseichuk"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                }
+              ],
+              "Dance_Name": "Int'l Quickstep",
+              "Dance_Abbreviation": "QS",
+              "Penalties": null
+            }
+          ],
+          "Summary": {
+            "Result_Headers": [
+              "Total",
+              "Result"
+            ],
+            "Competitors": [
+              {
+                "ID": 38,
+                "Bib": 358,
+                "Marks": [
+                  1,
+                  1,
+                  1,
+                  1,
+                  0,
+                  1,
+                  0,
+                  0,
+                  1,
+                  1
+                ],
+                "Total": 7,
+                "Result": null,
+                "Recalled": 1,
+                "Participants": [
+                  {
+                    "ID": 197,
+                    "Name": [
+                      "Kaiyu",
+                      "Ren"
+                    ]
+                  },
+                  {
+                    "ID": 13,
+                    "Name": [
+                      "Kristina",
+                      "Andreyeva"
+                    ]
+                  }
+                ]
+              },
+              {
+                "ID": 98,
+                "Bib": 368,
+                "Marks": [
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  0,
+                  1
+                ],
+                "Total": 9,
+                "Result": null,
+                "Recalled": 1,
+                "Participants": [
+                  {
+                    "ID": 87,
+                    "Name": [
+                      "Eli",
+                      "Hamre"
+                    ]
+                  },
+                  {
+                    "ID": 217,
+                    "Name": [
+                      "Kai",
+                      "Seo"
+                    ]
+                  }
+                ]
+              },
+              {
+                "ID": 17,
+                "Bib": 481,
+                "Marks": [
+                  0,
+                  1,
+                  0,
+                  1,
+                  1,
+                  0,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "Total": 7,
+                "Result": null,
+                "Recalled": 1,
+                "Participants": [
+                  {
+                    "ID": 189,
+                    "Name": [
+                      "Anton",
+                      "Polishko"
+                    ]
+                  },
+                  {
+                    "ID": 244,
+                    "Name": [
+                      "Olga",
+                      "Tanaseichuk"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "Alternates_Formula": null
+        },
+        {
+          "ID": 75,
+          "Name": "Final",
+          "Date_Time": "2/7/2026 10:50:00 AM",
+          "Session_ID": 1,
+          "Scoring_Method": "Skated",
+          "Dances": [
+            {
+              "Dance_ID": "WAL",
+              "Judges": [
+                {
+                  "ID": 1,
+                  "People_ID": 314,
+                  "Judge_Letter": "A",
+                  "Name": [
+                    "Jonathan",
+                    "Atkinson"
+                  ],
+                  "Photo_URL": "314.jpg",
+                  "Residence": "Los Angeles"
+                },
+                {
+                  "ID": 5,
+                  "People_ID": 24818,
+                  "Judge_Letter": "E",
+                  "Name": [
+                    "Roberta",
+                    "Lanard"
+                  ],
+                  "Photo_URL": "24818.jpg",
+                  "Residence": "San Jose, CA"
+                },
+                {
+                  "ID": 6,
+                  "People_ID": 1000,
+                  "Judge_Letter": "F",
+                  "Name": [
+                    "Marcus",
+                    "Johnson"
+                  ],
+                  "Photo_URL": "1000.jpg",
+                  "Residence": "San Diego, CA"
+                },
+                {
+                  "ID": 7,
+                  "People_ID": 1993,
+                  "Judge_Letter": "G",
+                  "Name": [
+                    "Alexandru",
+                    "Zagrean"
+                  ],
+                  "Photo_URL": "1993.jpg",
+                  "Residence": "Ventura, CA"
+                },
+                {
+                  "ID": 8,
+                  "People_ID": 31036,
+                  "Judge_Letter": "H",
+                  "Name": [
+                    "Igor",
+                    "Colac"
+                  ],
+                  "Photo_URL": "31036.jpg",
+                  "Residence": "Huntington Beach, CA"
+                }
+              ],
+              "Competitors": [
+                {
+                  "ID": 38,
+                  "Bib": 358,
+                  "Scores": [],
+                  "Marks": [
+                    2,
+                    7,
+                    4,
+                    3,
+                    7
+                  ],
+                  "Codes": [
+                    "",
+                    1,
+                    2,
+                    3,
+                    "-",
+                    "-",
+                    "-"
+                  ],
+                  "Average": null,
+                  "Result": 4,
+                  "Participants": [
+                    {
+                      "ID": 197,
+                      "Name": [
+                        "Kaiyu",
+                        "Ren"
+                      ]
+                    },
+                    {
+                      "ID": 13,
+                      "Name": [
+                        "Kristina",
+                        "Andreyeva"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                },
+                {
+                  "ID": 98,
+                  "Bib": 368,
+                  "Scores": [],
+                  "Marks": [
+                    3,
+                    4,
+                    2,
+                    5,
+                    3
+                  ],
+                  "Codes": [
+                    "",
+                    1,
+                    3,
+                    "-",
+                    "-",
+                    "-",
+                    "-"
+                  ],
+                  "Average": null,
+                  "Result": 2,
+                  "Participants": [
+                    {
+                      "ID": 87,
+                      "Name": [
+                        "Eli",
+                        "Hamre"
+                      ]
+                    },
+                    {
+                      "ID": 217,
+                      "Name": [
+                        "Kai",
+                        "Seo"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                },
+                {
+                  "ID": 17,
+                  "Bib": 481,
+                  "Scores": [],
+                  "Marks": [
+                    5,
+                    5,
+                    6,
+                    7,
+                    6
+                  ],
+                  "Codes": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    2,
+                    4,
+                    "-"
+                  ],
+                  "Average": null,
+                  "Result": 6,
+                  "Participants": [
+                    {
+                      "ID": 189,
+                      "Name": [
+                        "Anton",
+                        "Polishko"
+                      ]
+                    },
+                    {
+                      "ID": 244,
+                      "Name": [
+                        "Olga",
+                        "Tanaseichuk"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                }
+              ],
+              "Dance_Name": "Int'l Waltz",
+              "Dance_Abbreviation": "Wal",
+              "Penalties": null
+            },
+            {
+              "Dance_ID": "QS",
+              "Judges": [
+                {
+                  "ID": 1,
+                  "People_ID": 314,
+                  "Judge_Letter": "A",
+                  "Name": [
+                    "Jonathan",
+                    "Atkinson"
+                  ],
+                  "Photo_URL": "314.jpg",
+                  "Residence": "Los Angeles"
+                },
+                {
+                  "ID": 5,
+                  "People_ID": 24818,
+                  "Judge_Letter": "E",
+                  "Name": [
+                    "Roberta",
+                    "Lanard"
+                  ],
+                  "Photo_URL": "24818.jpg",
+                  "Residence": "San Jose, CA"
+                },
+                {
+                  "ID": 6,
+                  "People_ID": 1000,
+                  "Judge_Letter": "F",
+                  "Name": [
+                    "Marcus",
+                    "Johnson"
+                  ],
+                  "Photo_URL": "1000.jpg",
+                  "Residence": "San Diego, CA"
+                },
+                {
+                  "ID": 7,
+                  "People_ID": 1993,
+                  "Judge_Letter": "G",
+                  "Name": [
+                    "Alexandru",
+                    "Zagrean"
+                  ],
+                  "Photo_URL": "1993.jpg",
+                  "Residence": "Ventura, CA"
+                },
+                {
+                  "ID": 8,
+                  "People_ID": 31036,
+                  "Judge_Letter": "H",
+                  "Name": [
+                    "Igor",
+                    "Colac"
+                  ],
+                  "Photo_URL": "31036.jpg",
+                  "Residence": "Huntington Beach, CA"
+                }
+              ],
+              "Competitors": [
+                {
+                  "ID": 38,
+                  "Bib": 358,
+                  "Scores": [],
+                  "Marks": [
+                    6,
+                    7,
+                    5,
+                    2,
+                    7
+                  ],
+                  "Codes": [
+                    "",
+                    1,
+                    1,
+                    1,
+                    2,
+                    3,
+                    "-"
+                  ],
+                  "Average": null,
+                  "Result": 7,
+                  "Participants": [
+                    {
+                      "ID": 197,
+                      "Name": [
+                        "Kaiyu",
+                        "Ren"
+                      ]
+                    },
+                    {
+                      "ID": 13,
+                      "Name": [
+                        "Kristina",
+                        "Andreyeva"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                },
+                {
+                  "ID": 98,
+                  "Bib": 368,
+                  "Scores": [],
+                  "Marks": [
+                    2,
+                    4,
+                    2,
+                    3,
+                    6
+                  ],
+                  "Codes": [
+                    "",
+                    2,
+                    "3(7)",
+                    "-",
+                    "-",
+                    "-",
+                    "-"
+                  ],
+                  "Average": null,
+                  "Result": 2,
+                  "Participants": [
+                    {
+                      "ID": 87,
+                      "Name": [
+                        "Eli",
+                        "Hamre"
+                      ]
+                    },
+                    {
+                      "ID": 217,
+                      "Name": [
+                        "Kai",
+                        "Seo"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                },
+                {
+                  "ID": 17,
+                  "Bib": 481,
+                  "Scores": [],
+                  "Marks": [
+                    1,
+                    6,
+                    7,
+                    6,
+                    1
+                  ],
+                  "Codes": [
+                    2,
+                    2,
+                    2,
+                    2,
+                    2,
+                    4,
+                    "-"
+                  ],
+                  "Average": null,
+                  "Result": 6,
+                  "Participants": [
+                    {
+                      "ID": 189,
+                      "Name": [
+                        "Anton",
+                        "Polishko"
+                      ]
+                    },
+                    {
+                      "ID": 244,
+                      "Name": [
+                        "Olga",
+                        "Tanaseichuk"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                }
+              ],
+              "Dance_Name": "Int'l Quickstep",
+              "Dance_Abbreviation": "QS",
+              "Penalties": null
+            }
+          ],
+          "Summary": {
+            "Result_Headers": [
+              "Total",
+              "Result"
+            ],
+            "Competitors": [
+              {
+                "ID": 38,
+                "Bib": 358,
+                "Marks": [
+                  4,
+                  7
+                ],
+                "Total": null,
+                "Result": [
+                  11,
+                  5
+                ],
+                "Participants": [
+                  {
+                    "ID": 197,
+                    "Name": [
+                      "Kaiyu",
+                      "Ren"
+                    ]
+                  },
+                  {
+                    "ID": 13,
+                    "Name": [
+                      "Kristina",
+                      "Andreyeva"
+                    ]
+                  }
+                ]
+              },
+              {
+                "ID": 98,
+                "Bib": 368,
+                "Marks": [
+                  2,
+                  2
+                ],
+                "Total": null,
+                "Result": [
+                  4,
+                  3
+                ],
+                "Participants": [
+                  {
+                    "ID": 87,
+                    "Name": [
+                      "Eli",
+                      "Hamre"
+                    ]
+                  },
+                  {
+                    "ID": 217,
+                    "Name": [
+                      "Kai",
+                      "Seo"
+                    ]
+                  }
+                ]
+              },
+              {
+                "ID": 17,
+                "Bib": 481,
+                "Marks": [
+                  6,
+                  6
+                ],
+                "Total": null,
+                "Result": [
+                  12,
+                  6
+                ],
+                "Participants": [
+                  {
+                    "ID": 189,
+                    "Name": [
+                      "Anton",
+                      "Polishko"
+                    ]
+                  },
+                  {
+                    "ID": 244,
+                    "Name": [
+                      "Olga",
+                      "Tanaseichuk"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "Alternates_Formula": null
+        }
+      ]
+    }
+  }
+}

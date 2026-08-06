@@ -1,0 +1,23 @@
+{
+  "Status": 1,
+  "Result": {
+    "Events": [
+      {
+        "ID": 38,
+        "Name": "Closed Bronze Int'l Waltz"
+      },
+      {
+        "ID": 93,
+        "Name": "Closed Gold Int'l Waltz & QS"
+      },
+      {
+        "ID": 3,
+        "Name": "Newcomer Int'l Waltz"
+      },
+      {
+        "ID": 120,
+        "Name": "R/V Rookie Follow Int'l Waltz"
+      }
+    ]
+  }
+}

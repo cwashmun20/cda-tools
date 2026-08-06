@@ -1,0 +1,562 @@
+{
+  "Status": 1,
+  "Result": {
+    "Event": {
+      "ID": 38,
+      "Name": "Closed Bronze Int'l Waltz",
+      "Heat": 1,
+      "Type": "Couple",
+      "Ballroom": "Main Ballroom",
+      "Floor": "A",
+      "Alternates_Formula": null,
+      "JandJ": 0,
+      "First_Heat": "2/7/2026 08:30:00 AM",
+      "Rounds": [
+        {
+          "ID": 31,
+          "Name": "First Round",
+          "Date_Time": "2/7/2026 08:30:00 AM",
+          "Session_ID": 1,
+          "Scoring_Method": "Prelims",
+          "Dances": [
+            {
+              "Dance_ID": "WAL",
+              "Judges": [
+                {
+                  "ID": 2,
+                  "People_ID": 437,
+                  "Judge_Letter": "B",
+                  "Name": [
+                    "Lorena",
+                    "Bravo"
+                  ],
+                  "Photo_URL": "437.jpg",
+                  "Residence": "Sherman Oaks, CA"
+                },
+                {
+                  "ID": 3,
+                  "People_ID": 693,
+                  "Judge_Letter": "C",
+                  "Name": [
+                    "Ikaika",
+                    "Dowsett"
+                  ],
+                  "Photo_URL": "693.jpeg",
+                  "Residence": "Campbell, CA"
+                },
+                {
+                  "ID": 4,
+                  "People_ID": 12514,
+                  "Judge_Letter": "D",
+                  "Name": [
+                    "Stacey",
+                    "Chuang"
+                  ],
+                  "Photo_URL": "12514.jpg",
+                  "Residence": "San Jose, CA"
+                },
+                {
+                  "ID": 5,
+                  "People_ID": 24818,
+                  "Judge_Letter": "E",
+                  "Name": [
+                    "Roberta",
+                    "Lanard"
+                  ],
+                  "Photo_URL": "24818.jpg",
+                  "Residence": "San Jose, CA"
+                },
+                {
+                  "ID": 6,
+                  "People_ID": 1000,
+                  "Judge_Letter": "F",
+                  "Name": [
+                    "Marcus",
+                    "Johnson"
+                  ],
+                  "Photo_URL": "1000.jpg",
+                  "Residence": "San Diego, CA"
+                }
+              ],
+              "Competitors": [
+                {
+                  "ID": 97,
+                  "Bib": 440,
+                  "Marks": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                  ],
+                  "Codes": [],
+                  "Average": null,
+                  "Result": null,
+                  "Participants": [
+                    {
+                      "ID": 129,
+                      "Name": [
+                        "Edison",
+                        "Lee"
+                      ]
+                    },
+                    {
+                      "ID": 98,
+                      "Name": [
+                        "Sylvia",
+                        "Imbens"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                },
+                {
+                  "ID": 18,
+                  "Bib": 445,
+                  "Marks": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                  ],
+                  "Codes": [],
+                  "Average": null,
+                  "Result": null,
+                  "Participants": [
+                    {
+                      "ID": 256,
+                      "Name": [
+                        "Fiona",
+                        "Treacy"
+                      ]
+                    },
+                    {
+                      "ID": 240,
+                      "Name": [
+                        "Zoey",
+                        "Sugino"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                },
+                {
+                  "ID": 131,
+                  "Bib": 446,
+                  "Marks": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                  ],
+                  "Codes": [],
+                  "Average": null,
+                  "Result": null,
+                  "Participants": [
+                    {
+                      "ID": 273,
+                      "Name": [
+                        "Eugene",
+                        "Xie"
+                      ]
+                    },
+                    {
+                      "ID": 130,
+                      "Name": [
+                        "Yue Tong",
+                        "Lee"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                }
+              ],
+              "Dance_Name": "Int'l Waltz",
+              "Dance_Abbreviation": "Wal",
+              "Penalties": null
+            }
+          ],
+          "Summary": {
+            "Result_Headers": [
+              "Total",
+              "Result"
+            ],
+            "Competitors": [
+              {
+                "ID": 97,
+                "Bib": 440,
+                "Marks": [
+                  1,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "Total": 5,
+                "Result": null,
+                "Recalled": 1,
+                "Participants": [
+                  {
+                    "ID": 129,
+                    "Name": [
+                      "Edison",
+                      "Lee"
+                    ]
+                  },
+                  {
+                    "ID": 98,
+                    "Name": [
+                      "Sylvia",
+                      "Imbens"
+                    ]
+                  }
+                ]
+              },
+              {
+                "ID": 18,
+                "Bib": 445,
+                "Marks": [
+                  1,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "Total": 5,
+                "Result": null,
+                "Recalled": 1,
+                "Participants": [
+                  {
+                    "ID": 256,
+                    "Name": [
+                      "Fiona",
+                      "Treacy"
+                    ]
+                  },
+                  {
+                    "ID": 240,
+                    "Name": [
+                      "Zoey",
+                      "Sugino"
+                    ]
+                  }
+                ]
+              },
+              {
+                "ID": 131,
+                "Bib": 446,
+                "Marks": [
+                  1,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "Total": 5,
+                "Result": null,
+                "Recalled": 1,
+                "Participants": [
+                  {
+                    "ID": 273,
+                    "Name": [
+                      "Eugene",
+                      "Xie"
+                    ]
+                  },
+                  {
+                    "ID": 130,
+                    "Name": [
+                      "Yue Tong",
+                      "Lee"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "Alternates_Formula": null
+        },
+        {
+          "ID": 65,
+          "Name": "Final",
+          "Date_Time": "2/7/2026 10:23:00 AM",
+          "Session_ID": 1,
+          "Scoring_Method": "Skated",
+          "Dances": [
+            {
+              "Dance_ID": "WAL",
+              "Judges": [
+                {
+                  "ID": 1,
+                  "People_ID": 314,
+                  "Judge_Letter": "A",
+                  "Name": [
+                    "Jonathan",
+                    "Atkinson"
+                  ],
+                  "Photo_URL": "314.jpg",
+                  "Residence": "Los Angeles"
+                },
+                {
+                  "ID": 5,
+                  "People_ID": 24818,
+                  "Judge_Letter": "E",
+                  "Name": [
+                    "Roberta",
+                    "Lanard"
+                  ],
+                  "Photo_URL": "24818.jpg",
+                  "Residence": "San Jose, CA"
+                },
+                {
+                  "ID": 6,
+                  "People_ID": 1000,
+                  "Judge_Letter": "F",
+                  "Name": [
+                    "Marcus",
+                    "Johnson"
+                  ],
+                  "Photo_URL": "1000.jpg",
+                  "Residence": "San Diego, CA"
+                },
+                {
+                  "ID": 7,
+                  "People_ID": 1993,
+                  "Judge_Letter": "G",
+                  "Name": [
+                    "Alexandru",
+                    "Zagrean"
+                  ],
+                  "Photo_URL": "1993.jpg",
+                  "Residence": "Ventura, CA"
+                },
+                {
+                  "ID": 8,
+                  "People_ID": 31036,
+                  "Judge_Letter": "H",
+                  "Name": [
+                    "Igor",
+                    "Colac"
+                  ],
+                  "Photo_URL": "31036.jpg",
+                  "Residence": "Huntington Beach, CA"
+                }
+              ],
+              "Competitors": [
+                {
+                  "ID": 97,
+                  "Bib": 440,
+                  "Scores": [],
+                  "Marks": [
+                    3,
+                    2,
+                    4,
+                    3,
+                    1
+                  ],
+                  "Codes": [
+                    1,
+                    2,
+                    4,
+                    "-"
+                  ],
+                  "Average": null,
+                  "Result": 2,
+                  "Participants": [
+                    {
+                      "ID": 129,
+                      "Name": [
+                        "Edison",
+                        "Lee"
+                      ]
+                    },
+                    {
+                      "ID": 98,
+                      "Name": [
+                        "Sylvia",
+                        "Imbens"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                },
+                {
+                  "ID": 18,
+                  "Bib": 445,
+                  "Scores": [],
+                  "Marks": [
+                    2,
+                    3,
+                    2,
+                    4,
+                    4
+                  ],
+                  "Codes": [
+                    "",
+                    2,
+                    "3(7)",
+                    "-"
+                  ],
+                  "Average": null,
+                  "Result": 3,
+                  "Participants": [
+                    {
+                      "ID": 256,
+                      "Name": [
+                        "Fiona",
+                        "Treacy"
+                      ]
+                    },
+                    {
+                      "ID": 240,
+                      "Name": [
+                        "Zoey",
+                        "Sugino"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                },
+                {
+                  "ID": 131,
+                  "Bib": 446,
+                  "Scores": [],
+                  "Marks": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    2
+                  ],
+                  "Codes": [
+                    4,
+                    "-",
+                    "-",
+                    "-"
+                  ],
+                  "Average": null,
+                  "Result": 1,
+                  "Participants": [
+                    {
+                      "ID": 273,
+                      "Name": [
+                        "Eugene",
+                        "Xie"
+                      ]
+                    },
+                    {
+                      "ID": 130,
+                      "Name": [
+                        "Yue Tong",
+                        "Lee"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                }
+              ],
+              "Dance_Name": "Int'l Waltz",
+              "Dance_Abbreviation": "Wal",
+              "Penalties": null
+            }
+          ],
+          "Summary": {
+            "Result_Headers": [
+              "Total",
+              "Result"
+            ],
+            "Competitors": [
+              {
+                "ID": 97,
+                "Bib": 440,
+                "Marks": [
+                  2
+                ],
+                "Total": null,
+                "Result": [
+                  2,
+                  2
+                ],
+                "Participants": [
+                  {
+                    "ID": 129,
+                    "Name": [
+                      "Edison",
+                      "Lee"
+                    ]
+                  },
+                  {
+                    "ID": 98,
+                    "Name": [
+                      "Sylvia",
+                      "Imbens"
+                    ]
+                  }
+                ]
+              },
+              {
+                "ID": 18,
+                "Bib": 445,
+                "Marks": [
+                  3
+                ],
+                "Total": null,
+                "Result": [
+                  3,
+                  3
+                ],
+                "Participants": [
+                  {
+                    "ID": 256,
+                    "Name": [
+                      "Fiona",
+                      "Treacy"
+                    ]
+                  },
+                  {
+                    "ID": 240,
+                    "Name": [
+                      "Zoey",
+                      "Sugino"
+                    ]
+                  }
+                ]
+              },
+              {
+                "ID": 131,
+                "Bib": 446,
+                "Marks": [
+                  1
+                ],
+                "Total": null,
+                "Result": [
+                  1,
+                  1
+                ],
+                "Participants": [
+                  {
+                    "ID": 273,
+                    "Name": [
+                      "Eugene",
+                      "Xie"
+                    ]
+                  },
+                  {
+                    "ID": 130,
+                    "Name": [
+                      "Yue Tong",
+                      "Lee"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "Alternates_Formula": null
+        }
+      ]
+    }
+  }
+}

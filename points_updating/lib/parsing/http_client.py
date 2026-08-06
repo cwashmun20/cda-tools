@@ -11,11 +11,19 @@ import json
 import pickle
 import time
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Optional, Protocol
 
 import requests
 
 _THROTTLE_STATUS_CODES = frozenset({403, 429})
+
+
+class _RequestTransport(Protocol):
+    """The minimal interface ThrottledClient needs from a session -
+    `requests.Session` satisfies this already; tests inject a lighter fake.
+    """
+
+    def request(self, method: str, url: str, **kwargs) -> requests.Response: ...
 
 
 class ThrottledClient:
@@ -29,7 +37,7 @@ class ThrottledClient:
         min_delay_seconds: float = 1.0,
         max_retries: int = 5,
         backoff_base_seconds: float = 2.0,
-        session: Optional[requests.Session] = None,
+        session: Optional[_RequestTransport] = None,
         cache_dir: Optional[Path] = None,
         sleep: Callable[[float], None] = time.sleep,
         clock: Callable[[], float] = time.monotonic,
