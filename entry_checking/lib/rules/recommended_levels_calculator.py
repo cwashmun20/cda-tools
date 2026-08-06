@@ -8,7 +8,7 @@ every dance in that style.
 from cda_core.lib import constants
 from cda_core.lib.constants import Style
 from cda_core.lib.models.partnership import Partnership
-from cda_core.lib.rules.proficiency import ProficiencyCalculator
+from cda_core.lib.proficiency_calculator import ProficiencyCalculator
 
 
 class RecommendedLevelsCalculator:

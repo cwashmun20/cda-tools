@@ -1,4 +1,4 @@
-"""Tests for entry_checking.lib.rules.eligibility module."""
+"""Tests for entry_checking.lib.rules.eligibility_checker module."""
 
 import unittest
 import datetime
@@ -8,7 +8,7 @@ from cda_core.lib.models.dancer import Dancer
 from cda_core.lib.models.dance import Dance
 from cda_core.lib.models.entry import Entry
 from cda_core.lib.models.partnership import Partnership
-from entry_checking.lib.rules.eligibility import EligibilityChecker
+from entry_checking.lib.rules.eligibility_checker import EligibilityChecker
 from entry_checking.lib.rules.violations import ViolationType
 
 

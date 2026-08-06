@@ -15,7 +15,7 @@ from points_updating.lib.rules import cascade
 
 def _make_dancer(first, last, syllabus_pts=None, open_pts=None):
     """Helper to create a real Dancer with controlled points - same shape as
-    cda_core/tests/rules/test_proficiency.py's dancer-building helper.
+    cda_core/tests/test_proficiency_calculator.py's dancer-building helper.
     """
     if syllabus_pts is None:
         syllabus_pts = np.zeros((4, 19), dtype=int)
@@ -67,7 +67,7 @@ class TestPointsCalculator(unittest.TestCase):
     def test_split_level_exception_triples_award(self):
         """Lead and follow proficiency differ by >=2 levels and they danced
         at the level combined_level designates, tripling the award. Same
-        setup as test_eligibility.py's test_split_level_exception: lead
+        setup as test_eligibility_checker.py's test_split_level_exception: lead
         pointed out to Gold (3), follow at the Bronze floor (1) - the gap's
         combined_level (max-1 = 2) equals the Silver event being danced."""
         syllabus = np.zeros((4, 19), dtype=int)
@@ -87,7 +87,7 @@ class TestPointsCalculator(unittest.TestCase):
     def test_split_level_not_triggered_when_combined_mismatches_event(self):
         """Lead and follow proficiency differ by >=2 levels, but they danced
         at a different level than combined_level designates, so the award
-        isn't tripled. Same setup as test_eligibility.py's
+        isn't tripled. Same setup as test_eligibility_checker.py's
         test_split_level_exception_not_triggered_when_combined_mismatches_event:
         same gap as above, but registered for Bronze instead of the Silver
         level combined_level (2) designates."""

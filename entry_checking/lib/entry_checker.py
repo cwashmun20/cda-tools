@@ -18,8 +18,8 @@ from entry_checking.lib.parsing.csv_reader import read_entries
 from entry_checking.lib.parsing.multi_dance_expander import expand_multi_dance_events
 from entry_checking.lib.parsing.row_parser import is_tba_row
 from entry_checking.lib.report_view import build_report_view
-from entry_checking.lib.rules.eligibility import EligibilityChecker
-from entry_checking.lib.rules.level_rules import LevelRulesChecker
+from entry_checking.lib.rules.eligibility_checker import EligibilityChecker
+from entry_checking.lib.rules.level_rules_checker import LevelRulesChecker
 from entry_checking.lib.rules.violations import EligibilityResult, LevelViolation
 
 

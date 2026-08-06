@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from cda_core.lib import constants
 from cda_core.lib.constants import Style
 from cda_core.lib.models.dancer import Dancer
-from cda_core.lib.rules.proficiency import ProficiencyCalculator
+from cda_core.lib.proficiency_calculator import ProficiencyCalculator
 from points_updating.lib.models.result import CompetitionResult
 from points_updating.lib.rules import award_table, cascade
 from points_updating.lib.rules.cascade import PointDelta

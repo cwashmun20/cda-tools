@@ -1,8 +1,8 @@
-"""Tests for entry_checking.lib.rules.level_rules module."""
+"""Tests for entry_checking.lib.rules.level_rules_checker module."""
 
 import unittest
 from cda_core.lib.models.dance import Dance
-from entry_checking.lib.rules.level_rules import LevelRulesChecker
+from entry_checking.lib.rules.level_rules_checker import LevelRulesChecker
 
 
 class _FakeEntry:
