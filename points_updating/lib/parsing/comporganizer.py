@@ -32,9 +32,19 @@ def resolve_comp_year_id(cbid: str, client: ThrottledClient) -> int:
     Returns:
         CompOrganizer's `Comp_Year_ID` for this competition.
     """
+    return _fetch_comp_info(cbid, client)["Comp_Year_ID"]
+
+
+def fetch_competition_name(cbid: str, client: ThrottledClient) -> str:
+    """Returns the competition's own name for a school's dance.am callback
+    token."""
+    return _fetch_comp_info(cbid, client)["Full_Name"]
+
+
+def _fetch_comp_info(cbid: str, client: ThrottledClient) -> dict:
     response = client.get(_CALLBACK_COMPS_URL, params={"cbid": cbid})
     response.raise_for_status()
-    return response.json()["Comps"][0]["Comp_Year_ID"]
+    return response.json()["Comps"][0]
 
 
 def fetch_event_list(comp_year_id: int, client: ThrottledClient) -> list[tuple[int, str]]:

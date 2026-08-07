@@ -64,6 +64,17 @@ def fetch_heat_list(comp_id: str, client: ThrottledClient) -> list[tuple[str, st
     return heats
 
 
+def fetch_competition_name(comp_id: str, client: ThrottledClient) -> str:
+    """Returns the competition's own name from its results landing page."""
+    response = client.get(_EVENT_URL, params={"event": comp_id})
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "lxml")
+    cell = soup.find("td", class_="h4")
+    if not isinstance(cell, Tag):
+        raise ValueError(f"Could not find a competition name for event={comp_id!r}")
+    return cell.get_text(strip=True)
+
+
 def fetch_heat_page(comp_id: str, heat_id: str, client: ThrottledClient) -> str:
     """Returns one heat's default (Final round) page as raw HTML."""
     response = client.get(_SCORESHEET_URL, params={"event": comp_id, "heatid": heat_id})

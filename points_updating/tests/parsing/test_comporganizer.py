@@ -12,6 +12,7 @@ from points_updating.lib.parsing.comporganizer import (
     _extract_level,
     _lead_follow,
     _parse_event,
+    fetch_competition_name,
     fetch_event_list,
     fetch_event_results,
     parse_competition,
@@ -63,6 +64,22 @@ class TestResolveCompYearId(unittest.TestCase):
         comp_year_id = resolve_comp_year_id("688970749df5c", client)
 
         self.assertEqual(comp_year_id, 9629)
+
+
+class TestFetchCompetitionName(unittest.TestCase):
+    def test_resolves_from_callback_comps_response(self):
+        client = _make_client(
+            {
+                (
+                    "https://comporganizer.com/feed/callback-comps/",
+                    (("cbid", "688970749df5c"),),
+                ): _load_fixture("callback_comps.json")
+            }
+        )
+
+        name = fetch_competition_name("688970749df5c", client)
+
+        self.assertEqual(name, "Cal Poly Mustang Ball")
 
 
 class TestFetchEventList(unittest.TestCase):

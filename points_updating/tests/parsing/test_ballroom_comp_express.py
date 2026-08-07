@@ -21,6 +21,7 @@ from points_updating.lib.parsing.ballroom_comp_express import (
     _parse_event,
     _unescape_js_string,
     extract_embedded_json,
+    fetch_competition_name,
     fetch_event_list,
     fetch_event_page,
     parse_competition,
@@ -76,6 +77,15 @@ class TestFetchEventList(unittest.TestCase):
         events = fetch_event_list(178, client)
 
         self.assertFalse(any("Team Match" in name for _, name in events))
+
+
+class TestFetchCompetitionName(unittest.TestCase):
+    def test_returns_name_from_index_page(self):
+        client = _make_client({(_RESULTS_URL, (("cid", 178),)): _load_fixture("event_list.html")})
+
+        name = fetch_competition_name(178, client)
+
+        self.assertEqual(name, "Solar Flare DanceSport Challenge")
 
 
 class TestFetchEventPage(unittest.TestCase):

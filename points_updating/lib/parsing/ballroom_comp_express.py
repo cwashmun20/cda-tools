@@ -65,6 +65,7 @@ _LEVEL_PHRASES: tuple[tuple[str, Optional[str]], ...] = (
 
 _EVENT_ENTRY_RE = re.compile(r'<a href="\./results\.php\?cid=\d+&eid=(\d+)">([^<]+)</a>')
 _EMBEDDED_JSON_RE = re.compile(r"var (results|dancers|eventinfo) = JSON\.parse\('(.*?)'\);")
+_COMPETITION_NAME_RE = re.compile(r"<h1>Results for ([^<]+)</h1>")
 
 
 def fetch_event_list(cid: int, client: ThrottledClient) -> list[tuple[int, str]]:
@@ -74,6 +75,16 @@ def fetch_event_list(cid: int, client: ThrottledClient) -> list[tuple[int, str]]
     response = client.get(f"{_BASE_URL}/results.php", params={"cid": cid})
     response.raise_for_status()
     return [(int(eid), name) for eid, name in _EVENT_ENTRY_RE.findall(response.text)]
+
+
+def fetch_competition_name(cid: int, client: ThrottledClient) -> str:
+    """Returns the competition's own name from its results index page."""
+    response = client.get(f"{_BASE_URL}/results.php", params={"cid": cid})
+    response.raise_for_status()
+    match = _COMPETITION_NAME_RE.search(response.text)
+    if match is None:
+        raise ValueError(f"Could not find a competition name for cid={cid}")
+    return match.group(1)
 
 
 def fetch_event_page(cid: int, eid: int, client: ThrottledClient) -> str:

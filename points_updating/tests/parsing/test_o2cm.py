@@ -17,6 +17,7 @@ from points_updating.lib.parsing.o2cm import (
     _resolve_style_and_dances,
     _split_couple_names,
     _split_name,
+    fetch_competition_name,
     fetch_heat_list,
     fetch_heat_page,
     parse_competition,
@@ -94,6 +95,17 @@ class TestFetchHeatPage(unittest.TestCase):
         html = fetch_heat_page("isc25", "40322838", client)
 
         self.assertEqual(html, fixture)
+
+
+class TestFetchCompetitionName(unittest.TestCase):
+    def test_returns_name_from_landing_page(self):
+        client = _make_client(
+            {("GET", _EVENT_URL, (("event", "isc25"),)): _load_fixture("landing_page.html")}
+        )
+
+        name = fetch_competition_name("isc25", client)
+
+        self.assertEqual(name, "Claremont Intercollegiate Showdown 2025")
 
 
 class TestExtractLevel(unittest.TestCase):
