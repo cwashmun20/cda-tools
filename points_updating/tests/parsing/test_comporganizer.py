@@ -114,7 +114,7 @@ class TestExtractLevel(unittest.TestCase):
         self.assertEqual(_extract_level("Newcomer Int'l Waltz"), "Newcomer")
 
     def test_rv_rookie_follow_not_shadowed_by_shorter_match(self):
-        self.assertEqual(_extract_level("R/V Rookie Follow Int'l Waltz"), "R/V Rookie Follow")
+        self.assertEqual(_extract_level("R/V Rookie Follow Int'l Waltz"), "Rookie Follow")
 
     def test_unrecognized_level_raises(self):
         with self.assertRaises(ValueError):

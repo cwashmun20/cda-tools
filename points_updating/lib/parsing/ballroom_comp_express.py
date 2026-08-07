@@ -14,7 +14,7 @@ from typing import Optional
 
 from points_updating.lib.models.result import CompetitionResult, DancerRef
 from points_updating.lib.parsing.http_client import ThrottledClient
-from utils.lib.constants import Style
+from utils.lib.constants import OpenLevel, Style, SyllabusLevel
 from utils.lib.models.dance import Dance
 
 _BASE_URL = "https://ballroomcompexpress.com"
@@ -49,18 +49,18 @@ _STYLE_PHRASES: dict[str, Style] = {
 # Pre-Bronze - so explicit level words are checked before it, in case a
 # future event ever spells out "N Class Newcomer".
 _LEVEL_PHRASES: tuple[tuple[str, Optional[str]], ...] = (
-    ("Newcomer", "Newcomer"),
-    ("Open Gold", "Novice"),
+    ("Newcomer", SyllabusLevel.NEWCOMER),
+    ("Open Gold", OpenLevel.NOVICE),
     ("Pre-Bronze", None),
     ("N Class", None),
-    ("Bronze", "Bronze"),
-    ("E Class", "Bronze"),
-    ("Silver", "Silver"),
-    ("D Class", "Silver"),
-    ("Gold", "Gold"),
-    ("B Class", "Prechamp"),
-    ("A Class", "Champ"),
-    ("S Class", "Champ"),
+    ("Bronze", SyllabusLevel.BRONZE),
+    ("E Class", SyllabusLevel.BRONZE),
+    ("Silver", SyllabusLevel.SILVER),
+    ("D Class", SyllabusLevel.SILVER),
+    ("Gold", SyllabusLevel.GOLD),
+    ("B Class", OpenLevel.PRECHAMP),
+    ("A Class", OpenLevel.CHAMP),
+    ("S Class", OpenLevel.CHAMP),
 )
 
 _EVENT_ENTRY_RE = re.compile(r'<a href="\./results\.php\?cid=\d+&eid=(\d+)">([^<]+)</a>')

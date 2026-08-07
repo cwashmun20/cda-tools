@@ -11,25 +11,14 @@ from datetime import date
 from points_updating.lib.models.result import CompetitionResult, DancerRef
 from points_updating.lib.parsing.http_client import ThrottledClient
 from utils.lib.constants import SYLLABUS_LEVELS, Style
-from utils.lib.models.dance import Dance, convert_dance
+from utils.lib.models.dance import Dance, convert_dance, convert_level
 
 _CALLBACK_COMPS_URL = "https://comporganizer.com/feed/callback-comps/"
 _RESULTS_URL = "https://ndcapremier.com/feed/results/"
 
-# Level phrases as CompOrganizer actually writes them, longest/most-specific
-# first so "R/V Rookie Follow" isn't short-circuited by a shorter partial
-# match. convert_level() already recognizes each of these as an alias.
-_LEVEL_PREFIXES = (
-    "R/V Rookie Lead",
-    "R/V Rookie Follow",
-    "Newcomer",
-    "Bronze",
-    "Silver",
-    "Gold",
-    "Novice",
-    "Pre-Champ",
-    "Championship",
-)
+# The longest level phrase CompOrganizer writes ("R/V Rookie Lead"/"R/V
+# Rookie Follow") is 3 words.
+_MAX_LEVEL_WORDS = 3
 
 
 def resolve_comp_year_id(cbid: str, client: ThrottledClient) -> int:
@@ -173,14 +162,19 @@ def _extract_level(event_name: str) -> str:
             is_open = prefix == "Open "
             name = name[len(prefix) :]
             break
-    for level in _LEVEL_PREFIXES:
-        if name.startswith(level):
-            if is_open and level in SYLLABUS_LEVELS:
-                raise ValueError(
-                    f"Unexpected 'Open' syllabus-level event {event_name!r} - "
-                    "needs a code change to determine the correct CDA level."
-                )
-            return level
+
+    tokens = name.split()
+    for n in range(1, _MAX_LEVEL_WORDS + 1):
+        try:
+            level = convert_level(" ".join(tokens[:n]))
+        except ValueError:
+            continue
+        if is_open and level in SYLLABUS_LEVELS:
+            raise ValueError(
+                f"Unexpected 'Open' syllabus-level event {event_name!r} - "
+                "needs a code change to determine the correct CDA level."
+            )
+        return level
     raise ValueError(f"Could not find a recognized level in event name {event_name!r}")
 
 
