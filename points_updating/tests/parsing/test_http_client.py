@@ -6,7 +6,7 @@ from pathlib import Path
 
 import requests
 
-from points_updating.lib.parsing.http_client import ThrottledClient
+from points_updating.lib.parsing.http_client import _DEFAULT_USER_AGENT, ThrottledClient
 
 
 class _FakeSession:
@@ -40,6 +40,27 @@ def _make_response(status_code: int) -> requests.Response:
     response = requests.Response()
     response.status_code = status_code
     return response
+
+
+class TestThrottledClientDefaultSession(unittest.TestCase):
+    """Tests for the real requests.Session() constructed when no session is
+    injected - the case exercised by an actual live run, unlike every
+    other test in this file.
+    """
+
+    def test_sets_browser_like_user_agent_on_default_session(self):
+        # O2CM returns a 404 for requests' own default User-Agent - a real
+        # client must never fall back to it.
+        client = ThrottledClient()
+
+        self.assertEqual(client._session.headers["User-Agent"], _DEFAULT_USER_AGENT)
+
+    def test_injected_session_is_not_touched(self):
+        session = _FakeSession([])
+
+        ThrottledClient(session=session)
+
+        self.assertFalse(hasattr(session, "headers"))
 
 
 class TestThrottledClientDelay(unittest.TestCase):
@@ -195,6 +216,26 @@ class TestThrottledClientCaching(unittest.TestCase):
 
         # Neither the first (throttled, unretried) response nor a later
         # identical request should have been cached - both hit the transport.
+        self.assertEqual(len(session.calls), 2)
+
+    def test_error_response_not_cached(self):
+        """A non-throttle error (e.g. 404) must not be cached either - it
+        might reflect a transient issue or a bug on our end, and caching it
+        would make the error outlive whatever caused it.
+        """
+        clock = _FakeClock()
+        session = _FakeSession([_make_response(404), _make_response(404)])
+        client = ThrottledClient(
+            min_delay_seconds=0,
+            session=session,
+            cache_dir=self.cache_dir,
+            sleep=clock.sleep,
+            clock=clock.clock,
+        )
+
+        client.get("http://example.com/a")
+        client.get("http://example.com/a")
+
         self.assertEqual(len(session.calls), 2)
 
 

@@ -1,9 +1,8 @@
 """Rate-limited, cacheable HTTP client for results-source scrapers.
 
 Every results-source module (O2CM, Ballroom Comp Express, CompOrganizer)
-fetches from a live third-party site not under our control. This is shared
-infrastructure proven necessary during evaluation: O2CM's site returned a
-blanket 403 across every endpoint after an unthrottled ~135-request burst.
+fetches from a live third-party site not under our control, so requests
+are paced and retried defensively rather than fired as fast as possible.
 """
 
 import hashlib
@@ -11,11 +10,18 @@ import json
 import pickle
 import time
 from pathlib import Path
-from typing import Callable, Optional, Protocol
+from typing import Callable, Optional, Protocol, cast
 
 import requests
 
 _THROTTLE_STATUS_CODES = frozenset({403, 429})
+
+# O2CM's server returns a 404 for requests' default "python-requests/x.x"
+# User-Agent specifically - a browser-like one is required.
+_DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
 
 
 class _RequestTransport(Protocol):
@@ -68,7 +74,13 @@ class ThrottledClient:
         self.min_delay_seconds = min_delay_seconds
         self.max_retries = max_retries
         self.backoff_base_seconds = backoff_base_seconds
-        self._session = session if session is not None else requests.Session()
+        self._session: _RequestTransport
+        if session is not None:
+            self._session = session
+        else:
+            default_session = requests.Session()
+            default_session.headers.update({"User-Agent": _DEFAULT_USER_AGENT})
+            self._session = cast(_RequestTransport, default_session)
         self._cache_dir = cache_dir
         self._sleep = sleep
         self._clock = clock
@@ -87,7 +99,12 @@ class ThrottledClient:
             return cached
 
         response = self._request_with_backoff(method, url, **kwargs)
-        if response.status_code not in _THROTTLE_STATUS_CODES:
+        if response.ok:
+            # Only successful responses are cached - an error response
+            # (404, 500, etc.) might reflect a transient issue or a bug on
+            # our end rather than the real state of the page, and caching
+            # it would make that error "stick" across runs even after
+            # whatever caused it is fixed.
             self._write_cache(cache_key, response)
         return response
 
