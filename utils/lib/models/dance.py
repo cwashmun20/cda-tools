@@ -88,13 +88,15 @@ def convert_dance(style: Style, input_name: str) -> str:
         "Night Club 2-Step",
         "Nightclub 2-Step",
         "NC2S",
+        "NC Two Step",
     )
     argentine_tango_aliases = (DanceName.ARGENTINE_TANGO, "Arg. Tango")
+    viennese_waltz_aliases = (DanceName.VIENNESE_WALTZ, "Vie. Waltz", "V. Waltz")
     # "Swing" is a common organizer shorthand for Rhythm's East Coast Swing -
     # checked below with a style == RHYTHM guard, since "Swing" alone is too
     # generic a word to safely alias for every style (e.g. Nightclub also
     # has "West Coast Swing" and "Country Swing").
-    rhythm_east_coast_swing_aliases = (DanceName.EAST_COAST_SWING, "Swing")
+    rhythm_east_coast_swing_aliases = (DanceName.EAST_COAST_SWING, "Swing", "EC Swing")
 
     if style not in constants.STYLES:
         raise ValueError(f"""Unrecognized style.
@@ -110,6 +112,9 @@ def convert_dance(style: Style, input_name: str) -> str:
 
     if input_name in argentine_tango_aliases:
         return DanceName.ARGENTINE_TANGO
+
+    if input_name in viennese_waltz_aliases:
+        return DanceName.VIENNESE_WALTZ
 
     if style == Style.RHYTHM and input_name in rhythm_east_coast_swing_aliases:
         return DanceName.EAST_COAST_SWING
@@ -173,7 +178,7 @@ def convert_level(input_name: str) -> str:
         "RV Rookie Follow",
         "R/V Rookie Follow",
     )
-    prechamp_aliases = (OpenLevel.PRECHAMP, "Pre-Champ", "PreChamp")
+    prechamp_aliases = (OpenLevel.PRECHAMP, "Pre-Champ", "PreChamp", "Pre-Championship")
     champ_aliases = (OpenLevel.CHAMP, "Championship")
 
     input_name = input_name.strip()

@@ -54,6 +54,9 @@ class TestDance(unittest.TestCase):
     def test_convert_level_prechamp(self):
         self.assertEqual(convert_level("Pre-Champ"), "Prechamp")
 
+    def test_convert_level_pre_championship_alias(self):
+        self.assertEqual(convert_level("Pre-Championship"), "Prechamp")
+
     def test_convert_level_intadv(self):
         self.assertEqual(convert_level("Int/Adv"), "Intermediate/Advanced")
 
@@ -109,14 +112,29 @@ class TestDance(unittest.TestCase):
     def test_convert_dance_arg_tango_alias(self):
         self.assertEqual(convert_dance("Nightclub", "Arg. Tango"), "Argentine Tango")
 
+    def test_convert_dance_vie_waltz_alias(self):
+        """ "Vie. Waltz" must resolve to Viennese Waltz, not fall through to
+        the plain "Waltz" substring match - a real bug caught via live
+        testing against a real Viennese Waltz event."""
+        self.assertEqual(convert_dance("Standard", "Vie. Waltz"), "Viennese Waltz")
+
+    def test_convert_dance_v_waltz_alias(self):
+        self.assertEqual(convert_dance("Standard", "V. Waltz"), "Viennese Waltz")
+
     def test_convert_dance_wcs_alias(self):
         self.assertEqual(convert_dance("Nightclub", "WCS"), "West Coast Swing")
+
+    def test_convert_dance_nc_two_step_alias(self):
+        self.assertEqual(convert_dance("Nightclub", "NC Two Step"), "Nightclub Two-Step")
 
     def test_convert_dance_nc2s_alias(self):
         self.assertEqual(convert_dance("Nightclub", "NC2S"), "Nightclub Two-Step")
 
     def test_convert_dance_bare_swing_rhythm_alias(self):
         self.assertEqual(convert_dance("Rhythm", "Swing"), "East Coast Swing")
+
+    def test_convert_dance_ec_swing_rhythm_alias(self):
+        self.assertEqual(convert_dance("Rhythm", "EC Swing"), "East Coast Swing")
 
     def test_convert_dance_bare_swing_not_aliased_outside_rhythm(self):
         """ "Swing" alone shouldn't be silently reinterpreted for styles where
