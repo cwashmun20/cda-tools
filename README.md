@@ -65,15 +65,22 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 │       ├── rules/
 │       └── webapp/
 │
-├── points_updating/                   # Point-calculation engine (parsing & DB writes not yet built)
+├── points_updating/                   # Point-calculation engine, results parsing, and CLI (DB writes not yet built)
 │   ├── __init__.py
 │   ├── lib/
 │   │   ├── __init__.py
+│   │   ├── cli.py                # CLI: parses results, scores them, writes a report (see Usage)
 │   │   ├── update_engine.py      # UpdateEngine - process_competition()/run_backfill() orchestration
 │   │   ├── points_calculator.py  # PointsCalculator - per-result scoring (Split-Level, cascade)
 │   │   ├── report.py             # build_report()/render_report() - per-dancer point audit trail
 │   │   ├── models/
 │   │   │   └── result.py         #   CompetitionResult, DancerRef - format-agnostic result model
+│   │   ├── parsing/               # Results-source parsing (one module per source) + URL routing
+│   │   │   ├── http_client.py    #   ThrottledClient - shared rate-limited, cacheable HTTP client
+│   │   │   ├── comporganizer.py  #   CompOrganizer/dance.am parser
+│   │   │   ├── ballroom_comp_express.py  # Ballroom Comp Express parser
+│   │   │   ├── o2cm.py           #   O2CM parser
+│   │   │   └── routing.py        #   parse_results_url() - routes a URL to its source parser
 │   │   └── rules/
 │   │       ├── award_table.py    #   compute_award() - CDA's placement x round depth point table
 │   │       ├── cascade.py        #   build_cascade_delta() - cascades points down through levels
@@ -83,11 +90,16 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 │       ├── test_update_engine.py
 │       ├── test_points_calculator.py
 │       ├── test_report.py
+│       ├── test_parsing_to_engine_integration_*.py  # parsing -> UpdateEngine -> report, one file per source
 │       ├── models/
+│       ├── parsing/
+│       │   └── fixtures/         #   Real, captured/trimmed source data - no live calls in tests
 │       └── rules/
 │
 ├── data/
-│   └── inputs/                   # Competition entry CSVs (gitignored)
+│   ├── inputs/                   # Competition entry CSVs (gitignored)
+│   ├── outputs/                  # Point-update reports written by the CLI (gitignored)
+│   └── cache/                    # Cached raw results data, if the CLI's --cache is on (gitignored)
 │
 ├── pyproject.toml                # Python package configuration (deps, build, entry points)
 └── README.md
@@ -118,13 +130,15 @@ API communication is isolated in `utils/lib/api/`. The `DancerRecord` dataclass 
 `entry_checking/lib/report_view.py`'s `build_report_view()` extracts the CLI's split-level-notes-then-grouped-violations presentation logic (previously embedded in `entry_checker._report()`'s `print()` calls) into a plain `ReportView` dataclass. `entry_checker._report()` is now a thin printer over it, and `entry_checking/lib/webapp/` (a lightweight Flask app, see Usage below) renders the same `ReportView` in HTML and JSON — one grouping algorithm, multiple consumers. `entry_checking/lib/webapp/` is deliberately scoped to entry checking; a more robust unified CDA app (e.g. also covering `points_updating`, possibly React/TypeScript) would be a separate top-level addition alongside it, not a replacement.
 
 ### Point Update Engine
-`points_updating` is the calculation engine for CDA Fair Level Certification points — results parsing and the database write step are both intentionally out of scope for now (see below), so this is verifiable against real historical data (via the existing read-only `lookup_dancer()`) before write access is ever requested.
+`points_updating` parses real competition results, calculates the CDA Fair Level Certification points they earn, and writes a human-readable report — the database write step is the one piece still intentionally out of scope (see below), so everything up to that point is verifiable against real historical data (via the existing read-only `lookup_dancer()`) before write access is ever requested.
 
-- **`CompetitionResult`/`DancerRef`** (`points_updating/lib/models/result.py`) is the format-agnostic intermediate model any future results parser is expected to produce — one `CompetitionResult` per (couple, dance, event), built on `Dance`'s existing normalization so scoring logic never needs to know which results source produced the raw strings.
+- **`CompetitionResult`/`DancerRef`** (`points_updating/lib/models/result.py`) is the format-agnostic intermediate model every results parser produces — one `CompetitionResult` per (couple, dance, event), built on `Dance`'s existing normalization so scoring logic never needs to know which results source produced the raw strings.
+- **`points_updating/lib/parsing/`** has one module per results source actually used on the CDA circuit — O2CM (`o2cm.py`), Ballroom Comp Express (`ballroom_comp_express.py`), and CompOrganizer (`comporganizer.py`, the backend behind school-branded `*.dance.am` results pages) — each producing `CompetitionResult`s directly from that source's real page/API shape, no intermediate file format. `http_client.py`'s `ThrottledClient` (rate-limited, exponential backoff on throttling, optional on-disk response caching) is shared by all three, since each fetches from a live third-party site not under our control. `routing.py`'s `parse_results_url()` determines which parser to use from a results-page URL alone.
 - **`filter_points_eligible`** and **`select_points_event_results`** (`points_updating/lib/rules/`) are the pre-scoring pipeline: dropping non-points-eligible results (Nightclub, Rookie/Vet) and, for an open level split across more than one event (e.g. Novice Smooth run as a WTF event plus a separate V event), keeping only the event CDA rules use to calculate points.
 - **`PointsCalculator.compute()`** (`points_updating/lib/points_calculator.py`) scores one `CompetitionResult` against a couple's current proficiency (via `ProficiencyCalculator`, shared with `entry_checking`): detecting the Split-Level Exception (tripling the award) and cascading the placement award down through lower levels (`award_table.py`/`cascade.py`) into a `ResultAward`.
 - **`UpdateEngine`** (`points_updating/lib/update_engine.py`) is the orchestrator. `process_competition()` scores every result in one competition against the ledger's state as of immediately before that competition — never against points earned earlier in the same competition, so Split-Level detection can't depend on processing order — then applies every resulting delta. `run_backfill()` repeats that per competition across an already-sorted (it sorts internally) list of competitions, each building on the ledger state the last left behind. The dancer lookup is an injected dependency (defaulting to the real CDA API), so tests don't need a network call or a test database.
-- **`build_report()`/`render_report()`** (`points_updating/lib/report.py`) turn a set of `ResultAward`s plus `UpdateEngine.starting_totals()`/`final_totals()` into a per-dancer audit trail — every result that contributed to a point change (including zero-point placements), so an unexpected total can be traced back to the exact result that produced it, or explained to a dancer who asks.
+- **`build_report()`/`render_report()`** (`points_updating/lib/report.py`) turn a set of `ResultAward`s plus `UpdateEngine.starting_totals()`/`final_totals()` into a per-dancer audit trail — starting and final point totals stacked together for easy comparison, then every result that contributed to the change between them (including zero-point placements), so an unexpected total can be traced back to the exact result that produced it, or explained to a dancer who asks.
+- **`points_updating/lib/cli.py`** (see Usage below) is the only place a real `ThrottledClient` gets constructed — it wires `routing.py` → `UpdateEngine` → `report.py` together into a runnable command.
 
 ### Import Convention
 All internal imports are absolute package paths (`from utils.lib.models.dance import Dance`, `from entry_checking.lib.rules.eligibility_checker import EligibilityChecker`), not `sys.path` manipulation. This means `utils`, `entry_checking`, and `points_updating` need to be resolvable as real top-level packages — either via `pip install -e .` (see Setup), or by running from the repo root, where Python's `-m` flag adds the current directory to `sys.path` automatically.
@@ -180,6 +194,45 @@ A single-page form (competition details + CSV upload) that runs the same
 `EntryChecker` used by the CLI and renders the results as split-level notes
 followed by violations grouped by dancer/partnership. `POST /api/check`
 exposes the same check as JSON, for future programmatic callers.
+
+### Points Updating CLI
+```bash
+# Via entry point (requires `pip install -e .`)
+points-updater --result <results-page-url> <competition-date>
+
+# Or via -m, from the repo root (no install required)
+python -m points_updating.lib.cli --result <results-page-url> <competition-date>
+```
+
+Example — one competition:
+```bash
+points-updater --result "https://results.o2cm.com/event3.asp?event=isc25" 2025-11-14
+```
+
+Example — a chronological backfill across several competitions in one run (order given doesn't
+matter; `UpdateEngine` sorts by date before scoring):
+```bash
+points-updater \
+  --result "https://ballroomcompexpress.com/results.php?cid=178" 2025-10-25 \
+  --result "https://results.o2cm.com/event3.asp?event=isc25" 2025-11-14
+```
+
+`--result` takes a competition's results-page URL — O2CM, Ballroom Comp Express, or a school's
+`*.dance.am` results page — and that competition's date (`YYYY-MM-DD`). `routing.py` determines which parser to use from the URL alone. Repeat `--result` for a multi-competition backfill.
+
+Raw fetched results are cached to `data/cache/` by default, so re-running against the same
+competition doesn't re-hit the live site; pass `--no-cache` to disable. The rendered report is
+always written to `data/outputs/<timestamp>-report.txt` — one section per dancer with their
+starting and final point totals followed by every result that contributed to the change between
+them (including zero-point placements).
+
+> Like the entry checker, running `points_updating/lib/cli.py` directly (without `-m`) will NOT
+> work — use one of the two forms above.
+
+Fetching real results is deliberately rate-limited (`ThrottledClient`, shared across every source
+in one run). O2CM fetches a whole competition in a single request; Ballroom Comp Express and
+CompOrganizer fetch one request per event, so a large competition on either of those can still mean
+a couple of minutes of live requests, not a quick check.
 
 ## Setup
 
