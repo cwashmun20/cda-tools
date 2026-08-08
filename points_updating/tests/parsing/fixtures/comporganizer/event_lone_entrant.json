@@ -1,0 +1,161 @@
+{
+  "Status": 1,
+  "Result": {
+    "Event": {
+      "ID": 108,
+      "Name": "R/V Rookie Lead Int'l Vie. Waltz",
+      "Heat": 23,
+      "Type": "Couple",
+      "Ballroom": "Main Ballroom",
+      "Floor": "A",
+      "Alternates_Formula": null,
+      "JandJ": 0,
+      "First_Heat": "2/7/2026 11:08:00 AM",
+      "Rounds": [
+        {
+          "ID": 269,
+          "Name": "Final",
+          "Date_Time": "2/7/2026 11:08:00 AM",
+          "Session_ID": 1,
+          "Scoring_Method": "Skated",
+          "JandJ": 0,
+          "Dances": [
+            {
+              "Dance_ID": "VW",
+              "Judges": [
+                {
+                  "ID": 1,
+                  "People_ID": 314,
+                  "Judge_Letter": "A",
+                  "Name": [
+                    "Jonathan",
+                    "Atkinson"
+                  ],
+                  "Photo_URL": "314.jpg",
+                  "Residence": "Los Angeles"
+                },
+                {
+                  "ID": 5,
+                  "People_ID": 24818,
+                  "Judge_Letter": "E",
+                  "Name": [
+                    "Roberta",
+                    "Lanard"
+                  ],
+                  "Photo_URL": "24818.jpg",
+                  "Residence": "San Jose, CA"
+                },
+                {
+                  "ID": 6,
+                  "People_ID": 1000,
+                  "Judge_Letter": "F",
+                  "Name": [
+                    "Marcus",
+                    "Johnson"
+                  ],
+                  "Photo_URL": "1000.jpg",
+                  "Residence": "San Diego, CA"
+                },
+                {
+                  "ID": 7,
+                  "People_ID": 1993,
+                  "Judge_Letter": "G",
+                  "Name": [
+                    "Alexandru",
+                    "Zagrean"
+                  ],
+                  "Photo_URL": "1993.jpg",
+                  "Residence": "Ventura, CA"
+                },
+                {
+                  "ID": 8,
+                  "People_ID": 31036,
+                  "Judge_Letter": "H",
+                  "Name": [
+                    "Igor",
+                    "Colac"
+                  ],
+                  "Photo_URL": "31036.jpg",
+                  "Residence": "Huntington Beach, CA"
+                }
+              ],
+              "Competitors": [
+                {
+                  "ID": 190,
+                  "Bib": 426,
+                  "Scores": [],
+                  "Marks": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                  ],
+                  "Codes": [
+                    5,
+                    "-",
+                    "-"
+                  ],
+                  "Average": null,
+                  "Result": 1,
+                  "Participants": [
+                    {
+                      "ID": 185,
+                      "Name": [
+                        "Gregory",
+                        "Peregrin"
+                      ]
+                    },
+                    {
+                      "ID": 236,
+                      "Name": [
+                        "Cadie",
+                        "Sparks"
+                      ]
+                    }
+                  ],
+                  "Config": "LF"
+                }
+              ],
+              "Dance_Name": "Int'l Vie. Waltz",
+              "Dance_Abbreviation": "VW",
+              "Penalties": null
+            }
+          ],
+          "Summary": {
+            "Result_Headers": [
+              "Total",
+              "Result"
+            ],
+            "Competitors": [
+              {
+                "ID": 190,
+                "Bib": 426,
+                "Marks": [],
+                "Total": null,
+                "Result": null,
+                "Participants": [
+                  {
+                    "ID": 185,
+                    "Name": [
+                      "Gregory",
+                      "Peregrin"
+                    ]
+                  },
+                  {
+                    "ID": 236,
+                    "Name": [
+                      "Cadie",
+                      "Sparks"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "Alternates_Formula": null
+        }
+      ]
+    }
+  }
+}

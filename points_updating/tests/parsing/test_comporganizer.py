@@ -157,7 +157,29 @@ class TestDanceAndStyle(unittest.TestCase):
         style, bare_name = _dance_and_style("Am. Cha Cha")
         self.assertEqual(style, Style.RHYTHM)
 
-    def test_unrecognized_prefix_raises(self):
+    def test_amer_prefix_resolves_to_smooth(self):
+        """CompOrganizer also uses "Amer." (not just "Am.") for American
+        style on some events - confirmed via a live sweep of every Mustang
+        Ball event's dance names."""
+        style, bare_name = _dance_and_style("Amer. Waltz")
+        self.assertEqual(style, Style.SMOOTH)
+        self.assertEqual(bare_name, "Waltz")
+
+    def test_amer_prefix_resolves_to_rhythm(self):
+        style, bare_name = _dance_and_style("Amer. Cha Cha")
+        self.assertEqual(style, Style.RHYTHM)
+
+    def test_amer_ec_swing_resolves_to_rhythm(self):
+        style, bare_name = _dance_and_style("Amer. EC Swing")
+        self.assertEqual(style, Style.RHYTHM)
+        self.assertEqual(bare_name, "EC Swing")
+
+    def test_no_prefix_resolves_to_nightclub(self):
+        style, bare_name = _dance_and_style("Salsa")
+        self.assertEqual(style, Style.NIGHTCLUB)
+        self.assertEqual(bare_name, "Salsa")
+
+    def test_unrecognized_name_raises(self):
         with self.assertRaises(ValueError):
             _dance_and_style("Mystery Waltz")
 
@@ -222,6 +244,99 @@ class TestParseEvent(unittest.TestCase):
 
         with self.assertRaises(NotImplementedError):
             _parse_event(event, "Test Classic", date(2026, 2, 7))
+
+    def test_nightclub_event_has_no_intl_or_am_prefix(self):
+        event = _load_fixture("event_nightclub.json")["Result"]["Event"]
+
+        results = _parse_event(event, "Cal Poly Mustang Ball", date(2026, 2, 7))
+
+        self.assertEqual(len(results), 6)
+        expected_dance = Dance("Beginner", "Nightclub", "Salsa")
+        for result in results:
+            self.assertEqual(result.dance, expected_dance)
+            self.assertEqual(result.num_rounds, 3)
+
+    def test_lone_entrant_uses_dance_result_not_null_summary(self):
+        # A round with only one couple entered gets no combined Summary
+        # Result at all (null) - confirmed against a real event - even
+        # though the couple trivially placed 1st. Placement must come from
+        # the dance's own Result field instead for a single-dance event.
+        event = _load_fixture("event_lone_entrant.json")["Result"]["Event"]
+
+        results = _parse_event(event, "Cal Poly Mustang Ball", date(2026, 2, 7))
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].place, 1)
+        self.assertEqual(results[0].lead.full_name, "Gregory Peregrin")
+        self.assertEqual(results[0].follow.full_name, "Cadie Sparks")
+        self.assertEqual(results[0].dance, Dance("Rookie Lead", "Standard", "Viennese Waltz"))
+
+    def test_single_dance_fractional_tie_rounds_down(self):
+        # A true, unresolved tie between couples 1 and 2 for 6th/7th,
+        # matching CompOrganizer's own real fractional Result format.
+        event = {
+            "Type": "Couple",
+            "Name": "Closed Bronze Int'l Waltz",
+            "Rounds": [
+                {
+                    "Dances": [
+                        {
+                            "Dance_Name": "Int'l Waltz",
+                            "Competitors": [
+                                {
+                                    "ID": 1,
+                                    "Result": 6.5,
+                                    "Participants": [
+                                        {"Name": ["Alex", "Lee"]},
+                                        {"Name": ["Jamie", "Kim"]},
+                                    ],
+                                },
+                                {
+                                    "ID": 2,
+                                    "Result": 6.5,
+                                    "Participants": [
+                                        {"Name": ["Sam", "Park"]},
+                                        {"Name": ["Robin", "Cho"]},
+                                    ],
+                                },
+                            ],
+                        }
+                    ],
+                    "Summary": {"Competitors": []},
+                }
+            ],
+        }
+
+        results = _parse_event(event, "Test Classic", date(2026, 2, 7))
+
+        self.assertEqual({r.place for r in results}, {6})
+
+    def test_multi_dance_fractional_tie_rounds_down(self):
+        participants = [{"Name": ["Alex", "Lee"]}, {"Name": ["Jamie", "Kim"]}]
+        event = {
+            "Type": "Couple",
+            "Name": "Closed Gold Int'l Waltz & QS",
+            "Rounds": [
+                {
+                    "Dances": [
+                        {
+                            "Dance_Name": "Int'l Waltz",
+                            "Competitors": [{"ID": 1, "Result": 3, "Participants": participants}],
+                        },
+                        {
+                            "Dance_Name": "Int'l Quickstep",
+                            "Competitors": [{"ID": 1, "Result": 3, "Participants": participants}],
+                        },
+                    ],
+                    "Summary": {"Competitors": [{"ID": 1, "Result": [3.5, 3.5]}]},
+                }
+            ],
+        }
+
+        results = _parse_event(event, "Test Classic", date(2026, 2, 7))
+
+        self.assertEqual(len(results), 2)
+        self.assertEqual({r.place for r in results}, {3})
 
 
 class TestParseCompetition(unittest.TestCase):

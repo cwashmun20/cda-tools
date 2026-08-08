@@ -6,6 +6,7 @@ dance.am's own backend. Confirmed against a real 2026 CDA competition (Cal
 Poly Mustang Ball).
 """
 
+import math
 from datetime import date
 
 from points_updating.lib.models.result import CompetitionResult, DancerRef
@@ -93,25 +94,12 @@ def parse_competition(
 def _parse_event(
     event: dict, competition_name: str, competition_date: date
 ) -> list[CompetitionResult]:
-    """Parses one already-fetched event's JSON into CompetitionResults, one
-    per (couple, dance) danced in it.
+    """Parses one already-fetched event's JSON into CompetitionResults.
 
-    Placement comes from the final round's round-level Summary, not any
-    individual dance's own per-competitor Result; the Summary already
-    holds the couple's combined placement across every dance in the event
-    (a single-dance event's Summary result equals that one dance's own
-    result), matching the CDA's rule that a multi-dance's points are based
-    on overall placement, not any one dance's individual placement.
-
-    Args:
-        event: The `Result.Event` dict from fetch_event_results().
-        competition_name: The competition's name.
-        competition_date: The date the competition was held.
-    Returns:
-        One CompetitionResult per (couple, dance), every dance in the event
-        sharing one event_dances tuple and one num_rounds.
-    Raises:
-        NotImplementedError: if event["Type"] isn't "Couple".
+    Placement comes from the Summary (combined across dances), except for
+    a single-dance event with only one couple entered - Summary Result is
+    null there, so we fall back to the dance's own Result. Fractional Results
+    (ties) get floored - "1224" ranking.
     """
     if event["Type"] != "Couple":
         raise NotImplementedError(f"Unsupported CompOrganizer event type: {event['Type']!r}")
@@ -122,10 +110,17 @@ def _parse_event(
     final_round = rounds[-1]
     dances_json = final_round["Dances"]
 
-    placements = {
-        competitor["ID"]: competitor["Result"][-1]
-        for competitor in final_round["Summary"]["Competitors"]
-    }
+    if len(dances_json) == 1:
+        placements = {
+            competitor["ID"]: math.floor(competitor["Result"])
+            for competitor in dances_json[0]["Competitors"]
+        }
+    else:
+        placements = {
+            competitor["ID"]: math.floor(competitor["Result"][-1])
+            for competitor in final_round["Summary"]["Competitors"]
+            if competitor["Result"]
+        }
 
     dances = []
     for dance_json in dances_json:
@@ -190,18 +185,24 @@ def _extract_level(event_name: str) -> str:
 
 def _dance_and_style(dance_name: str) -> tuple[Style, str]:
     """Splits a per-dance name like "Int'l Waltz" or "Am. Cha Cha" into
-    (style, bare dance name). The "Int'l"/"Am." marker alone doesn't say
-    Standard-vs-Latin or Smooth-vs-Rhythm, so each candidate style is tried
-    via convert_dance() until one recognizes the bare name.
+    (style, bare dance name). The "Int'l"/"Am."/"Amer." marker alone doesn't
+    say Standard-vs-Latin or Smooth-vs-Rhythm, so each candidate style is
+    tried via convert_dance() until one recognizes the bare name. Nightclub
+    dance names (e.g. "Salsa") carry neither marker, so they're tried as
+    Style.NIGHTCLUB directly.
     """
     if dance_name.startswith("Int'l "):
         candidates = Style.international_styles()
         bare_name = dance_name[len("Int'l ") :]
+    elif dance_name.startswith("Amer. "):
+        candidates = Style.american_styles()
+        bare_name = dance_name[len("Amer. ") :]
     elif dance_name.startswith("Am. "):
         candidates = Style.american_styles()
         bare_name = dance_name[len("Am. ") :]
     else:
-        raise ValueError(f"Unrecognized dance name prefix: {dance_name!r}")
+        candidates = [Style.NIGHTCLUB]
+        bare_name = dance_name
 
     for style in candidates:
         try:
