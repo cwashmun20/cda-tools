@@ -12,7 +12,7 @@ from typing import Optional
 
 from bs4 import BeautifulSoup, Tag
 
-from points_updating.lib.models.result import CompetitionResult, DancerRef
+from points_updating.lib.models.result import CompetitionResult, DancerRef, event_dances_to_score
 from points_updating.lib.parsing.http_client import ThrottledClient
 from utils.lib import constants
 from utils.lib.constants import OpenLevel, Style
@@ -169,7 +169,7 @@ def _build_results(
     results = []
     for row_text in final_rows:
         place, lead, follow = _parse_placement_row(row_text)
-        for dance in dances:
+        for dance in event_dances_to_score(level, event_dances):
             results.append(
                 CompetitionResult(
                     dance=dance,

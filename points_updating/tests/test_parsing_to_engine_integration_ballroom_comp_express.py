@@ -113,8 +113,10 @@ class TestParsingToEngineIntegration(unittest.TestCase):
 
         # Rookie/Vet and N Class/Pre-Bronze events parse successfully (both
         # are Couple-type events) but score no points - skipped by the
-        # parser itself, never reaching the ledger at all.
-        self.assertEqual(len(results), 28)
+        # parser itself, never reaching the ledger at all. Open-level
+        # multi-dance combos (Open Gold/B Class/A Class) each score once
+        # per partnership rather than once per dance.
+        self.assertEqual(len(results), 14)
 
         # Cross-check one concrete award against the calculation engine's
         # own already-tested award-table/cascade logic, proving a real

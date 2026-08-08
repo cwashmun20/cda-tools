@@ -12,7 +12,7 @@ import re
 from datetime import date
 from typing import Optional
 
-from points_updating.lib.models.result import CompetitionResult, DancerRef
+from points_updating.lib.models.result import CompetitionResult, DancerRef, event_dances_to_score
 from points_updating.lib.parsing.http_client import ThrottledClient
 from utils.lib.constants import OpenLevel, Style, SyllabusLevel
 from utils.lib.models.dance import Dance
@@ -242,7 +242,7 @@ def _parse_event(
     for partnership_id in final_round["partnershiporder"]:
         partnership = final_round[str(partnership_id)]
         lead, follow = _lead_follow(dancers_json[str(partnership_id)])
-        for dance in dances:
+        for dance in event_dances_to_score(level, dances):
             results.append(
                 CompetitionResult(
                     dance=dance,

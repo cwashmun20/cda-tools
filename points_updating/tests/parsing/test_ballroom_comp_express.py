@@ -285,11 +285,13 @@ class TestParseEvent(unittest.TestCase):
 
         results = _parse_event(event, "Solar Flare DanceSport Challenge", date(2025, 3, 1))
 
-        self.assertEqual(len(results), 3)  # 1 partnership x 3 dances
+        # Novice is an open level, so this multi-dance combo scores once for
+        # the partnership (keyed off the first dance), not once per dance.
+        self.assertEqual(len(results), 1)  # 1 partnership x 1 result
         waltz = Dance("Novice", "Standard", "Waltz")
         foxtrot = Dance("Novice", "Standard", "Foxtrot")
         quickstep = Dance("Novice", "Standard", "Quickstep")
-        self.assertEqual(set(r.dance for r in results), {waltz, foxtrot, quickstep})
+        self.assertEqual(set(r.dance for r in results), {waltz})
         for result in results:
             self.assertEqual(result.place, 1)
             self.assertEqual(result.lead.full_name, "Brian Corpus")
@@ -300,7 +302,9 @@ class TestParseEvent(unittest.TestCase):
 
         results = _parse_event(event, "Solar Flare DanceSport Challenge", date(2025, 3, 1))
 
-        self.assertEqual(len(results), 4)  # 1 partnership x 4 dances
+        # Prechamp is an open level, so this multi-dance combo scores once
+        # for the partnership, not once per dance.
+        self.assertEqual(len(results), 1)  # 1 partnership x 1 result
         self.assertTrue(all(r.dance.level == "Prechamp" for r in results))
         self.assertTrue(all(r.dance.style == Style.STANDARD for r in results))
 
@@ -309,7 +313,9 @@ class TestParseEvent(unittest.TestCase):
 
         results = _parse_event(event, "Solar Flare DanceSport Challenge", date(2025, 3, 1))
 
-        self.assertEqual(len(results), 12)  # 3 partnerships x 4 dances
+        # Champ is an open level, so this multi-dance combo scores once per
+        # partnership, not once per dance.
+        self.assertEqual(len(results), 3)  # 3 partnerships x 1 result
         self.assertTrue(all(r.dance.level == "Champ" for r in results))
         self.assertTrue(all(r.dance.style == Style.SMOOTH for r in results))
         by_name_and_dance = {(r.lead.full_name, r.dance.dance): r.place for r in results}
@@ -387,9 +393,11 @@ class TestParseCompetition(unittest.TestCase):
             178, "Solar Flare DanceSport Challenge", date(2025, 3, 1), client
         )
 
-        # 7 (Newcomer) + 2 (Closed Gold) + 3 (Open Gold) + 0 (N Class) +
-        # 0 (Rookie/Vet) + 4 (B Class) + 12 (A Class) + 0 (no results) = 28.
-        self.assertEqual(len(results), 28)
+        # 7 (Newcomer) + 2 (Closed Gold) + 1 (Open Gold, one open-level
+        # multi-dance combo scores once) + 0 (N Class) + 0 (Rookie/Vet) +
+        # 1 (B Class, same) + 3 (A Class, one per partnership) +
+        # 0 (no results) = 14.
+        self.assertEqual(len(results), 14)
 
 
 if __name__ == "__main__":

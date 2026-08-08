@@ -113,9 +113,29 @@ def _render_award_line(award: ResultAward) -> str:
     breakdown = _level_breakdown(award.delta)
     points_str = ", ".join(f"{level} +{pts}" for level, pts in breakdown) if breakdown else "+0 pts"
     return (
-        f"  {result.dance} - Placed {_ordinal(result.place)} from {result.num_rounds} "
+        f"  {_render_dance(result)} - Placed {_ordinal(result.place)} from {result.num_rounds} "
         f"round(s){split_level_note} -> {points_str}"
     )
+
+
+def _render_dance(result) -> str:
+    """Renders a result's dance(s): just the single dance for a
+    single-dance event (unchanged from before), or the shared level/style
+    prefix once followed by every dance name in the combo joined by "/" for
+    a multi-dance event - now that an open combo collapses to one award
+    line, that line should still show everything that was danced rather
+    than only the one dance the award was keyed off.
+    """
+    if len(result.event_dances) <= 1:
+        return str(result.dance)
+    first = result.event_dances[0]
+    designation = ""
+    if first.style in constants.AM_STYLES:
+        designation = "Am. "
+    elif first.style in constants.INTL_STYLES:
+        designation = "Intl. "
+    dance_names = "/".join(dance.dance for dance in result.event_dances)
+    return f"{first.level} {designation}{dance_names}"
 
 
 def _level_breakdown(delta: PointDelta) -> list[tuple[str, int]]:

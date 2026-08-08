@@ -286,21 +286,23 @@ class TestParseResultsPage(unittest.TestCase):
             self.assertEqual(result.event_dances, (expected_dance,))
 
     def test_multi_dance_single_round_uses_bare_style_word(self):
+        # Champ is an open level, so this multi-dance combo scores once per
+        # couple (keyed off the first dance) rather than once per dance -
+        # see event_dances_to_score().
         waltz = Dance("Champ", "Smooth", "Waltz")
         tango = Dance("Champ", "Smooth", "Tango")
         foxtrot = Dance("Champ", "Smooth", "Foxtrot")
         vwaltz = Dance("Champ", "Smooth", "Viennese Waltz")
-        matches = self._matching("Champ", Style.SMOOTH, "Waltz") + self._matching(
-            "Champ", Style.SMOOTH, "Tango"
-        )
+        matches = self._matching("Champ", Style.SMOOTH, "Waltz")
 
-        self.assertEqual(len(matches), 4)  # 2 couples x 2 (of the 4) dances checked
+        self.assertEqual(len(matches), 2)  # 2 couples, 1 result each
         for result in matches:
             self.assertEqual(result.num_rounds, 1)
             self.assertEqual(result.event_dances, (waltz, tango, foxtrot, vwaltz))
-        by_name_and_dance = {(r.lead.full_name, r.dance): r.place for r in matches}
-        self.assertEqual(by_name_and_dance[("Brody Silva", waltz)], 1)
-        self.assertEqual(by_name_and_dance[("Edward Rogers", waltz)], 2)
+        self.assertEqual(self._matching("Champ", Style.SMOOTH, "Tango"), [])
+        by_name = {r.lead.full_name: r.place for r in matches}
+        self.assertEqual(by_name["Brody Silva"], 1)
+        self.assertEqual(by_name["Edward Rogers"], 2)
 
     def test_dance_table_title_ambiguous_letter(self):
         # "Amateur Bronze Am. Swing (S)" - confirmed real heat where the
@@ -348,7 +350,10 @@ class TestParseCompetition(unittest.TestCase):
             "isc25", "Claremont Intercollegiate Showdown 2025", date(2025, 11, 14), client
         )
 
-        self.assertGreater(len(results), 900)
+        # Open multi-dance events now collapse to one result per couple
+        # instead of one per dance (see event_dances_to_score()), so this
+        # competition-wide total is lower than it was pre-fix.
+        self.assertGreater(len(results), 800)
         bronze_waltz = [r for r in results if r.dance == Dance("Bronze", "Smooth", "Waltz")]
         self.assertEqual(len(bronze_waltz), 6)
 

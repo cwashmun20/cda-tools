@@ -2,6 +2,7 @@
 
 import unittest
 from datetime import date
+from typing import Optional
 
 import numpy as np
 
@@ -28,6 +29,7 @@ def _make_award(
     comp_date: date,
     comp_name: str = "Test Classic",
     is_split_level: bool = False,
+    event_dances: Optional[tuple[Dance, ...]] = None,
 ) -> ResultAward:
     result = CompetitionResult(
         dance=dance,
@@ -37,7 +39,7 @@ def _make_award(
         num_rounds=num_rounds,
         competition_name=comp_name,
         competition_date=comp_date,
-        event_dances=(dance,),
+        event_dances=event_dances if event_dances is not None else (dance,),
     )
     delta = cascade.build_cascade_delta(dance, award_table.compute_award(num_rounds, place))
     return ResultAward(result=result, is_split_level=is_split_level, delta=delta)
@@ -239,6 +241,54 @@ class TestRenderReport(unittest.TestCase):
 
         self.assertIn("2025-10-04 Morning Classic:", text)
         self.assertIn("2025-10-04 Evening Classic:", text)
+
+    def test_multi_dance_award_line_shows_every_dance_in_the_combo(self):
+        """An open-level multi-dance combo now collapses to a single award
+        line (one CompetitionResult, keyed off the first dance) - that line
+        should still show every dance danced, not just the representative
+        one, via event_dances.
+        """
+        lead = DancerRef(first="Lead", last="Dancer")
+        follow = DancerRef(first="Follow", last="Dancer")
+        waltz = Dance("Novice", "Standard", "Waltz")
+        foxtrot = Dance("Novice", "Standard", "Foxtrot")
+        quickstep = Dance("Novice", "Standard", "Quickstep")
+        award = _make_award(
+            waltz,
+            lead,
+            follow,
+            place=1,
+            num_rounds=2,
+            comp_date=date(2025, 10, 4),
+            event_dances=(waltz, foxtrot, quickstep),
+        )
+        starting = {"Lead Dancer": _zero_points(), "Follow Dancer": _zero_points()}
+        final = {"Lead Dancer": _zero_points(), "Follow Dancer": _zero_points()}
+        report = build_report([award], starting, final)
+
+        text = render_report(report)
+
+        self.assertIn("Novice Intl. Waltz/Foxtrot/Quickstep", text)
+
+    def test_single_dance_award_line_is_unchanged(self):
+        lead = DancerRef(first="Lead", last="Dancer")
+        follow = DancerRef(first="Follow", last="Dancer")
+        award = _make_award(
+            Dance("Bronze", "Smooth", "Waltz"),
+            lead,
+            follow,
+            place=1,
+            num_rounds=3,
+            comp_date=date(2025, 10, 4),
+        )
+        starting = {"Lead Dancer": _zero_points(), "Follow Dancer": _zero_points()}
+        final = {"Lead Dancer": _zero_points(), "Follow Dancer": _zero_points()}
+        report = build_report([award], starting, final)
+
+        text = render_report(report)
+
+        self.assertIn("Bronze Am. Waltz", text)
+        self.assertNotIn("/", text)
 
     def test_non_split_level_award_has_no_split_level_marker(self):
         lead = DancerRef(first="Lead", last="Dancer")

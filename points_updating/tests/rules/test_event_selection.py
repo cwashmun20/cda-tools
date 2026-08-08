@@ -149,6 +149,24 @@ class TestSelectScoringResults(unittest.TestCase):
 
         self._assert_selected_exactly(selected, results)
 
+    def test_one_result_per_open_event_shape(self):
+        """Post-fix, an open-level multi-dance event's parser output is one
+        CompetitionResult per couple (keyed off the first dance), not one
+        per dance - confirms the filter's event_dances-tuple comparison
+        works correctly against that realistic shape, not just the
+        synthetic one-result-per-dance shape the other tests use.
+        """
+        wtf_result = _make_result(
+            "Novice", "Smooth", "Waltz", place=1, event_dance_names=("Waltz", "Tango", "Foxtrot")
+        )
+        v_result = _make_result(
+            "Novice", "Smooth", "Viennese Waltz", place=1, event_dance_names=("Viennese Waltz",)
+        )
+
+        selected = event_selection.select_points_event_results([wtf_result, v_result])
+
+        self._assert_selected_exactly(selected, [wtf_result])
+
     def test_practical_open_level_combinations(self):
         """Real-world open-level event splits seen in practice, across
         every points-eligible style and open level, including groups of
