@@ -103,6 +103,23 @@ class TestExtractLevel(unittest.TestCase):
         with self.assertRaises(ValueError):
             _extract_level("Amateur  Mystery Am. Waltz  (W)")
 
+    def test_double_open_resolves_to_champ(self):
+        # Real heat (UCSB Beach Ball): "Open" doubles as both O2CM's
+        # required-but-meaningless age-category placeholder and this
+        # comp's own name for their single combined open-level event.
+        self.assertEqual(_extract_level("Amateur Open Open Standard (WTVFQ)"), "Champ")
+
+    def test_single_open_placeholder_is_ignored(self):
+        # Same comp's syllabus events still carry the meaningless "Open"
+        # age-category placeholder exactly once - it must not shadow the
+        # real level elsewhere in the name.
+        self.assertEqual(_extract_level("Amateur Open Bronze Am. Waltz (W)"), "Bronze")
+
+    def test_no_open_at_all_is_unaffected(self):
+        # A normal comp with no age-category quirk (e.g. Claremont) must
+        # parse exactly as before.
+        self.assertEqual(_extract_level("Amateur  Bronze Am. Waltz  (W)"), "Bronze")
+
 
 class TestResolveStyleAndDances(unittest.TestCase):
     def test_bare_style_word_for_multi_dance_heat(self):

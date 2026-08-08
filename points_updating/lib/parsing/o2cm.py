@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup, Tag
 from points_updating.lib.models.result import CompetitionResult, DancerRef
 from points_updating.lib.parsing.http_client import ThrottledClient
 from utils.lib import constants
-from utils.lib.constants import Style
+from utils.lib.constants import OpenLevel, Style
 from utils.lib.models.dance import Dance, convert_dance, convert_level
 from utils.lib.multi_dance import expand_abbreviation
 
@@ -32,6 +32,11 @@ _TBA_RE = re.compile(r"\bTBA\d*\b")
 
 # Team Match events are not eligible for points.
 _TEAM_MATCH_MARKER = "Team Match"
+
+# O2CM requires every event to carry an age-category value; a comp with no
+# age divisions may default every event to the literal placeholder word "Open".
+_DOUBLE_OPEN_RE = re.compile(r"\bOpen\s+Open\b")
+_OPEN_WORD_RE = re.compile(r"\bOpen\b")
 
 # Bare style words O2CM uses for multi-dance heat names (e.g. "Amateur
 # Silver Smooth (WT)") - unambiguous, unlike the "Am."/"Intl." prefix used
@@ -200,7 +205,15 @@ def _extract_level(heat_name: str) -> str:
     first, each adjacent word pair, so two-word divisions like "Rookie
     Followers" are recognized ahead of a skill word appearing later in the
     same name, e.g. "Rookie Followers Bronze Am. Waltz").
+
+    See _DOUBLE_OPEN_RE's comment for the "Open"-as-placeholder-age-
+    category handling - a no-op for any heat name that doesn't contain the
+    word "Open" at all, so this doesn't affect comps without that quirk.
     """
+    if _DOUBLE_OPEN_RE.search(heat_name):
+        return OpenLevel.CHAMP
+    heat_name = _OPEN_WORD_RE.sub("", heat_name)
+
     tokens = heat_name.split()
     two_word_windows = [" ".join(pair) for pair in zip(tokens, tokens[1:])]
     for candidate in two_word_windows + tokens:
