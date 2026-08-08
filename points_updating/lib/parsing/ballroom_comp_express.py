@@ -24,6 +24,13 @@ _BASE_URL = "https://ballroomcompexpress.com"
 # "Rookie/Veteran" phrasing.
 _ROOKIE_VET_MARKER = "Rookie"
 
+# Nightclub-style events (e.g. "Amateur Open Open Nightclub Salsa" - real,
+# confirmed) use "Open" as a placeholder level with no real CDA syllabus/
+# open level behind it, since Nightclub isn't points-eligible at all -
+# skipped the same way as Rookie/Vet and Pre-Bronze/N Class, rather than
+# guessing a level.
+_NIGHTCLUB_MARKER = "Nightclub"
+
 # Style phrases as they appear in Ballroom Comp Express's own event display
 # names. Unlike CompOrganizer's "Int'l"/"Am." prefix, these phrases are
 # unambiguous, so no trial-and-error via convert_dance() is needed.
@@ -150,13 +157,17 @@ def parse_competition(
         client: The HTTP client to fetch with.
     Returns:
         One CompetitionResult per (couple, dance) across every couple event
-        in the competition. Non-couple events (e.g. Formation Team) are
-        skipped here, not raised on - see _parse_event for the single-event
-        contract, which does raise for those.
+        in the competition. Non-couple events (e.g. Formation Team) and
+        listed events with no recorded results are skipped here, not raised on.
+        See _parse_event for the single-event contract, which does raise for
+        an actually-malformed page.
     """
     results = []
     for eid, _ in fetch_event_list(cid, client):
-        event = extract_embedded_json(fetch_event_page(cid, eid, client))
+        html = fetch_event_page(cid, eid, client)
+        if not _EMBEDDED_JSON_RE.search(html):
+            continue
+        event = extract_embedded_json(html)
         if event["eventinfo"]["eventtype"] != 1:
             continue
         results.extend(_parse_event(event, competition_name, competition_date))
@@ -187,8 +198,8 @@ def _parse_event(
     Returns:
         One CompetitionResult per (couple, dance), every dance in the event
         sharing one event_dances tuple and one num_rounds. Empty if the
-        event is Rookie/Veteran, or a level with no CDA points equivalent
-        (e.g. Pre-Bronze/N Class) - see below.
+        event is Rookie/Veteran, Nightclub-style, or a level with no CDA
+        points equivalent (e.g. Pre-Bronze/N Class) - see below.
     Raises:
         NotImplementedError: if eventinfo["eventtype"] isn't 1 (Couple).
     """
@@ -201,6 +212,8 @@ def _parse_event(
         # Not points-eligible; unlike CompOrganizer, Ballroom Comp Express
         # doesn't say which partner is the rookie, so this skips rather
         # than guessing roles.
+        return []
+    if _NIGHTCLUB_MARKER in eventinfo["displayname"]:
         return []
 
     level = _extract_level(eventinfo["displayname"])

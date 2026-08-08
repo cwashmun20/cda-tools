@@ -67,7 +67,7 @@ class TestFetchEventList(unittest.TestCase):
         events = fetch_event_list(178, client)
 
         self.assertIn((852, "Amateur Adult Newcomer American Smooth Waltz"), events)
-        self.assertEqual(len(events), 7)
+        self.assertEqual(len(events), 8)
 
     def test_team_match_links_are_not_returned(self):
         # Team Match events link via tmid=, not eid=, so they're naturally
@@ -331,6 +331,15 @@ class TestParseEvent(unittest.TestCase):
 
         self.assertEqual(results, [])
 
+    def test_nightclub_skipped_without_raising(self):
+        # Real event: "Amateur Open Open Nightclub Salsa" - "Open" here is
+        # a placeholder, not a real CDA level, and would otherwise raise.
+        event = extract_embedded_json(_load_fixture("event_nightclub.html"))
+
+        results = _parse_event(event, "Solar Flare DanceSport Challenge", date(2025, 3, 1))
+
+        self.assertEqual(results, [])
+
     def test_non_couple_type_raises(self):
         event = {"eventinfo": {"eventtype": 5, "displayname": "Formation Team"}}
 
@@ -341,9 +350,10 @@ class TestParseEvent(unittest.TestCase):
 class TestParseCompetition(unittest.TestCase):
     """Tests parse_competition()'s fetch-list-then-fetch-each-event
     orchestration against the full, real Solar Flare event list, exercising
-    every skip path (Rookie/Vet, N Class/Pre-Bronze, and the tmid= Team
-    Match link that never even reaches fetch_event_list()'s output) plus
-    every level-mapping path together.
+    every skip path (Rookie/Vet, N Class/Pre-Bronze, a real listed-but-
+    never-judged empty event, and the tmid= Team Match link that never even
+    reaches fetch_event_list()'s output) plus every level-mapping path
+    together.
     """
 
     def test_parses_every_couple_event_and_skips_ineligible_ones(self):
@@ -367,6 +377,9 @@ class TestParseCompetition(unittest.TestCase):
                 (_RESULTS_URL, (("cid", 178), ("eid", 289))): _load_fixture(
                     "event_a_class_multi_dance.html"
                 ),
+                (_RESULTS_URL, (("cid", 178), ("eid", 748))): _load_fixture(
+                    "event_no_results.html"
+                ),
             }
         )
 
@@ -375,7 +388,7 @@ class TestParseCompetition(unittest.TestCase):
         )
 
         # 7 (Newcomer) + 2 (Closed Gold) + 3 (Open Gold) + 0 (N Class) +
-        # 0 (Rookie/Vet) + 4 (B Class) + 12 (A Class) = 28.
+        # 0 (Rookie/Vet) + 4 (B Class) + 12 (A Class) + 0 (no results) = 28.
         self.assertEqual(len(results), 28)
 
 
