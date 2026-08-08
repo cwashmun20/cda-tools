@@ -9,6 +9,7 @@ exact result that produced it.
 
 from collections import defaultdict
 from dataclasses import dataclass
+from itertools import groupby
 
 from points_updating.lib.points_calculator import ResultAward
 from points_updating.lib.rules.cascade import PointDelta
@@ -53,7 +54,9 @@ def build_report(
     Returns:
         An UpdateReport with one DancerReport per dancer appearing in
         awards, each dancer's awards sorted chronologically by competition
-        date.
+        (date, then name - a compound key so two competitions sharing one
+        date still sort/group into separate blocks, not just tie-broken
+        arbitrarily).
     """
     awards_by_dancer: dict[str, list[ResultAward]] = defaultdict(list)
     for award in awards:
@@ -65,11 +68,15 @@ def build_report(
             dancer_name=name,
             starting_points=starting_totals[name],
             final_points=final_totals[name],
-            awards=sorted(dancer_awards, key=lambda award: award.result.competition_date),
+            awards=sorted(dancer_awards, key=_competition_key),
         )
         for name, dancer_awards in awards_by_dancer.items()
     ]
     return UpdateReport(dancer_reports=dancer_reports)
+
+
+def _competition_key(award: ResultAward) -> tuple:
+    return (award.result.competition_date, award.result.competition_name)
 
 
 def render_report(report: UpdateReport) -> str:
@@ -87,7 +94,9 @@ def _render_dancer_report(dancer_report: DancerReport) -> str:
         _render_totals(dancer_report.starting_points, dancer_report.final_points),
         "",
     ]
-    lines.extend(_render_award_line(award) for award in dancer_report.awards)
+    for (comp_date, comp_name), comp_awards in groupby(dancer_report.awards, key=_competition_key):
+        lines.append(f"{comp_date} {comp_name}:")
+        lines.extend(_render_award_line(award) for award in comp_awards)
     return "\n".join(lines)
 
 
@@ -104,9 +113,8 @@ def _render_award_line(award: ResultAward) -> str:
     breakdown = _level_breakdown(award.delta)
     points_str = ", ".join(f"{level} +{pts}" for level, pts in breakdown) if breakdown else "+0 pts"
     return (
-        f"  {result.competition_date} {result.competition_name}: {result.dance} - "
-        f"Placed {_ordinal(result.place)} from {result.num_rounds} round(s){split_level_note} "
-        f"-> {points_str}"
+        f"  {result.dance} - Placed {_ordinal(result.place)} from {result.num_rounds} "
+        f"round(s){split_level_note} -> {points_str}"
     )
 
 

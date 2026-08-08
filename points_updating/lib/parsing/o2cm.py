@@ -24,11 +24,14 @@ _EVENT_URL = "https://results.o2cm.com/event3.asp"
 _EVENT_LINK_HREF_RE = re.compile(r"scoresheet3\.asp\?event=")
 _PLACEMENT_ROW_RE = re.compile(r"^(\d+)\)\s+\d+\s+(.+)$")
 _STATE_SEPARATOR_RE = re.compile(r"\s-\s*")
-_CODE_RE = re.compile(r"\(([A-Za-z]+)\)\s*$")
+_CODE_RE = re.compile(r"\(([A-Za-z_]+)\)\s*$")
 _SEPARATOR_TEXT = "----"
 # A couple entered with no partner assigned yet shows as e.g. "TBA01 TBA" -
 # not a real dancer, so that row is skipped rather than parsed.
 _TBA_RE = re.compile(r"\bTBA\d*\b")
+
+# Team Match events are not eligible for points.
+_TEAM_MATCH_MARKER = "Team Match"
 
 # Bare style words O2CM uses for multi-dance heat names (e.g. "Amateur
 # Silver Smooth (WT)") - unambiguous, unlike the "Am."/"Intl." prefix used
@@ -151,6 +154,9 @@ def _build_results(
     competition_name: str,
     competition_date: date,
 ) -> list[CompetitionResult]:
+    if _TEAM_MATCH_MARKER in heat_name:
+        return []
+
     level = _extract_level(heat_name)
     style, dances = _resolve_style_and_dances(heat_name, level)
     event_dances = tuple(dances)
@@ -211,8 +217,8 @@ def _resolve_style_and_dances(heat_name: str, level: str) -> tuple[Style, list[D
     Bronze Am. Waltz (W)", "Amateur Beginner Merengue (M)").
 
     A bare style word (e.g. "Smooth") gives the style directly, and the
-    code expands via expand_abbreviation(). Otherwise an "Am."/"Intl."
-    prefix narrows it to two candidate styles, disambiguated by checking
+    code expands via expand_abbreviation(). Otherwise an "Am."/"Amer."/
+    "Intl." prefix narrows it to two candidate styles, disambiguated by checking
     which one's abbreviation map covers every letter in the code - Smooth/
     Rhythm and Standard/Latin use entirely disjoint letters, so exactly
     one candidate ever matches. With neither a bare style word nor a
@@ -222,7 +228,10 @@ def _resolve_style_and_dances(heat_name: str, level: str) -> tuple[Style, list[D
     code_match = _CODE_RE.search(heat_name)
     if code_match is None:
         raise ValueError(f"Could not find a dance code in heat name {heat_name!r}")
-    code = code_match.group(1)
+    # A trailing "_" placeholder shows up on some real heats (e.g.
+    # "(CRSB_)") - not a real dance slot, so it's dropped rather than
+    # treated as an unrecognized letter.
+    code = code_match.group(1).replace("_", "")
 
     for word, style in _STYLE_WORDS.items():
         if word in heat_name:
@@ -230,7 +239,7 @@ def _resolve_style_and_dances(heat_name: str, level: str) -> tuple[Style, list[D
 
     if "Intl." in heat_name:
         candidates = Style.international_styles()
-    elif "Am." in heat_name:
+    elif "Am." in heat_name or "Amer." in heat_name:
         candidates = Style.american_styles()
     else:
         candidates = None

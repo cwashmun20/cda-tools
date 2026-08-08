@@ -3,10 +3,13 @@
 CompetitionResult is one per (couple, dance, event), so a multi-dance event
 produces one result per dance. When an open level was split across more
 than one event at a competition (e.g. Novice Smooth run as a WTF event plus
-a separate V event), couples placed in all of them - but CDA rules use only
-the event with the most dances to calculate points at that level+style; the
-other event's results are dropped, not because the placements didn't
-happen, but because they don't count toward points.
+a separate V event), CDA rules use only the event with the most dances to
+calculate points at that level+style for every couple - including a couple
+who finaled in the smaller event but not the larger one, who score zero at
+that level+style rather than falling back to the smaller event's placement.
+The points event is therefore a property of the competition (determined
+from every couple's results at that level+style, not just one couple's),
+not something decided independently per couple.
 """
 
 from collections import defaultdict
@@ -23,57 +26,47 @@ _TIEBREAK_DANCES = (DanceName.WALTZ, DanceName.CHA_CHA)
 def select_points_event_results(results: list[CompetitionResult]) -> list[CompetitionResult]:
     """Drops CompetitionResults from events CDA rules don't use for points.
 
-    Groups results by (competition, lead, follow, style, open level) and
-    keeps only the points-event results within each group (see
-    _filter_group_to_points_event). Syllabus-level results always pass
-    through unchanged, since this rule only applies to open levels.
-
     Args:
         results: CompetitionResults to filter - may span multiple
             competitions, couples, styles, and levels.
     Returns:
-        results with non-points-event CompetitionResults removed.
+        results with non-points-event CompetitionResults removed. Syllabus-
+        level results always pass through unchanged, since this rule only
+        applies to open levels.
     """
-    groups: dict[Hashable, list[CompetitionResult]] = defaultdict(list)
+    event_dance_sets: dict[Hashable, set[tuple[Dance, ...]]] = defaultdict(set)
     passthrough: list[CompetitionResult] = []
+    open_results: list[CompetitionResult] = []
 
     for result in results:
         if result.dance.level not in constants.OPEN_LEVELS:
             passthrough.append(result)
             continue
-        key = (
-            result.competition_name,
-            result.competition_date,
-            result.lead,
-            result.follow,
-            result.dance.style,
-            result.dance.level,
-        )
-        groups[key].append(result)
+        open_results.append(result)
+        event_dance_sets[_competition_level_key(result)].add(result.event_dances)
 
-    selected = list(passthrough)
-    for group in groups.values():
-        selected.extend(_filter_group_to_points_event(group))
+    points_events = {
+        key: max(dance_sets, key=_event_rank) for key, dance_sets in event_dance_sets.items()
+    }
+
+    selected = passthrough
+    selected.extend(
+        result
+        for result in open_results
+        if result.event_dances == points_events[_competition_level_key(result)]
+    )
     return selected
 
 
-def _filter_group_to_points_event(group: list[CompetitionResult]) -> list[CompetitionResult]:
-    """Keeps only one couple's results from the event CDA rules use for points.
-
-    Args:
-        group: Every CompetitionResult one couple earned at one open
-            level+style at one competition - may span more than one event.
-    Returns:
-        Only the results from the event with the most dances, breaking ties
-        by whether the event includes Waltz or Cha Cha. Unchanged if the
-        group is already a single event.
-    """
-    event_dance_sets = {result.event_dances for result in group}
-    if len(event_dance_sets) <= 1:
-        return group
-
-    points_event = max(event_dance_sets, key=_event_rank)
-    return [result for result in group if result.event_dances == points_event]
+def _competition_level_key(result: CompetitionResult) -> Hashable:
+    """Identifies one open level+style at one competition - the scope
+    within which a single points event applies to every couple."""
+    return (
+        result.competition_name,
+        result.competition_date,
+        result.dance.style,
+        result.dance.level,
+    )
 
 
 def _event_rank(event_dances: tuple[Dance, ...]) -> tuple[int, bool]:

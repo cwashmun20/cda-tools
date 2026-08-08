@@ -13,6 +13,7 @@ import requests
 
 from points_updating.lib.parsing.http_client import ThrottledClient
 from points_updating.lib.parsing.o2cm import (
+    _build_results,
     _extract_level,
     _extract_nightclub_dance_name,
     _parse_placement_row,
@@ -116,6 +117,15 @@ class TestResolveStyleAndDances(unittest.TestCase):
         self.assertEqual(style, Style.SMOOTH)
         self.assertEqual(dances, [Dance("Bronze", "Smooth", "Waltz")])
 
+    def test_amer_prefix_resolves_via_letter_membership(self):
+        # "Amer." (not just "Am.") is another real American-style marker -
+        # confirmed against a real heat name; "Am." isn't a substring of
+        # "Amer." (the period doesn't immediately follow "Am"), so this
+        # needs its own check rather than falling out of the "Am." one.
+        style, dances = _resolve_style_and_dances("Amateur Bronze Amer. Waltz (W)", "Bronze")
+        self.assertEqual(style, Style.SMOOTH)
+        self.assertEqual(dances, [Dance("Bronze", "Smooth", "Waltz")])
+
     def test_am_prefix_rhythm_dance_resolves_via_letter_membership(self):
         style, dances = _resolve_style_and_dances("Amateur Bronze Am. Cha Cha (C)", "Bronze")
         self.assertEqual(style, Style.RHYTHM)
@@ -144,6 +154,21 @@ class TestResolveStyleAndDances(unittest.TestCase):
     def test_missing_code_raises(self):
         with self.assertRaises(ValueError):
             _resolve_style_and_dances("Amateur Bronze Am. Waltz", "Bronze")
+
+    def test_trailing_underscore_placeholder_is_dropped(self):
+        # Real heat: "Amateur Pre-Champ Rhythm (CRSB_)" - the trailing "_"
+        # isn't a real dance slot.
+        style, dances = _resolve_style_and_dances("Amateur Pre-Champ Rhythm (CRSB_)", "Prechamp")
+        self.assertEqual(style, Style.RHYTHM)
+        self.assertEqual(
+            dances,
+            [
+                Dance("Prechamp", "Rhythm", "Cha Cha"),
+                Dance("Prechamp", "Rhythm", "Rumba"),
+                Dance("Prechamp", "Rhythm", "East Coast Swing"),
+                Dance("Prechamp", "Rhythm", "Bolero"),
+            ],
+        )
 
 
 class TestExtractNightclubDanceName(unittest.TestCase):
@@ -193,6 +218,21 @@ class TestParsePlacementRow(unittest.TestCase):
     def test_malformed_row_raises(self):
         with self.assertRaises(ValueError):
             _parse_placement_row("not a placement row")
+
+
+class TestBuildResults(unittest.TestCase):
+    def test_team_match_skipped_without_raising(self):
+        # Real heat name: teams (not couples) have no individual CDA level
+        # of their own, so this would otherwise fail level extraction.
+        results = _build_results(
+            "Am Team Match Open Intl. Multi-Dance (VCSWJ)",
+            final_rows=["1) 100 Some Team"],
+            num_rounds=1,
+            competition_name="Test Classic",
+            competition_date=date(2026, 1, 1),
+        )
+
+        self.assertEqual(results, [])
 
 
 class TestParseResultsPage(unittest.TestCase):

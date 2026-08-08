@@ -7,7 +7,13 @@ import numpy as np
 
 from points_updating.lib.models.result import CompetitionResult, DancerRef
 from points_updating.lib.points_calculator import ResultAward
-from points_updating.lib.report import _level_breakdown, _ordinal, build_report, render_report
+from points_updating.lib.report import (
+    UpdateReport,
+    _level_breakdown,
+    _ordinal,
+    build_report,
+    render_report,
+)
 from points_updating.lib.rules import award_table, cascade
 from utils.lib.models.dance import Dance
 from utils.lib.points import Points
@@ -165,6 +171,74 @@ class TestRenderReport(unittest.TestCase):
         award_idx = text.index("Placed")
         self.assertLess(starting_idx, final_idx)
         self.assertLess(final_idx, award_idx)
+
+    def test_competition_listed_once_with_awards_indented_underneath(self):
+        lead = DancerRef(first="Lead", last="Dancer")
+        follow = DancerRef(first="Follow", last="Dancer")
+        waltz_award = _make_award(
+            Dance("Bronze", "Smooth", "Waltz"),
+            lead,
+            follow,
+            place=1,
+            num_rounds=2,
+            comp_date=date(2025, 10, 4),
+            comp_name="Fall Classic",
+        )
+        tango_award = _make_award(
+            Dance("Bronze", "Smooth", "Tango"),
+            lead,
+            follow,
+            place=2,
+            num_rounds=2,
+            comp_date=date(2025, 10, 4),
+            comp_name="Fall Classic",
+        )
+        starting = {"Lead Dancer": _zero_points(), "Follow Dancer": _zero_points()}
+        final = {"Lead Dancer": _zero_points(), "Follow Dancer": _zero_points()}
+        report = build_report([waltz_award, tango_award], starting, final)
+
+        # Isolate one dancer's section - both lead and follow otherwise
+        # each get their own "Fall Classic" header (one per dancer, not
+        # one per award), which would make a whole-report count of 2 a
+        # false positive for the thing this test is actually checking:
+        # the header not repeating once per award *within* one section.
+        lead_report = next(dr for dr in report.dancer_reports if dr.dancer_name == "Lead Dancer")
+        text = render_report(UpdateReport(dancer_reports=[lead_report]))
+
+        self.assertEqual(text.count("Fall Classic"), 1)
+        self.assertIn("2025-10-04 Fall Classic:\n  Bronze Am. Waltz", text)
+        self.assertIn("\n  Bronze Am. Tango", text)
+
+    def test_two_competitions_on_the_same_date_get_separate_headers(self):
+        lead = DancerRef(first="Lead", last="Dancer")
+        follow = DancerRef(first="Follow", last="Dancer")
+        dance = Dance("Bronze", "Smooth", "Waltz")
+        first_comp = _make_award(
+            dance,
+            lead,
+            follow,
+            place=1,
+            num_rounds=2,
+            comp_date=date(2025, 10, 4),
+            comp_name="Morning Classic",
+        )
+        second_comp = _make_award(
+            dance,
+            lead,
+            follow,
+            place=1,
+            num_rounds=2,
+            comp_date=date(2025, 10, 4),
+            comp_name="Evening Classic",
+        )
+        starting = {"Lead Dancer": _zero_points(), "Follow Dancer": _zero_points()}
+        final = {"Lead Dancer": _zero_points(), "Follow Dancer": _zero_points()}
+        report = build_report([first_comp, second_comp], starting, final)
+
+        text = render_report(report)
+
+        self.assertIn("2025-10-04 Morning Classic:", text)
+        self.assertIn("2025-10-04 Evening Classic:", text)
 
     def test_non_split_level_award_has_no_split_level_marker(self):
         lead = DancerRef(first="Lead", last="Dancer")

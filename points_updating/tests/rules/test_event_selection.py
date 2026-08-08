@@ -11,18 +11,26 @@ from utils.lib.models.dance import Dance
 
 _LEAD = DancerRef(first="Jane", last="Doe")
 _FOLLOW = DancerRef(first="John", last="Smith")
+_OTHER_LEAD = DancerRef(first="Alex", last="Zhu")
+_OTHER_FOLLOW = DancerRef(first="Sam", last="Reyes")
 _COMP_NAME = "Test Classic"
 _COMP_DATE = date(2025, 10, 4)
 
 
 def _make_result(
-    level: str, style: str, dance_name: str, place: int, event_dance_names: tuple[str, ...]
+    level: str,
+    style: str,
+    dance_name: str,
+    place: int,
+    event_dance_names: tuple[str, ...],
+    lead: DancerRef = _LEAD,
+    follow: DancerRef = _FOLLOW,
 ) -> CompetitionResult:
     event_dances = tuple(Dance(level, style, name) for name in event_dance_names)
     return CompetitionResult(
         dance=Dance(level, style, dance_name),
-        lead=_LEAD,
-        follow=_FOLLOW,
+        lead=lead,
+        follow=follow,
         place=place,
         num_rounds=3,
         competition_name=_COMP_NAME,
@@ -57,6 +65,36 @@ class TestSelectScoringResults(unittest.TestCase):
         self.assertEqual(len(selected), len(expected))
         for result in expected:
             self.assertIn(result, selected)
+
+    def test_couple_who_only_finaled_in_smaller_event_scores_nothing(self):
+        """A couple who finaled in the single-dance event but NOT the
+        multi-dance one must not fall back to the single-dance placement -
+        the multi-dance event is still the points event for this level+
+        style (another couple finaled there), so this couple simply has no
+        points-event result at all.
+        """
+        wtf_results = [
+            _make_result(
+                "Novice", "Smooth", name, place=1, event_dance_names=("Waltz", "Tango", "Foxtrot")
+            )
+            for name in ("Waltz", "Tango", "Foxtrot")
+        ]
+        other_couple_v_result = _make_result(
+            "Novice",
+            "Smooth",
+            "Viennese Waltz",
+            place=1,
+            event_dance_names=("Viennese Waltz",),
+            lead=_OTHER_LEAD,
+            follow=_OTHER_FOLLOW,
+        )
+
+        selected = event_selection.select_points_event_results(
+            wtf_results + [other_couple_v_result]
+        )
+
+        self._assert_selected_exactly(selected, wtf_results)
+        self.assertNotIn(other_couple_v_result, selected)
 
     def test_larger_event_wins_over_smaller_event(self):
         wtf_results = [

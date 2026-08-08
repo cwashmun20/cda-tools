@@ -1,0 +1,112 @@
+body {
+  font-family: system-ui, sans-serif;
+  /* Wider than a typical text page - the report's point-total grids run
+     170+ characters wide, and award lines (with long competition names)
+     can run wider still. */
+  max-width: 80rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  color: #1a1a1a;
+}
+
+.error {
+  background: #fdecea;
+  border: 1px solid #f5c2c0;
+  color: #8a1f11;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.tab-row {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.tab-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-bottom: none;
+  background: #f5f5f5;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+}
+
+.tab-btn.active {
+  background: #fff;
+  font-weight: 600;
+  border-bottom: 1px solid #fff;
+  margin-bottom: -1px;
+}
+
+.link-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.link-row input[type="url"] {
+  flex: 1;
+  min-width: 0;
+}
+
+.remove-row-btn {
+  padding: 0.25rem 0.6rem;
+  line-height: 1;
+}
+
+#add-row-btn {
+  margin-bottom: 1rem;
+}
+
+button {
+  padding: 0.5rem 1rem;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.running-message {
+  color: #555;
+  font-style: italic;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+#dancer-select {
+  min-width: 16rem;
+  max-width: 100%;
+}
+
+#results-text {
+  /* The report's point-total grids are space-aligned plain text, so this
+     has to be a true monospace font, not the page's sans-serif default -
+     a proportional font breaks the column alignment. */
+  font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Consolas, Menlo,
+    "Liberation Mono", monospace;
+  /* Preserve exact spacing (no wrapping, which would break the point-grid
+     alignment) and let long lines scroll horizontally instead. */
+  white-space: pre;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  max-height: 70vh;
+  overflow: auto;
+}

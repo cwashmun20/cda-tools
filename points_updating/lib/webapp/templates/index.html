@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CDA Points Updater</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>CDA Points Updater</h1>
+  <p>Paste one or more results-page links (O2CM, Ballroom Comp Express, or a school's dance.am
+     page), each with the date that competition was danced on, then run the update.</p>
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  {% if dancer_names is defined %}
+    <div class="tab-row">
+      <button type="button" class="tab-btn" id="input-tab-btn">Input</button>
+      <button type="button" class="tab-btn active" id="results-tab-btn">Results</button>
+    </div>
+  {% endif %}
+
+  <div id="input-panel">
+    <form method="post" id="update-form">
+      <div id="links-container">
+        {% for url, date_value in submitted_pairs %}
+          <div class="link-row">
+            <input type="url" name="url" placeholder="Results page URL" value="{{ url }}" required>
+            <input type="date" name="date" value="{{ date_value }}" required>
+            <button type="button" class="remove-row-btn" aria-label="Remove link">&times;</button>
+          </div>
+        {% endfor %}
+      </div>
+      <button type="button" id="add-row-btn">+ Add another link</button>
+
+      <div class="button-row">
+        <button type="submit" id="run-update-btn">Run Update</button>
+      </div>
+      <p id="running-message" class="running-message" hidden>
+        Running... this may take a few minutes for a large competition.
+      </p>
+    </form>
+  </div>
+
+  {% if dancer_names is defined %}
+    <div id="results-panel">
+      <div class="results-header">
+        <select id="dancer-select">
+          <option value="__all__">Show all updates</option>
+          {% for name in dancer_names %}
+            <option value="{{ name }}">{{ name }}</option>
+          {% endfor %}
+        </select>
+        <button type="button" id="download-results-btn">Download as .txt</button>
+      </div>
+      <pre id="results-text">{{ all_text }}</pre>
+    </div>
+
+    <script type="application/json" id="results-data">
+      {{ results_data | tojson }}
+    </script>
+  {% endif %}
+
+  <script>
+    // --- Dynamic add/remove link rows ---
+    var linksContainer = document.getElementById('links-container');
+
+    function syncRemoveButtons() {
+      var rows = linksContainer.querySelectorAll('.link-row');
+      rows.forEach(function (row) {
+        row.querySelector('.remove-row-btn').disabled = rows.length <= 1;
+      });
+    }
+
+    document.getElementById('add-row-btn').addEventListener('click', function () {
+      var firstRow = linksContainer.querySelector('.link-row');
+      var newRow = firstRow.cloneNode(true);
+      newRow.querySelectorAll('input').forEach(function (input) {
+        input.value = '';
+      });
+      linksContainer.appendChild(newRow);
+      syncRemoveButtons();
+    });
+
+    linksContainer.addEventListener('click', function (event) {
+      if (event.target.classList.contains('remove-row-btn')) {
+        var rows = linksContainer.querySelectorAll('.link-row');
+        if (rows.length > 1) {
+          event.target.closest('.link-row').remove();
+          syncRemoveButtons();
+        }
+      }
+    });
+
+    syncRemoveButtons();
+
+    // Show a wait message and disable the button for the duration of the
+    // (full page reload) request - a real update can take a few minutes,
+    // so it should be obvious something is happening, not look stuck.
+    document.getElementById('update-form').addEventListener('submit', function () {
+      var runBtn = document.getElementById('run-update-btn');
+      runBtn.disabled = true;
+      runBtn.textContent = 'Running...';
+      document.getElementById('running-message').hidden = false;
+    });
+
+    // --- Tabs + dancer dropdown + download (only relevant once results exist) ---
+    var resultsData = document.getElementById('results-data');
+    if (resultsData) {
+      var textsByDancer = JSON.parse(resultsData.textContent);
+      var resultsText = document.getElementById('results-text');
+      var inputPanel = document.getElementById('input-panel');
+      var resultsPanel = document.getElementById('results-panel');
+      var inputTabBtn = document.getElementById('input-tab-btn');
+      var resultsTabBtn = document.getElementById('results-tab-btn');
+
+      function showTab(tab) {
+        inputPanel.hidden = tab !== 'input';
+        resultsPanel.hidden = tab !== 'results';
+        inputTabBtn.classList.toggle('active', tab === 'input');
+        resultsTabBtn.classList.toggle('active', tab === 'results');
+      }
+      inputTabBtn.addEventListener('click', function () { showTab('input'); });
+      resultsTabBtn.addEventListener('click', function () { showTab('results'); });
+      // A run just completed - go straight to the results.
+      showTab('results');
+
+      document.getElementById('dancer-select').addEventListener('change', function (event) {
+        resultsText.textContent = textsByDancer[event.target.value];
+      });
+
+      document.getElementById('download-results-btn').addEventListener('click', function () {
+        var select = document.getElementById('dancer-select');
+        var label = select.value === '__all__' ? 'all-dancers' : select.value;
+        var safeLabel = label.replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '-');
+
+        var blob = new Blob([resultsText.textContent], { type: 'text/plain' });
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = 'points-update-' + safeLabel + '.txt';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
+    }
+  </script>
+</body>
+</html>

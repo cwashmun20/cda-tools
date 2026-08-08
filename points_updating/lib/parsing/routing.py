@@ -62,7 +62,12 @@ def parse_results_url(
     response.raise_for_status()
     match = _CBID_RE.search(response.text)
     if match is None:
-        raise ValueError(f"Unrecognized results source: {url!r}")
+        raise ValueError(
+            f"Could not find a CompOrganizer results page at {url!r}. A dance.am "
+            "site's home page doesn't embed the token this needs - navigate to "
+            "its actual results page in a browser (usually reached via a "
+            '"Results" link) and use that URL instead.'
+        )
     cbid = match.group(1)
     name = competition_name or comporganizer.fetch_competition_name(cbid, client)
     return comporganizer.parse_competition(cbid, name, competition_date, client)

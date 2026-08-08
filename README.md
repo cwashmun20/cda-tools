@@ -81,11 +81,17 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 │   │   │   ├── ballroom_comp_express.py  # Ballroom Comp Express parser
 │   │   │   ├── o2cm.py           #   O2CM parser
 │   │   │   └── routing.py        #   parse_results_url() - routes a URL to its source parser
-│   │   └── rules/
-│   │       ├── award_table.py    #   compute_award() - CDA's placement x round depth point table
-│   │       ├── cascade.py        #   build_cascade_delta() - cascades points down through levels
-│   │       ├── eligibility_filter.py  # filter_points_eligible() - ignores Nightclub/Rookie-Vet
-│   │       └── event_selection.py     # select_points_event_results() - open level multi-dance rule
+│   │   ├── rules/
+│   │   │   ├── award_table.py    #   compute_award() - CDA's placement x round depth point table
+│   │   │   ├── cascade.py        #   build_cascade_delta() - cascades points down through levels
+│   │   │   ├── eligibility_filter.py  # filter_points_eligible() - ignores Nightclub/Rookie-Vet
+│   │   │   └── event_selection.py     # select_points_event_results() - open level multi-dance rule
+│   │   └── webapp/               # Lightweight Flask UI, scoped to points updating
+│   │       ├── app.py            #   create_app() factory + web console-script entry point
+│   │       ├── routes.py         #   HTML form/results route
+│   │       ├── update_service.py #   Shared parse -> UpdateEngine -> report helper
+│   │       ├── templates/
+│   │       └── static/
 │   └── tests/                    # Mirrors the lib/ tree above (see Test Organization below)
 │       ├── test_update_engine.py
 │       ├── test_points_calculator.py
@@ -94,7 +100,8 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 │       ├── models/
 │       ├── parsing/
 │       │   └── fixtures/         #   Real, captured/trimmed source data - no live calls in tests
-│       └── rules/
+│       ├── rules/
+│       └── webapp/
 │
 ├── data/
 │   ├── inputs/                   # Competition entry CSVs (gitignored)
@@ -138,7 +145,8 @@ API communication is isolated in `utils/lib/api/`. The `DancerRecord` dataclass 
 - **`PointsCalculator.compute()`** (`points_updating/lib/points_calculator.py`) scores one `CompetitionResult` against a couple's current proficiency (via `ProficiencyCalculator`, shared with `entry_checking`): detecting the Split-Level Exception (tripling the award) and cascading the placement award down through lower levels (`award_table.py`/`cascade.py`) into a `ResultAward`.
 - **`UpdateEngine`** (`points_updating/lib/update_engine.py`) is the orchestrator. `process_competition()` scores every result in one competition against the ledger's state as of immediately before that competition — never against points earned earlier in the same competition, so Split-Level detection can't depend on processing order — then applies every resulting delta. `run_backfill()` repeats that per competition across an already-sorted (it sorts internally) list of competitions, each building on the ledger state the last left behind. The dancer lookup is an injected dependency (defaulting to the real CDA API), so tests don't need a network call or a test database.
 - **`build_report()`/`render_report()`** (`points_updating/lib/report.py`) turn a set of `ResultAward`s plus `UpdateEngine.starting_totals()`/`final_totals()` into a per-dancer audit trail — starting and final point totals stacked together for easy comparison, then every result that contributed to the change between them (including zero-point placements), so an unexpected total can be traced back to the exact result that produced it, or explained to a dancer who asks.
-- **`points_updating/lib/cli.py`** (see Usage below) is the only place a real `ThrottledClient` gets constructed — it wires `routing.py` → `UpdateEngine` → `report.py` together into a runnable command.
+- **`points_updating/lib/cli.py`** (see Usage below) wires `routing.py` → `UpdateEngine` → `report.py` together into a runnable command.
+- **`points_updating/lib/webapp/`** (see Usage below) is a second, lightweight consumer of the same `routing.py` → `UpdateEngine` → `report.py` pipeline — `update_service.py`'s `run_update()` is the shared entry point both would call into if a JSON API route were ever added, mirroring `entry_checking/lib/webapp/check_service.py`'s role for that package.
 
 ### Import Convention
 All internal imports are absolute package paths (`from utils.lib.models.dance import Dance`, `from entry_checking.lib.rules.eligibility_checker import EligibilityChecker`), not `sys.path` manipulation. This means `utils`, `entry_checking`, and `points_updating` need to be resolvable as real top-level packages — either via `pip install -e .` (see Setup), or by running from the repo root, where Python's `-m` flag adds the current directory to `sys.path` automatically.
@@ -233,6 +241,33 @@ Fetching real results is deliberately rate-limited (`ThrottledClient`, shared ac
 in one run). O2CM fetches a whole competition in a single request; Ballroom Comp Express and
 CompOrganizer fetch one request per event, so a large competition on either of those can still mean
 a couple of minutes of live requests, not a quick check.
+
+### Points Updating Web UI
+```bash
+# Via entry point (requires `pip install -e .`)
+points-updater-web
+# Then open http://127.0.0.1:5000/ in a browser
+
+# Or, for auto-reload while developing templates/routes:
+flask --app points_updating.lib.webapp.app:create_app run --debug --reload
+```
+
+Paste one or more results-page links, each with the date that competition was danced on (use
+"+ Add another link" for a backfill across several competitions), then run the update. The page is
+a full synchronous submit — like the CLI, a large competition can take a few minutes, so the button
+shows a "Running..." state for the duration rather than looking stuck.
+
+Once results load, the page switches to a **Results** tab (freely toggled back to **Input** without
+losing either) showing every dancer's starting/final totals and contributing results, in the same
+format as the CLI's output file. A dropdown — sorted by last name, with "Show all updates" as the
+default — filters the view to one dancer at a time, entirely client-side (no server round-trip). A
+**Download as .txt** button saves whatever's currently visible (all dancers or just the selected
+one) exactly as shown.
+
+Runs in the foreground of its terminal (**Ctrl+C** to stop); if it outlives its terminal, find and
+stop it the same way as the entry-checker's Web UI above. Flask's dev server defaults to port 5000
+for both — don't run this alongside the entry-checker Web UI without changing one's port
+(`flask run --port 5001`, or `create_app().run(port=5001)`).
 
 ## Setup
 
