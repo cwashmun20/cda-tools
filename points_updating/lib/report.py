@@ -11,6 +11,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from points_updating.lib.points_calculator import ResultAward
+from points_updating.lib.rules.cascade import PointDelta
+from utils.lib import constants
 from utils.lib.points import Points
 
 
@@ -82,19 +84,60 @@ def render_report(report: UpdateReport) -> str:
 def _render_dancer_report(dancer_report: DancerReport) -> str:
     lines = [
         f"=== {dancer_report.dancer_name} ===",
-        f"Starting totals:\n{dancer_report.starting_points}",
+        _render_totals(dancer_report.starting_points, dancer_report.final_points),
+        "",
     ]
     lines.extend(_render_award_line(award) for award in dancer_report.awards)
-    lines.append(f"Final totals:\n{dancer_report.final_points}")
     return "\n".join(lines)
+
+
+def _render_totals(starting: Points, final: Points) -> str:
+    """Renders starting and final point totals stacked vertically, grouped
+    together ahead of the award lines for easy before/after comparison.
+    """
+    return f"Starting:\n{starting}\nFinal:\n{final}"
 
 
 def _render_award_line(award: ResultAward) -> str:
     result = award.result
-    total_points = int(award.delta.syllabus.sum() + award.delta.open.sum())
     split_level_note = " [SPLIT-LEVEL EXCEPTION]" if award.is_split_level else ""
+    breakdown = _level_breakdown(award.delta)
+    points_str = ", ".join(f"{level} +{pts}" for level, pts in breakdown) if breakdown else "+0 pts"
     return (
         f"  {result.competition_date} {result.competition_name}: {result.dance} - "
-        f"placed {result.place} of {result.num_rounds} round(s){split_level_note} "
-        f"-> +{total_points} pts"
+        f"Placed {_ordinal(result.place)} from {result.num_rounds} round(s){split_level_note} "
+        f"-> {points_str}"
     )
+
+
+def _level_breakdown(delta: PointDelta) -> list[tuple[str, int]]:
+    """Returns (level, points) for every level this delta actually awarded
+    points to, ordered from the danced level down through each cascaded
+    level below it - what a dancer actually cares about, rather than one
+    opaque combined total.
+
+    Each affected row's cells share one point value (either a single
+    (style, dance) cell for a syllabus event, or every cell in that style
+    for an open event's cascade into syllabus levels) - max() reads that
+    shared value directly, where sum() would overcount an open cascade's
+    multi-cell row.
+    """
+    breakdown = [
+        (level, int(row.max()))
+        for level, row in zip(constants.SYLLABUS_LEVELS, delta.syllabus)
+        if row.max()
+    ]
+    breakdown += [
+        (level, int(row.max()))
+        for level, row in zip(constants.OPEN_LEVELS, delta.open)
+        if row.max()
+    ]
+    return list(reversed(breakdown))
+
+
+def _ordinal(n: int) -> str:
+    if 11 <= n % 100 <= 13:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
