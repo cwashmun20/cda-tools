@@ -172,3 +172,9 @@ utils/lib/api/config.py
 
 # Agent working files (notes, task lists, design docs)
 agents/
+
+# points_updating CLI generated output/cache (dirs kept via .gitkeep)
+data/outputs/*
+!data/outputs/.gitkeep
+data/cache/*
+!data/cache/.gitkeep

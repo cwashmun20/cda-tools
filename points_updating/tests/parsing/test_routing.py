@@ -46,12 +46,14 @@ class TestParseResultsUrl(unittest.TestCase):
         client = _make_client()
 
         results = parse_results_url(
-            "https://results.o2cm.com/event3.asp?event=isc25", date(2025, 2, 8), client
+            "https://results.o2cm.com/event3.asp?event=isc25", date(2025, 11, 14), client
         )
 
         self.assertEqual(results, ["sentinel"])
         mock_fetch_name.assert_called_once_with("isc25", client)
-        mock_parse.assert_called_once_with("isc25", "Claremont Showdown", date(2025, 2, 8), client)
+        mock_parse.assert_called_once_with(
+            "isc25", "Claremont Showdown", date(2025, 11, 14), client
+        )
 
     @patch.object(ballroom_comp_express, "fetch_competition_name", return_value="Solar Flare")
     @patch.object(ballroom_comp_express, "parse_competition", return_value=["sentinel"])
@@ -87,13 +89,13 @@ class TestParseResultsUrl(unittest.TestCase):
 
         parse_results_url(
             "https://results.o2cm.com/event3.asp?event=isc25",
-            date(2025, 2, 8),
+            date(2025, 11, 14),
             client,
             competition_name="Overridden Name",
         )
 
         mock_fetch_name.assert_not_called()
-        mock_parse.assert_called_once_with("isc25", "Overridden Name", date(2025, 2, 8), client)
+        mock_parse.assert_called_once_with("isc25", "Overridden Name", date(2025, 11, 14), client)
 
     def test_unrecognized_host_raises(self):
         url = "https://example.com/results"

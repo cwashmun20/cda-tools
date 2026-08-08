@@ -36,6 +36,7 @@ dev = [
 [project.scripts]
 entry-checker = "entry_checking.lib.entry_checker:main"
 entry-checker-web = "entry_checking.lib.webapp.app:main"
+points-updater = "points_updating.lib.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["utils*", "entry_checking*", "points_updating*"]
