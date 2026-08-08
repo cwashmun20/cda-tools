@@ -7,9 +7,10 @@ Usage:
 """
 
 from datetime import date
+from typing import Optional
 
 from entry_checking.lib.parsing.csv_reader import read_entries
-from entry_checking.lib.parsing.multi_dance_expander import expand_multi_dance_events
+from entry_checking.lib.parsing.multi_dance_resolver import resolve_dance_names
 from entry_checking.lib.parsing.row_parser import is_tba_row
 from entry_checking.lib.report_view import build_report_view
 from entry_checking.lib.rules.eligibility_checker import EligibilityChecker
@@ -52,15 +53,24 @@ class EntryChecker:
         # on every later entry that happens to still trigger it.
         self._seen_level_violations: dict[str, set[tuple]] = {}
 
-    def check_entry(self, partnership_obj: Partnership, dance_obj: Dance) -> EligibilityResult:
+    def check_entry(
+        self,
+        partnership_obj: Partnership,
+        dance_obj: Dance,
+        event_dances: Optional[tuple[Dance, ...]] = None,
+    ) -> EligibilityResult:
         """Check whether a partnership would be eligible for a dance, without
         registering the entry. Read-only: does not modify the competition,
         partnership, or dancer state.
         """
-        return self.eligibility_checker.check(partnership_obj, dance_obj)
+        return self.eligibility_checker.check(partnership_obj, dance_obj, event_dances)
 
     def register_entry(
-        self, partnership_obj: Partnership, dance_obj: Dance, heat: str | None = None
+        self,
+        partnership_obj: Partnership,
+        dance_obj: Dance,
+        heat: str | None = None,
+        event_dances: Optional[tuple[Dance, ...]] = None,
     ) -> tuple[EligibilityResult, list[LevelViolation]]:
         """Check whether a partnership is eligible for a dance and, if so,
         register the entry and check the lead and follow for any new
@@ -70,6 +80,10 @@ class EntryChecker:
             partnership_obj: The partnership entering the dance.
             dance_obj: The dance being entered.
             heat: The heat number/label, if known.
+            event_dances: Every dance in dance_obj's event, for a multi-
+                dance event - see EligibilityChecker.check() for how this
+                affects the Split-Level Exception/proficiency check.
+                Defaults to (dance_obj,) for a single-dance event.
         Returns:
             A tuple of (eligibility_result, new_level_violations).
             new_level_violations contains only violations for the lead/follow
@@ -78,7 +92,7 @@ class EntryChecker:
             Nothing is registered, and no new level violations are returned,
             if the entry is ineligible.
         """
-        result = self.eligibility_checker.check(partnership_obj, dance_obj)
+        result = self.eligibility_checker.check(partnership_obj, dance_obj, event_dances)
         if not result.eligible:
             return result, []
 
@@ -147,17 +161,21 @@ class EntryChecker:
                 comp.partnerships[partnership_name] = Partnership(lead_obj, follow_obj)
 
             partnership_obj = comp.partnerships[partnership_name]
-            level, style, dance_name = row["Skill"], row["Style"], row["Dance"]
+            level, style = row["Skill"], row["Style"]
             heat = row["Heat"] if "Heat" in comp.raw_data.columns else None
 
-            dance_obj = Dance(level, style, dance_name)
-            if dance_obj.level in (RookieVetLevel.ROOKIE_LEAD, RookieVetLevel.ROOKIE_FOLLOW):
-                rookie_vet_entries.append((partnership_obj, dance_obj, heat))
-            else:
-                regular_entries.append((partnership_obj, dance_obj, heat))
+            dance_names = resolve_dance_names(row["Dance"], style)
+            event_dances = tuple(Dance(level, style, name) for name in dance_names)
+            for dance_obj in event_dances:
+                if dance_obj.level in (RookieVetLevel.ROOKIE_LEAD, RookieVetLevel.ROOKIE_FOLLOW):
+                    rookie_vet_entries.append((partnership_obj, dance_obj, heat, event_dances))
+                else:
+                    regular_entries.append((partnership_obj, dance_obj, heat, event_dances))
 
-        for partnership_obj, dance_obj, heat in regular_entries + rookie_vet_entries:
-            result, new_violations = self.register_entry(partnership_obj, dance_obj, heat)
+        for partnership_obj, dance_obj, heat, event_dances in regular_entries + rookie_vet_entries:
+            result, new_violations = self.register_entry(
+                partnership_obj, dance_obj, heat, event_dances
+            )
 
             if not result.eligible or result.is_split_level:
                 eligibility_results.append(result)
@@ -194,7 +212,7 @@ def _report(
 def main():
     """Run the entry checker, prompting for a CSV file and competition details."""
     path = input("Please enter full path of entry spreadsheet (with file extension): ")
-    raw_data = expand_multi_dance_events(read_entries(path))
+    raw_data = read_entries(path)
 
     comp_name = input("Please enter competition name: ")
     # Bypass naming for test purposes (defaults to newcomer rv ruleset).

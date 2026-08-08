@@ -47,7 +47,7 @@ ensuring that dancers' points are verified and updated in a timely manner and th
 │   │   ├── parsing/              # Input parsing (CSV, multi-dance)
 │   │   │   ├── csv_reader.py     #   CSV reading & column validation
 │   │   │   ├── row_parser.py     #   Per-row data extraction
-│   │   │   └── multi_dance_expander.py  # Multi-dance abbreviation expansion
+│   │   │   └── multi_dance_resolver.py  # Multi-dance abbreviation resolution
 │   │   ├── rules/                # FLC rule checking
 │   │   │   ├── violations.py     #   ViolationType, EligibilityResult, LevelViolation
 │   │   │   ├── recommended_levels_calculator.py  # RecommendedLevelsCalculator
@@ -152,7 +152,7 @@ API communication is isolated in `utils/lib/api/`. The `DancerRecord` dataclass 
 All internal imports are absolute package paths (`from utils.lib.models.dance import Dance`, `from entry_checking.lib.rules.eligibility_checker import EligibilityChecker`), not `sys.path` manipulation. This means `utils`, `entry_checking`, and `points_updating` need to be resolvable as real top-level packages — either via `pip install -e .` (see Setup), or by running from the repo root, where Python's `-m` flag adds the current directory to `sys.path` automatically.
 
 ### Test Organization
-In `utils`, `entry_checking`, and `points_updating`, `tests/` mirrors the shape of `lib/` — a module directly under `lib/` (e.g. `entry_checking/lib/entry_checker.py`) has its test directly under `tests/` (`entry_checking/tests/test_entry_checker.py`), and a subpackage under `lib/` (e.g. `utils/lib/models/`, `entry_checking/lib/rules/`) has a matching subdirectory under `tests/` (`utils/tests/models/`, `entry_checking/tests/rules/`) holding its tests. Test files are also named after the module they test - `utils/lib/api/client.py` is tested by `utils/tests/api/test_client.py`, not `test_api_client.py` - so a module covering several source files (e.g. the `parsing/` package) gets one test file per source file (`test_csv_reader.py`, `test_row_parser.py`, `test_multi_dance_expander.py`) rather than one combined file. This makes it easy to find a module's tests (and vice versa) purely from its path, without needing to guess at a naming convention.
+In `utils`, `entry_checking`, and `points_updating`, `tests/` mirrors the shape of `lib/` — a module directly under `lib/` (e.g. `entry_checking/lib/entry_checker.py`) has its test directly under `tests/` (`entry_checking/tests/test_entry_checker.py`), and a subpackage under `lib/` (e.g. `utils/lib/models/`, `entry_checking/lib/rules/`) has a matching subdirectory under `tests/` (`utils/tests/models/`, `entry_checking/tests/rules/`) holding its tests. Test files are also named after the module they test - `utils/lib/api/client.py` is tested by `utils/tests/api/test_client.py`, not `test_api_client.py` - so a module covering several source files (e.g. the `parsing/` package) gets one test file per source file (`test_csv_reader.py`, `test_row_parser.py`, `test_multi_dance_resolver.py`) rather than one combined file. This makes it easy to find a module's tests (and vice versa) purely from its path, without needing to guess at a naming convention.
 
 ## Usage
 

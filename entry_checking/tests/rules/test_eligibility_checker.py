@@ -508,6 +508,49 @@ class TestEligibilityChecker(unittest.TestCase):
         self.assertFalse(result.eligible)
         self.assertEqual(result.violation_type, ViolationType.POINTED_OUT)
 
+    def test_split_level_combo_aggregates_proficiency_across_event_dances(self):
+        """A multi-dance event's dance set is fixed by the organizer, so
+        eligibility is decided once for the whole combo - the higher of each
+        partner's proficiency across every dance in it. Checking Waltz alone
+        here finds no split-level gap (lead and follow are only 1 level
+        apart in Waltz specifically), but the lead is fully pointed out of
+        Gold in Tango (part of the same combo), which event_dances must
+        surface.
+        """
+        syllabus = np.zeros((4, 19), dtype=int)
+        syllabus[0][6] = syllabus[1][6] = syllabus[2][6] = syllabus[3][6] = 7  # Smooth Tango
+        lead = _make_dancer("Lead", "Dancer", syllabus)
+        follow = _make_dancer("Follow", "Dancer")  # zero points -> floor of Bronze (1)
+        partnership = Partnership(lead, follow)
+        waltz = Dance("Gold", "Smooth", "Waltz")
+        tango = Dance("Gold", "Smooth", "Tango")
+
+        single_dance_result = self.checker.check(partnership, waltz)
+        combo_result = self.checker.check(partnership, waltz, (waltz, tango))
+
+        self.assertFalse(single_dance_result.is_split_level)
+        self.assertTrue(combo_result.eligible)
+        self.assertTrue(combo_result.is_split_level)
+        self.assertIsNotNone(combo_result.split_level_info)
+
+    def test_event_dances_matching_proficiency_does_not_change_outcome(self):
+        """A combo where both dances agree on proficiency must behave
+        identically to a single-dance check (the aggregation is a no-op when
+        every dance in the combo gives the same answer) - regression-safety
+        for the combo-aware change above.
+        """
+        lead = _make_dancer("Lead", "Dancer")
+        follow = _make_dancer("Follow", "Dancer")
+        partnership = Partnership(lead, follow)
+        waltz = Dance("Bronze", "Smooth", "Waltz")
+        tango = Dance("Bronze", "Smooth", "Tango")
+
+        single_dance_result = self.checker.check(partnership, waltz)
+        combo_result = self.checker.check(partnership, waltz, (waltz, tango))
+
+        self.assertEqual(single_dance_result.eligible, combo_result.eligible)
+        self.assertEqual(single_dance_result.is_split_level, combo_result.is_split_level)
+
     def test_pointed_out_violation(self):
         """Both partners pointed out to Silver (2) in Smooth Waltz; registering
         for Bronze (1) - below their proficiency - is a Pointed-Out violation."""

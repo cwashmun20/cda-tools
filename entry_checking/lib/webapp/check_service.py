@@ -11,7 +11,6 @@ from typing import IO, Union
 
 from entry_checking.lib.entry_checker import EntryChecker
 from entry_checking.lib.parsing.csv_reader import read_entries
-from entry_checking.lib.parsing.multi_dance_expander import expand_multi_dance_events
 from entry_checking.lib.report_view import ReportView, build_report_view
 from utils.lib import competition
 from utils.lib.api.client import DancerLookupError
@@ -55,7 +54,7 @@ def run_check(
         what went wrong and what HTTP status to report it under.
     """
     try:
-        raw_data = expand_multi_dance_events(read_entries(csv_source))
+        raw_data = read_entries(csv_source)
     except ValueError as e:
         return CheckError(str(e), 400)
 

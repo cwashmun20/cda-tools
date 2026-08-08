@@ -56,9 +56,19 @@ class PointsCalculator:
             result.num_rounds, result.place
         )
 
-        lead_level = ProficiencyCalculator.compute_proficiency_level(lead, dance.style, dance.dance)
-        follow_level = ProficiencyCalculator.compute_proficiency_level(
-            follow, dance.style, dance.dance
+        # A multi-dance event's dance set is fixed by the organizer, not
+        # chosen per-dancer, so the couple's Split-Level Exception
+        # eligibility is decided once for the whole combo - the higher of
+        # each partner's proficiency across every dance in the combo, not
+        # just the one dance this result happens to be keyed off of. For a
+        # single-dance event this max() degenerates to today's behavior.
+        lead_level = max(
+            ProficiencyCalculator.compute_proficiency_level(lead, dance.style, d.dance)
+            for d in result.event_dances
+        )
+        follow_level = max(
+            ProficiencyCalculator.compute_proficiency_level(follow, dance.style, d.dance)
+            for d in result.event_dances
         )
         # None if the couple doesn't qualify for the Split-Level Exception.
         combined_level = ProficiencyCalculator.compute_split_level_combined_level(

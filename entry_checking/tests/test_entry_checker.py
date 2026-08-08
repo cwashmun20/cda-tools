@@ -150,6 +150,62 @@ class TestRookieVetProcessedLast(unittest.TestCase):
         )
 
 
+class TestMultiDanceEventCombo(unittest.TestCase):
+    """Confirms check() aggregates Split-Level Exception eligibility across
+    a whole multi-dance combo's dances, end to end (raw_data has one row per
+    event, not one per dance - see EntryChecker.check())."""
+
+    def test_split_level_eligibility_aggregates_across_combo_dances(self):
+        """A single "WT" (Waltz/Tango) combo row registers two entries
+        (WT -> 2 dances). Checking Waltz alone would find no split-level
+        gap between the partners (they're only 1 level apart in Waltz
+        specifically), but the lead is fully pointed out of Gold in Tango -
+        part of the same combo - which the combo-wide aggregation must
+        catch for BOTH resulting entries, not just Tango's.
+        """
+        comp_date = datetime.date(2026, 6, 1)
+        raw_data = pd.DataFrame(
+            {
+                "Style": ["Smooth"],
+                "Dance": ["WT"],
+                "Skill": ["Gold"],
+                "Lead First": ["Baris"],
+                "Lead Last": ["Varol"],
+                "Follow First": ["Denise"],
+                "Follow Last": ["Machin"],
+            }
+        )
+        comp = competition.Competition(
+            comp_name="test",
+            comp_date=comp_date,
+            rv_ruleset="newcomer",
+            consecutive_level_limit=2,
+            rookie_max_level="Bronze",
+            raw_data=raw_data,
+        )
+        syllabus = np.zeros((4, 19), dtype=int)
+        # Smooth Tango (col 6): fully pointed out through Gold.
+        syllabus[0][6] = syllabus[1][6] = syllabus[2][6] = syllabus[3][6] = 7
+        lead_record = DancerRecord(
+            cda_id=1,
+            first="Baris",
+            last="Varol",
+            first_comp_date=datetime.date(2020, 1, 1),
+            created_date="2020-01-01",
+            syllabus_pts=syllabus,
+            open_pts=np.zeros((3, 4), dtype=int),
+        )
+        comp.competitors["Baris Varol"] = Dancer.from_data(comp_date, lead_record)
+        comp.competitors["Denise Machin"] = _mock_dancer(comp_date, "Denise", "Machin")
+
+        eligibility_results, _ = EntryChecker(comp).check()
+
+        self.assertEqual(len(comp.entries), 2)
+        self.assertEqual({e.dance_data.dance for e in comp.entries}, {"Waltz", "Tango"})
+        split_level_results = [r for r in eligibility_results if r.is_split_level]
+        self.assertEqual(len(split_level_results), 2)
+
+
 class TestCheckEntryAndRegisterEntry(unittest.TestCase):
     """Tests the single-entry building blocks check() is written in terms of."""
 

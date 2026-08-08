@@ -5,7 +5,7 @@ is eligible to compete in a given dance at a given level, returning
 structured EligibilityResult objects.
 """
 
-from typing import cast
+from typing import Optional, cast
 
 from entry_checking.lib.rules.recommended_levels_calculator import RecommendedLevelsCalculator
 from entry_checking.lib.rules.violations import EligibilityResult, ViolationType
@@ -51,15 +51,28 @@ class EligibilityChecker:
         self.rv_ruleset = cast(constants.RvRuleset, rv_ruleset)
         self.rookie_max_level = cast(constants.RookieMaxLevel, rookie_max_level)
 
-    def check(self, partnership: Partnership, dance_obj: Dance) -> EligibilityResult:
+    def check(
+        self,
+        partnership: Partnership,
+        dance_obj: Dance,
+        event_dances: Optional[tuple[Dance, ...]] = None,
+    ) -> EligibilityResult:
         """Check whether a partnership is eligible for a dance.
 
         Args:
             partnership: A Partnership object containing lead and follow dancers.
             dance_obj: The Dance being checked.
+            event_dances: Every dance in dance_obj's event, for a multi-dance
+                event (the organizer fixes a multi-dance event's dance set -
+                couples don't choose a subset of it - so eligibility is
+                decided once for the whole combo). Defaults to (dance_obj,)
+                for a single-dance event, which degenerates to checking
+                dance_obj alone exactly as before.
         Returns:
             An EligibilityResult with the outcome and any violation details.
         """
+        if event_dances is None:
+            event_dances = (dance_obj,)
         # A dancer already registered for this exact dance (regardless of
         # partner) is a duplicate entry - checked first since it should be
         # flagged even at levels that are otherwise always eligible.
@@ -138,12 +151,24 @@ class EligibilityChecker:
             if result is not None:
                 return result
 
-        # Check proficiency (Split-Level Exception and Pointing Out)
-        lead_level = ProficiencyCalculator.compute_proficiency_level(
-            partnership.lead, dance_obj.style, dance_obj.dance
+        # Check proficiency (Split-Level Exception and Pointing Out). A
+        # multi-dance event's dance set is fixed by the organizer, not
+        # chosen per-dancer, so each partner's proficiency is the higher of
+        # their proficiency across every dance in the combo, not just this
+        # one dance - otherwise this determination could arbitrarily
+        # disagree depending on which of the combo's dances happened to be
+        # checked.
+        lead_level = max(
+            ProficiencyCalculator.compute_proficiency_level(
+                partnership.lead, dance_obj.style, d.dance
+            )
+            for d in event_dances
         )
-        follow_level = ProficiencyCalculator.compute_proficiency_level(
-            partnership.follow, dance_obj.style, dance_obj.dance
+        follow_level = max(
+            ProficiencyCalculator.compute_proficiency_level(
+                partnership.follow, dance_obj.style, d.dance
+            )
+            for d in event_dances
         )
         event_level = constants.LEVELS.index(dance_obj.level)
 

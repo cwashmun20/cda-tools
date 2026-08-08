@@ -2,6 +2,7 @@
 
 import datetime
 import unittest
+from typing import Optional
 
 import numpy as np
 
@@ -33,7 +34,9 @@ def _make_dancer(first, last, syllabus_pts=None, open_pts=None):
     return Dancer.from_data(datetime.date(2026, 1, 1), record)
 
 
-def _make_result(dance: Dance, place: int, num_rounds: int) -> CompetitionResult:
+def _make_result(
+    dance: Dance, place: int, num_rounds: int, event_dances: Optional[tuple[Dance, ...]] = None
+) -> CompetitionResult:
     return CompetitionResult(
         dance=dance,
         lead=DancerRef(first="Lead", last="Dancer"),
@@ -42,7 +45,7 @@ def _make_result(dance: Dance, place: int, num_rounds: int) -> CompetitionResult
         num_rounds=num_rounds,
         competition_name="Test Classic",
         competition_date=datetime.date(2025, 10, 4),
-        event_dances=(dance,),
+        event_dances=event_dances if event_dances is not None else (dance,),
     )
 
 
@@ -102,6 +105,30 @@ class TestPointsCalculator(unittest.TestCase):
 
         self.assertFalse(award.is_split_level)
         expected_delta = cascade.build_cascade_delta(dance, (3, 6, 7))
+        self.assertTrue(np.array_equal(award.delta.syllabus, expected_delta.syllabus))
+        self.assertTrue(np.array_equal(award.delta.open, expected_delta.open))
+
+    def test_split_level_aggregates_proficiency_across_the_whole_combo(self):
+        """A couple's Split-Level Exception eligibility is decided once for
+        the whole multi-dance combo (the higher of each partner's
+        proficiency across every dance in it), not just the one dance this
+        result happens to be keyed off of - checking Waltz alone here would
+        find no split-level gap (lead and follow are only 1 level apart in
+        Waltz specifically), but the lead is fully pointed out of Gold in
+        Tango (part of the same combo), which the combo-wide max must catch.
+        """
+        syllabus = np.zeros((4, 19), dtype=int)
+        syllabus[0][6] = syllabus[1][6] = syllabus[2][6] = syllabus[3][6] = 7  # Smooth Tango
+        lead = _make_dancer("Lead", "Dancer", syllabus)
+        follow = _make_dancer("Follow", "Dancer")  # zero points -> Bronze floor
+        waltz = Dance("Gold", "Smooth", "Waltz")
+        tango = Dance("Gold", "Smooth", "Tango")
+        result = _make_result(waltz, place=1, num_rounds=2, event_dances=(waltz, tango))
+
+        award = PointsCalculator.compute(result, lead, follow)
+
+        self.assertTrue(award.is_split_level)
+        expected_delta = cascade.build_cascade_delta(waltz, (9, 18, 21))  # 3x semifinal 1st (3,6,7)
         self.assertTrue(np.array_equal(award.delta.syllabus, expected_delta.syllabus))
         self.assertTrue(np.array_equal(award.delta.open, expected_delta.open))
 
