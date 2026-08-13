@@ -47,6 +47,7 @@ def run_update(
     urls: list[str],
     date_strs: list[str],
     lookup: Callable[[str, str], DancerRecord] = lookup_dancer,
+    dry_run: bool = True,
 ) -> UpdateSuccess | UpdateError:
     """Runs a full points update from raw form input.
 
@@ -56,11 +57,19 @@ def run_update(
             paired by position with urls.
         lookup: Fetches a DancerRecord for a first/last name - forwarded to
             UpdateEngine; tests inject a fake so no real API call happens.
+        dry_run: If False, a real (write-to-the-database) update was
+            requested. There is no write step yet, so this returns an
+            UpdateError rather than silently behaving like a dry run.
     Returns:
         An UpdateSuccess with the rendered report(s) to display, or an
         UpdateError describing what went wrong and what HTTP status to
         report it under.
     """
+    if not dry_run:
+        return UpdateError(
+            "Live updates aren't supported yet - only dry-run calculation is available."
+        )
+
     if not urls:
         return UpdateError("At least one results link is required.")
 

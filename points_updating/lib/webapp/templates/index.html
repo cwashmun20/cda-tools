@@ -34,6 +34,16 @@
       </div>
       <button type="button" id="add-row-btn">+ Add another link</button>
 
+      <div class="dry-run-row">
+        <label>
+          <input type="checkbox" name="dry_run" id="dry-run-checkbox" {% if dry_run %}checked{% endif %}>
+          Dry run (calculate only, don't write to the database)
+        </label>
+        <p id="dry-run-warning" class="dry-run-warning" {% if dry_run %}hidden{% endif %}>
+          Live updates aren't supported yet - only dry-run calculation is available.
+        </p>
+      </div>
+
       <div class="button-row">
         <button type="submit" id="run-update-btn">Run Update</button>
       </div>
@@ -98,6 +108,14 @@
     });
 
     syncRemoveButtons();
+
+    // Live-toggle the "not supported yet" warning as the checkbox changes,
+    // instead of only updating it after a full round trip.
+    var dryRunCheckbox = document.getElementById('dry-run-checkbox');
+    var dryRunWarning = document.getElementById('dry-run-warning');
+    dryRunCheckbox.addEventListener('change', function () {
+      dryRunWarning.hidden = dryRunCheckbox.checked;
+    });
 
     // Show a wait message and disable the button for the duration of the
     // (full page reload) request - a real update can take a few minutes,

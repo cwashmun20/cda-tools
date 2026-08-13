@@ -26,6 +26,8 @@ class TestIndexRoute(unittest.TestCase):
         self.assertIn(b'name="date"', response.data)
         # No results yet on a bare GET, so there's no results tab to show.
         self.assertNotIn(b'id="results-panel"', response.data)
+        # Dry run defaults to true
+        self.assertIn(b'name="dry_run" id="dry-run-checkbox" checked', response.data)
 
     def test_post_blank_url_shows_friendly_error(self):
         response = self.client.post("/", data={"url": [""], "date": [""]})
@@ -45,10 +47,11 @@ class TestIndexRoute(unittest.TestCase):
         )
         with mock.patch.object(routes, "run_update", return_value=success) as mock_run:
             response = self.client.post(
-                "/", data={"url": ["https://example.com"], "date": ["2026-01-01"]}
+                "/",
+                data={"url": ["https://example.com"], "date": ["2026-01-01"], "dry_run": "on"},
             )
 
-        mock_run.assert_called_once_with(["https://example.com"], ["2026-01-01"])
+        mock_run.assert_called_once_with(["https://example.com"], ["2026-01-01"], dry_run=True)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'id="results-panel"', response.data)
         self.assertIn(b"Jamie Adams", response.data)
@@ -60,7 +63,8 @@ class TestIndexRoute(unittest.TestCase):
         success = UpdateSuccess(dancer_names=[], all_text="", dancer_text={}, new_dancer_count=3)
         with mock.patch.object(routes, "run_update", return_value=success):
             response = self.client.post(
-                "/", data={"url": ["https://example.com"], "date": ["2026-01-01"]}
+                "/",
+                data={"url": ["https://example.com"], "date": ["2026-01-01"], "dry_run": "on"},
             )
 
         self.assertIn(b"3 new dancers", response.data)
@@ -70,7 +74,8 @@ class TestIndexRoute(unittest.TestCase):
             routes, "run_update", return_value=UpdateError("Failed to fetch/parse it", 502)
         ):
             response = self.client.post(
-                "/", data={"url": ["https://example.com"], "date": ["2026-01-01"]}
+                "/",
+                data={"url": ["https://example.com"], "date": ["2026-01-01"], "dry_run": "on"},
             )
 
         self.assertEqual(response.status_code, 200)
@@ -90,12 +95,34 @@ class TestIndexRoute(unittest.TestCase):
                 data={
                     "url": ["https://a.example.com", "https://b.example.com"],
                     "date": ["2026-01-01", "2026-02-01"],
+                    "dry_run": "on",
                 },
             )
 
         mock_run.assert_called_once_with(
-            ["https://a.example.com", "https://b.example.com"], ["2026-01-01", "2026-02-01"]
+            ["https://a.example.com", "https://b.example.com"],
+            ["2026-01-01", "2026-02-01"],
+            dry_run=True,
         )
+
+    def test_unchecked_dry_run_is_forwarded_as_false(self):
+        with mock.patch.object(
+            routes,
+            "run_update",
+            return_value=UpdateError("Live updates aren't supported yet."),
+        ) as mock_run:
+            response = self.client.post(
+                "/", data={"url": ["https://example.com"], "date": ["2026-01-01"]}
+            )
+
+        mock_run.assert_called_once_with(["https://example.com"], ["2026-01-01"], dry_run=False)
+        self.assertIn(b"Live updates aren&#39;t supported yet.", response.data)
+
+    def test_unchecked_dry_run_preserved_on_error_rerender(self):
+        response = self.client.post("/", data={"url": [""], "date": [""]})
+
+        self.assertNotIn(b'name="dry_run" id="dry-run-checkbox" checked', response.data)
+        self.assertIn(b'name="dry_run" id="dry-run-checkbox" ', response.data)
 
 
 if __name__ == "__main__":

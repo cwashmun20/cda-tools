@@ -61,6 +61,16 @@ body {
   margin-bottom: 1rem;
 }
 
+.dry-run-row {
+  margin-bottom: 0.5rem;
+}
+
+.dry-run-warning {
+  color: #8a1f11;
+  font-size: 0.9em;
+  margin: 0.25rem 0 0;
+}
+
 button {
   padding: 0.5rem 1rem;
 }

@@ -55,6 +55,28 @@ def _make_result(place: int, num_rounds: int = 2) -> CompetitionResult:
 
 
 class TestRunUpdate(unittest.TestCase):
+    def test_dry_run_false_returns_error_without_fetching_anything(self):
+        """There is no DB write step yet, so a real (non-dry-run) update
+        request must be rejected clearly rather than silently behaving like
+        a dry run - checked before any parsing/fetching happens."""
+        with mock.patch.object(update_service, "parse_results_url") as mock_parse:
+            result = run_update(["https://example.com"], ["2026-01-01"], dry_run=False)
+
+        self.assertIsInstance(result, UpdateError)
+        self.assertIn("live updates aren't supported yet", result.message.lower())
+        mock_parse.assert_not_called()
+
+    def test_dry_run_defaults_to_true(self):
+        """The default (no dry_run argument at all) must behave as a dry
+        run - every existing caller that doesn't know about this parameter
+        should keep working exactly as before."""
+        with mock.patch.object(
+            update_service, "parse_results_url", return_value=[_make_result(place=1)]
+        ):
+            result = run_update(["https://example.com"], ["2026-01-01"], lookup=_new_dancer_lookup)
+
+        self.assertIsInstance(result, UpdateSuccess)
+
     def test_no_urls_returns_error(self):
         result = run_update([], [])
 
