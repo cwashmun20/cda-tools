@@ -239,6 +239,34 @@ class TestParseEvent(unittest.TestCase):
         self.assertEqual(by_name_and_dance[("Anton Polishko", waltz)], 6)
         self.assertEqual(by_name_and_dance[("Anton Polishko", quickstep)], 6)
 
+    def test_open_level_multi_dance_event_scores_once_per_couple(self):
+        # Real, captured Cal Poly Mustang Ball data (event ID 2, "Novice
+        # Standard (W/F/Q)") - fills a real fixture gap: Novice is an open
+        # level, so this multi-dance combo must score once per couple
+        # (event_dances_to_score()), unlike event_multi_dance.json's Gold/
+        # syllabus combo above, which scores once per dance.
+        event = _load_fixture("event_open_multi_dance.json")["Result"]["Event"]
+
+        results = _parse_event(event, "Cal Poly Mustang Ball", date(2026, 2, 7))
+
+        self.assertEqual(len(results), 6)  # 6 couples x 1 result each, not x3 dances
+        waltz = Dance("Novice", "Standard", "Waltz")
+        foxtrot = Dance("Novice", "Standard", "Foxtrot")
+        quickstep = Dance("Novice", "Standard", "Quickstep")
+        event_dances = (waltz, foxtrot, quickstep)
+        self.assertEqual(set(r.dance for r in results), {waltz})
+        for result in results:
+            self.assertEqual(result.event_dances, event_dances)
+            self.assertEqual(result.num_rounds, 3)
+
+        by_name = {r.lead.full_name: r.place for r in results}
+        self.assertEqual(by_name["Catherine Kuntoro"], 1)
+        self.assertEqual(by_name["Katie Smoot"], 2)
+        self.assertEqual(by_name["Sean Gray"], 3)
+        self.assertEqual(by_name["William Kenton"], 4)
+        self.assertEqual(by_name["Carleton Imbens"], 5)
+        self.assertEqual(by_name["Ishan Sen"], 6)
+
     def test_non_couple_type_raises(self):
         event = {"Type": "JandJ", "Name": "Some Event", "Rounds": []}
 
