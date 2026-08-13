@@ -68,19 +68,42 @@ class TestParseResultsUrl(unittest.TestCase):
         mock_fetch_name.assert_called_once_with(178, client)
         mock_parse.assert_called_once_with(178, "Solar Flare", date(2025, 2, 8), client)
 
+    @patch.object(comporganizer, "resolve_comp_year_id", return_value=9629)
     @patch.object(comporganizer, "fetch_competition_name", return_value="Cal Poly Mustang Ball")
     @patch.object(comporganizer, "parse_competition", return_value=["sentinel"])
-    def test_routes_danceam_url_to_comporganizer(self, mock_parse, mock_fetch_name):
+    def test_routes_cbid_danceam_url_to_comporganizer(
+        self, mock_parse, mock_fetch_name, mock_resolve
+    ):
+        """Mustang-Ball-style template: cbid embedded in the results page."""
         url = "https://mustangball.dance.am/pages/results/Default.asp"
         client = _make_client({url: _load_fixture("danceam_page.html")})
 
         results = parse_results_url(url, date(2026, 2, 7), client)
 
         self.assertEqual(results, ["sentinel"])
+        mock_resolve.assert_called_once_with("688970749df5c", client)
         mock_fetch_name.assert_called_once_with("688970749df5c", client)
-        mock_parse.assert_called_once_with(
-            "688970749df5c", "Cal Poly Mustang Ball", date(2026, 2, 7), client
-        )
+        mock_parse.assert_called_once_with(9629, "Cal Poly Mustang Ball", date(2026, 2, 7), client)
+
+    @patch.object(comporganizer, "resolve_comp_year_id_from_host", return_value=9720)
+    @patch.object(
+        comporganizer, "fetch_competition_name_from_host", return_value="Cardinal Classic"
+    )
+    @patch.object(comporganizer, "parse_competition", return_value=["sentinel"])
+    def test_routes_cbid_less_danceam_url_to_comporganizer(
+        self, mock_parse, mock_fetch_name, mock_resolve
+    ):
+        """Cardinal-Classic-style template: no cbid - resolved by host
+        instead, an equally first-class discovery path."""
+        url = "https://m-cardinal.dance.am/"
+        client = _make_client({url: _load_fixture("danceam_page_no_cbid.html")})
+
+        results = parse_results_url(url, date(2026, 4, 4), client)
+
+        self.assertEqual(results, ["sentinel"])
+        mock_resolve.assert_called_once_with("m-cardinal.dance.am", client)
+        mock_fetch_name.assert_called_once_with("m-cardinal.dance.am", client)
+        mock_parse.assert_called_once_with(9720, "Cardinal Classic", date(2026, 4, 4), client)
 
     @patch.object(o2cm, "fetch_competition_name")
     @patch.object(o2cm, "parse_competition", return_value=["sentinel"])
@@ -98,8 +121,16 @@ class TestParseResultsUrl(unittest.TestCase):
         mock_parse.assert_called_once_with("isc25", "Overridden Name", date(2025, 11, 14), client)
 
     def test_unrecognized_host_raises(self):
+        # Neither dance.am discovery path matches: no cbid embedded in the
+        # page, and /shared/comp.php isn't a real config endpoint here (its
+        # response fails to parse as JSON, same as a real unrelated host).
         url = "https://example.com/results"
-        client = _make_client({url: "<html><body>Not a results page</body></html>"})
+        client = _make_client(
+            {
+                url: "<html><body>Not a results page</body></html>",
+                "https://example.com/shared/comp.php": "<html>404 Not Found</html>",
+            }
+        )
 
         with self.assertRaises(ValueError):
             parse_results_url(url, date(2025, 2, 8), client)

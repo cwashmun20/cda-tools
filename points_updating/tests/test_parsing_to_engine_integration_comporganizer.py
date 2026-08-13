@@ -67,10 +67,6 @@ class TestParsingToEngineIntegration(unittest.TestCase):
             min_delay_seconds=0,
             session=_FakeSession(
                 {
-                    (
-                        "https://comporganizer.com/feed/callback-comps/",
-                        (("cbid", "688970749df5c"),),
-                    ): _load_fixture("callback_comps.json"),
                     (_RESULTS_URL, (("cyi", 9629), ("list", "events"))): _load_fixture(
                         "event_list.json"
                     ),
@@ -91,7 +87,7 @@ class TestParsingToEngineIntegration(unittest.TestCase):
         )
         comp_date = date(2026, 2, 7)
 
-        results = parse_competition("688970749df5c", "Cal Poly Mustang Ball", comp_date, client)
+        results = parse_competition(9629, "Cal Poly Mustang Ball", comp_date, client)
         engine = UpdateEngine(lookup=_new_dancer_lookup)
         awards = engine.process_competition(results)
         starting_totals = engine.starting_totals()

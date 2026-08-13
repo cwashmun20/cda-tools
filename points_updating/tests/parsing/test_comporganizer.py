@@ -13,10 +13,12 @@ from points_updating.lib.parsing.comporganizer import (
     _lead_follow,
     _parse_event,
     fetch_competition_name,
+    fetch_competition_name_from_host,
     fetch_event_list,
     fetch_event_results,
     parse_competition,
     resolve_comp_year_id,
+    resolve_comp_year_id_from_host,
 )
 from points_updating.lib.parsing.http_client import ThrottledClient
 from utils.lib.constants import Style
@@ -80,6 +82,28 @@ class TestFetchCompetitionName(unittest.TestCase):
         name = fetch_competition_name("688970749df5c", client)
 
         self.assertEqual(name, "Cal Poly Mustang Ball")
+
+
+class TestResolveCompYearIdFromHost(unittest.TestCase):
+    def test_resolves_from_comp_php_response(self):
+        client = _make_client(
+            {("https://m-cardinal.dance.am/shared/comp.php", ()): _load_fixture("comp_php.json")}
+        )
+
+        comp_year_id = resolve_comp_year_id_from_host("m-cardinal.dance.am", client)
+
+        self.assertEqual(comp_year_id, 9720)
+
+
+class TestFetchCompetitionNameFromHost(unittest.TestCase):
+    def test_resolves_from_comp_php_response(self):
+        client = _make_client(
+            {("https://m-cardinal.dance.am/shared/comp.php", ()): _load_fixture("comp_php.json")}
+        )
+
+        name = fetch_competition_name_from_host("m-cardinal.dance.am", client)
+
+        self.assertEqual(name, "Cardinal Classic")
 
 
 class TestFetchEventList(unittest.TestCase):
@@ -383,10 +407,6 @@ class TestParseCompetition(unittest.TestCase):
         }
         client = _make_client(
             {
-                (
-                    "https://comporganizer.com/feed/callback-comps/",
-                    (("cbid", "abc123"),),
-                ): _load_fixture("callback_comps.json"),
                 (results_url, (("cyi", 9629), ("list", "events"))): {
                     "Status": 1,
                     "Result": {
@@ -401,7 +421,7 @@ class TestParseCompetition(unittest.TestCase):
             }
         )
 
-        results = parse_competition("abc123", "Cal Poly Mustang Ball", date(2026, 2, 7), client)
+        results = parse_competition(9629, "Cal Poly Mustang Ball", date(2026, 2, 7), client)
 
         self.assertEqual(len(results), 3)  # only the Couple event's 3 results
 

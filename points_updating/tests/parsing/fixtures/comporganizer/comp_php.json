@@ -1,0 +1,280 @@
+{
+  "Comp_Year_ID": 9720,
+  "Competition_ID": 215,
+  "Comp_Year": 2026,
+  "Name": "Cardinal Classic",
+  "Competition_Name": "Cardinal Classic",
+  "Short_Name": "Cardinal Classic",
+  "Address": "",
+  "City": "Stanford",
+  "State": "CA",
+  "Zip": "94305",
+  "Country": "United States",
+  "Telephone": "",
+  "Email": "cardinal-classic@ballroom.stanford.edu",
+  "URL": "https://cardinal.dance.am/",
+  "Top_Domain": "cardinal.dance.am",
+  "Logo": "https://cardinal.dance.am//images/logo.jpg",
+  "Organizers": "Stanford Ballroom",
+  "Organizer_Photo": "https://cardinal.dance.am/images/organizer.jpg",
+  "Hotel_Name": "Stanford University Campus",
+  "Hotel_Address": "",
+  "Hotel_City": "Stanford",
+  "Hotel_State": "CA",
+  "Hotel_Zip": "94305",
+  "Hotel_Country": "United States",
+  "Hotel_Telephone": "",
+  "Hotel_Website": "",
+  "Hotel_Image": "https://cardinal.dance.am/images/arch.jpg",
+  "Hotel_Description": null,
+  "Booking_Link": "http://",
+  "Booking_Status": 0,
+  "Hotel_Code": "",
+  "Room_Rates": [
+    0,
+    0
+  ],
+  "Room_Tax": 0,
+  "Founded": null,
+  "Purse": 0,
+  "Start_Date": "2026-04-04 00:00:00",
+  "End_Date": "2026-04-04 00:00:00",
+  "Total_Days": 0,
+  "Date_Range": "Apr 4, 2026",
+  "First_Heat": "8:00 am",
+  "Server_Time": "2026-08-13 01:41:30",
+  "Timezone_Offset": 0,
+  "Focus": 0,
+  "Future_Comp": 0,
+  "Countdown_Time": -11295690,
+  "Entry_Deadline": "2026-03-27 00:00:00",
+  "Hotel_Deadline": null,
+  "Custom_Dates": [],
+  "Date_Desc4": "",
+  "Date4": null,
+  "Active": 1,
+  "Comporganizer": 1,
+  "NDCA": 0,
+  "Software": "Callback",
+  "Publish_Settings": {
+    "Heatlists": 0,
+    "Heatlist_Times": 1,
+    "Heatlist_Heat_Numbers": 1,
+    "Registration": 0,
+    "Results": 1,
+    "Program": 0,
+    "Program_Entries": 0,
+    "Program_Results": 0,
+    "Dates": 1,
+    "Officials": 1,
+    "Entry_Forms": 0,
+    "Schedule": 0,
+    "Counters": 1,
+    "Contact": 1
+  },
+  "Publish_Links": {
+    "Registration": "",
+    "Heatlists": "https://ndcapremier.com/feed/heatlists/?cyi=9720",
+    "Results": "https://ndcapremier.com/feed/results/?cyi=9720",
+    "Program": "https://ndcapremier.com/feed/program/?cyi=9720"
+  },
+  "Registration_Link": "",
+  "Program_Link": "",
+  "Custom_Pages": [],
+  "Custom_Page1_Type": 0,
+  "Custom_Page2_Type": 0,
+  "Latitude": 0,
+  "Longitude": 0,
+  "Zoom_Level": 100,
+  "Map_Search": "Stanford University",
+  "Background_Image": "",
+  "Background_Image_Home": "",
+  "Poster_Image": "https://cardinal.dance.am/images/mobile/poster-square.jpg",
+  "PDF_Folder": "",
+  "Password_Folder": "",
+  "Heat_Counter": null,
+  "Mobile_Status": 1,
+  "Custom_Message": null,
+  "Officials": [
+    {
+      "Category": "Chairman of Judges",
+      "Roster": [
+        {
+          "ID": 18411,
+          "People_ID": 693,
+          "Type": 2,
+          "Label": null,
+          "Name": [
+            "Ikaika",
+            "Dowsett"
+          ],
+          "City": "Campbell",
+          "State": "CA",
+          "Country": "United States",
+          "Photo_URL": "https://comporganizer.com/images/people/693.jpeg",
+          "Bio": ""
+        }
+      ]
+    },
+    {
+      "Category": "Adjudicators",
+      "Roster": [
+        {
+          "ID": 18451,
+          "People_ID": 1000,
+          "Type": 1,
+          "Label": null,
+          "Name": [
+            "Marcus",
+            "Johnson"
+          ],
+          "City": "San Diego",
+          "State": "CA",
+          "Country": "United States",
+          "Photo_URL": "https://comporganizer.com/images/people/1000.jpg",
+          "Bio": ""
+        },
+        {
+          "ID": 18412,
+          "People_ID": 12514,
+          "Type": 1,
+          "Label": null,
+          "Name": [
+            "Stacey",
+            "Chuang"
+          ],
+          "City": "San Jose",
+          "State": "CA",
+          "Country": "United States",
+          "Photo_URL": "https://comporganizer.com/images/people/12514.jpg",
+          "Bio": ""
+        },
+        {
+          "ID": 18410,
+          "People_ID": 314,
+          "Type": 1,
+          "Label": null,
+          "Name": [
+            "Jonathan",
+            "Atkinson"
+          ],
+          "City": "Los Angeles",
+          "State": "",
+          "Country": "United States",
+          "Photo_URL": "https://comporganizer.com/images/people/314.jpg",
+          "Bio": "Jonathan Atkinson has been active in the dance industry since 1992, when he first began teaching at a local Arthur Murray studio. Over the past three decades, he has taught, competed, and adjudicated throughout the United States, earning numerous titles including U.S. Rising Star Smooth Vice Champion, U.S. Open Professional Smooth Semi-Finalist, U.S. 9-Dance Finalist, and U.S. Pro-Am American Smooth and International Ballroom Champion.\r\n\r\nJonathan has appeared in films and television commercials, including Dance with Me and Disney\u0092s The Princess and the Frog, and has contributed choreography to popular television productions such as Dancing with the Stars and So You Think You Can Dance. Today, he travels extensively as an adjudicator and competition consultant, assisting organizers and helping deliver successful events across the country.\r\n\r\nOutside of dance, Jonathan enjoys spending time with his children, hiking, surfing, and building innovative software and websites for the dance industry."
+        },
+        {
+          "ID": 18462,
+          "People_ID": 32659,
+          "Type": 1,
+          "Label": null,
+          "Name": [
+            "Katya",
+            "Afanasyeva"
+          ],
+          "City": "San Jose",
+          "State": "CA",
+          "Country": "United States",
+          "Photo_URL": null,
+          "Bio": ""
+        },
+        {
+          "ID": 18409,
+          "People_ID": 437,
+          "Type": 1,
+          "Label": null,
+          "Name": [
+            "Lorena",
+            "Bravo"
+          ],
+          "City": "Sherman Oaks",
+          "State": "CA",
+          "Country": "United States",
+          "Photo_URL": "https://comporganizer.com/images/people/437.jpg",
+          "Bio": "Lorena danced with the USC Ballroom and Latin Dance Team for 5 years. Having earned her Master's Degree in teaching, she went on to become a United States National Finalist in American Rhythm and 9-Dance, before turning pro and winning countless titles, including Pro-Am Smooth World Champion."
+        },
+        {
+          "ID": 18449,
+          "People_ID": 12513,
+          "Type": 1,
+          "Label": null,
+          "Name": [
+            "Rhett",
+            "Grant"
+          ],
+          "City": "San Jose",
+          "State": "CA",
+          "Country": "United States",
+          "Photo_URL": "https://comporganizer.com/images/people/12513.jpg",
+          "Bio": ""
+        },
+        {
+          "ID": 18450,
+          "People_ID": 32544,
+          "Type": 1,
+          "Label": null,
+          "Name": [
+            "Juan Carlos",
+            "Camarena"
+          ],
+          "City": "San Jose",
+          "State": "CA",
+          "Country": "United States",
+          "Photo_URL": "https://comporganizer.com/images/people/32544.jpg",
+          "Bio": ""
+        }
+      ]
+    },
+    {
+      "Category": "Officials & Staff",
+      "Roster": [
+        {
+          "ID": 18454,
+          "People_ID": 12517,
+          "Type": 12,
+          "Label": "Registrar",
+          "Name": [
+            "Christopher",
+            "Ellwood"
+          ],
+          "City": "San Luis Obispo",
+          "State": "CA",
+          "Country": "United States",
+          "Photo_URL": "https://comporganizer.com/images/people/12517.jpeg",
+          "Bio": ""
+        },
+        {
+          "ID": 18455,
+          "People_ID": 12796,
+          "Type": 12,
+          "Label": "Scrutineer",
+          "Name": [
+            "Denise",
+            "Machin"
+          ],
+          "City": null,
+          "State": "CA",
+          "Country": "United States",
+          "Photo_URL": "https://comporganizer.com/images/people/12796.jpg",
+          "Bio": null
+        }
+      ]
+    }
+  ],
+  "Theme": {
+    "Mode": "dark",
+    "Background_Color": "#ffffff",
+    "Overlay_Color": "#ffffff",
+    "Text_Color": "#000000",
+    "Accent_Color": "#8c1515",
+    "Button_Color1": "#555",
+    "Button_Color2": "#222",
+    "Button_Text_Color": "#fff",
+    "Button_Style": "3d"
+  },
+  "Forms": {
+    "Public": [],
+    "Private": []
+  }
+}

@@ -1,9 +1,20 @@
 """CompOrganizer results parsing for points_updating.
 
 CompOrganizer/NDCA Premier is a shared third-party backend behind
-school-branded dance.am results pages (e.g. mustangball.dance.am), not
-dance.am's own backend. Confirmed against a real 2026 CDA competition (Cal
-Poly Mustang Ball).
+school-branded dance.am results pages, not dance.am's own backend.
+Confirmed against two real 2026 CDA competitions using two different
+dance.am front-end templates over the same backend/data schema:
+
+- Cal Poly Mustang Ball (mustangball.dance.am): embeds a callback token
+  (`var cbid = "...";`) in its results page, resolved to a Comp_Year_ID via
+  callback-comps - see resolve_comp_year_id()/fetch_competition_name().
+- Stanford Cardinal Classic (m-cardinal.dance.am): no cbid at all - its
+  Comp_Year_ID is resolved directly from a `/shared/comp.php` endpoint on
+  the school's own dance.am subdomain (keyed by hostname, not a token) -
+  see resolve_comp_year_id_from_host()/fetch_competition_name_from_host().
+  Both templates' data ultimately comes from the same ndcapremier.com feed
+  API once a Comp_Year_ID is known, confirmed by diffing real event-list/
+  event-results responses from both competitions against the same schema.
 """
 
 import math
@@ -16,6 +27,7 @@ from utils.lib.models.dance import Dance, convert_dance, convert_level
 
 _CALLBACK_COMPS_URL = "https://comporganizer.com/feed/callback-comps/"
 _RESULTS_URL = "https://ndcapremier.com/feed/results/"
+_COMP_PHP_PATH = "/shared/comp.php"
 
 # The longest level phrase CompOrganizer writes ("R/V Rookie Lead"/"R/V
 # Rookie Follow") is 3 words.
@@ -33,19 +45,45 @@ def resolve_comp_year_id(cbid: str, client: ThrottledClient) -> int:
     Returns:
         CompOrganizer's `Comp_Year_ID` for this competition.
     """
-    return _fetch_comp_info(cbid, client)["Comp_Year_ID"]
+    return _fetch_comp_info_from_cbid(cbid, client)["Comp_Year_ID"]
 
 
 def fetch_competition_name(cbid: str, client: ThrottledClient) -> str:
     """Returns the competition's own name for a school's dance.am callback
     token."""
-    return _fetch_comp_info(cbid, client)["Full_Name"]
+    return _fetch_comp_info_from_cbid(cbid, client)["Full_Name"]
 
 
-def _fetch_comp_info(cbid: str, client: ThrottledClient) -> dict:
+def _fetch_comp_info_from_cbid(cbid: str, client: ThrottledClient) -> dict:
     response = client.get(_CALLBACK_COMPS_URL, params={"cbid": cbid})
     response.raise_for_status()
     return response.json()["Comps"][0]
+
+
+def resolve_comp_year_id_from_host(host: str, client: ThrottledClient) -> int:
+    """Resolves a dance.am subdomain directly to CompOrganizer's own
+    competition-year identifier, for the template family that carries no
+    cbid token at all (e.g. Stanford's Cardinal Classic).
+
+    Args:
+        host: The dance.am subdomain (e.g. "m-cardinal.dance.am").
+        client: The HTTP client to fetch with.
+    Returns:
+        CompOrganizer's `Comp_Year_ID` for this competition.
+    """
+    return _fetch_comp_info_from_host(host, client)["Comp_Year_ID"]
+
+
+def fetch_competition_name_from_host(host: str, client: ThrottledClient) -> str:
+    """Returns the competition's own name for a dance.am subdomain, for the
+    cbid-less template family - see resolve_comp_year_id_from_host()."""
+    return _fetch_comp_info_from_host(host, client)["Competition_Name"]
+
+
+def _fetch_comp_info_from_host(host: str, client: ThrottledClient) -> dict:
+    response = client.get(f"https://{host}{_COMP_PHP_PATH}")
+    response.raise_for_status()
+    return response.json()
 
 
 def fetch_event_list(comp_year_id: int, client: ThrottledClient) -> list[tuple[int, str]]:
@@ -64,14 +102,16 @@ def fetch_event_results(comp_year_id: int, event_id: int, client: ThrottledClien
 
 
 def parse_competition(
-    cbid: str, competition_name: str, competition_date: date, client: ThrottledClient
+    comp_year_id: int, competition_name: str, competition_date: date, client: ThrottledClient
 ) -> list[CompetitionResult]:
     """Fetches and parses every couple event in a CompOrganizer-backed
     competition.
 
     Args:
-        cbid: The callback token embedded in the school's dance.am results
-            page.
+        comp_year_id: CompOrganizer's own competition-year identifier,
+            already resolved by the caller (see resolve_comp_year_id()/
+            resolve_comp_year_id_from_host(), depending on which dance.am
+            template family the results page uses).
         competition_name: The competition's name.
         competition_date: The date the competition was held.
         client: The HTTP client to fetch with.
@@ -81,7 +121,6 @@ def parse_competition(
         etc.) are skipped here, not raised on - see _parse_event for the
         single-event contract, which does raise for those.
     """
-    comp_year_id = resolve_comp_year_id(cbid, client)
     results = []
     for event_id, _ in fetch_event_list(comp_year_id, client):
         event = fetch_event_results(comp_year_id, event_id, client)["Result"]["Event"]

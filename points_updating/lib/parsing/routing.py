@@ -2,16 +2,26 @@
 
 Routes a competition's results-page URL to the matching source parser
 (O2CM, Ballroom Comp Express, or CompOrganizer/dance.am), determined from
-the URL's host. A dance.am page carries no identifier in the URL itself,
-so that source is the fallback: fetch the page and pull the `cbid` token
-embedded in it, which also doubles as validating the host actually is a
-CompOrganizer-backed results page.
+the URL's host. A dance.am page carries no identifier in the URL itself, so
+that source is the fallback - and CompOrganizer itself serves dance.am
+results through (at least) two distinct front-end templates:
+
+- Mustang-Ball-style: the results page embeds a `cbid` callback token
+  (`var cbid = "...";`), resolved to a Comp_Year_ID via callback-comps.
+- Cardinal-Classic-style: no cbid at all - the school's dance.am subdomain
+  itself resolves directly to a Comp_Year_ID via a `/shared/comp.php`
+  config endpoint on that subdomain.
+
+See points_updating/lib/parsing/comporganizer.py's module docstring for
+how each is confirmed against real competition data.
 """
 
 import re
 from datetime import date
 from typing import Optional
 from urllib.parse import parse_qs, urlparse
+
+import requests
 
 from points_updating.lib.models.result import CompetitionResult
 from points_updating.lib.parsing import ballroom_comp_express, comporganizer, o2cm
@@ -60,17 +70,26 @@ def parse_results_url(
 
     response = client.get(url)
     response.raise_for_status()
-    match = _CBID_RE.search(response.text)
-    if match is None:
+    cbid_match = _CBID_RE.search(response.text)
+    if cbid_match is not None:
+        cbid = cbid_match.group(1)
+        comp_year_id = comporganizer.resolve_comp_year_id(cbid, client)
+        name = competition_name or comporganizer.fetch_competition_name(cbid, client)
+        return comporganizer.parse_competition(comp_year_id, name, competition_date, client)
+
+    try:
+        comp_year_id = comporganizer.resolve_comp_year_id_from_host(host, client)
+        name = competition_name or comporganizer.fetch_competition_name_from_host(host, client)
+    except (requests.RequestException, KeyError):
         raise ValueError(
-            f"Could not find a CompOrganizer results page at {url!r}. A dance.am "
-            "site's home page doesn't embed the token this needs - navigate to "
-            "its actual results page in a browser (usually reached via a "
-            '"Results" link) and use that URL instead.'
-        )
-    cbid = match.group(1)
-    name = competition_name or comporganizer.fetch_competition_name(cbid, client)
-    return comporganizer.parse_competition(cbid, name, competition_date, client)
+            f"Could not find a CompOrganizer results page at {url!r}. Neither "
+            "dance.am template this source supports matched: no `cbid` token is "
+            f"embedded in the page, and {host!r} doesn't expose a "
+            "/shared/comp.php config endpoint either - navigate to the "
+            "competition's actual results page in a browser (usually reached "
+            'via a "Results" link) and use that URL instead.'
+        ) from None
+    return comporganizer.parse_competition(comp_year_id, name, competition_date, client)
 
 
 def _query_param(url: str, name: str) -> str:
