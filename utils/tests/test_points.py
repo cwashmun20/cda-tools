@@ -102,6 +102,52 @@ class TestPoints(unittest.TestCase):
         self.assertEqual(pts.syllabus_data[0][5], 7)
         self.assertEqual(pts.open_data[0][1], 2)
 
+    def test_add_leaves_negative_cell_untouched_instead_of_corrupting_it(self):
+        """A negative cell is the DB's "already pointed out via cross-style
+        pairing" marker, not a literal negative point count. Adding a real
+        award on top of it (e.g. -1 + 7 = 6) would corrupt that marker into
+        a misleadingly low value, so the cell is left as-is instead - it's
+        already functionally equivalent to 7 for every consumer that
+        matters, so there's no real total to compute for it.
+        """
+        syllabus = np.zeros((4, 19), dtype=int)
+        syllabus[1][5] = -1  # already pointed out via cross-style pairing
+        pts = Points(syllabus, np.zeros((3, 4), dtype=int))
+
+        syllabus_delta = np.zeros((4, 19), dtype=int)
+        syllabus_delta[1][5] = 7  # a real award earned in the same cell
+        pts.add(syllabus_delta, np.zeros((3, 4), dtype=int))
+
+        self.assertEqual(pts.syllabus_data[1][5], -1)
+
+    def test_add_negative_open_cell_also_left_untouched(self):
+        syllabus = np.zeros((4, 19), dtype=int)
+        open_pts = np.zeros((3, 4), dtype=int)
+        open_pts[0][0] = -1
+        pts = Points(syllabus, open_pts)
+
+        open_delta = np.zeros((3, 4), dtype=int)
+        open_delta[0][0] = 3
+        pts.add(np.zeros((4, 19), dtype=int), open_delta)
+
+        self.assertEqual(pts.open_data[0][0], -1)
+
+    def test_add_other_cells_still_accumulate_normally_alongside_a_negative_one(self):
+        """A negative marker in one cell shouldn't block accumulation in
+        every other (non-negative) cell during the same add() call."""
+        syllabus = np.zeros((4, 19), dtype=int)
+        syllabus[1][5] = -1
+        syllabus[1][6] = 4
+        pts = Points(syllabus, np.zeros((3, 4), dtype=int))
+
+        syllabus_delta = np.zeros((4, 19), dtype=int)
+        syllabus_delta[1][5] = 7
+        syllabus_delta[1][6] = 3
+        pts.add(syllabus_delta, np.zeros((3, 4), dtype=int))
+
+        self.assertEqual(pts.syllabus_data[1][5], -1)
+        self.assertEqual(pts.syllabus_data[1][6], 7)
+
     def test_add_does_not_mutate_delta_arrays(self):
         syllabus_delta = np.zeros((4, 19), dtype=int)
         syllabus_delta[0][0] = 5

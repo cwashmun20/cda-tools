@@ -27,12 +27,25 @@ class Points:
         """Adds per-cell deltas (same shape as syllabus_data/open_data) to
         this dancer's running point totals in place.
 
+        A negative cell value is the CDA database's marker for "already
+        pointed out via cross-style pairing" (see
+        ProficiencyCalculator.has_pointed_out(), which already treats <0 the
+        same as >=7) - not a literal negative point count to accumulate
+        onto. Adding a real award on top of it (e.g. -1 + 7 = 6) would
+        corrupt that marker into a misleadingly low value, so such a cell
+        is left untouched instead - it's already functionally equivalent to
+        7 for every consumer that matters (entry_checking's
+        has_pointed_out() treats <0 and >=7 identically), so there's
+        nothing to gain by trying to compute a "real" total for it.
+
         Args:
             syllabus_delta: 4x19 array to add to syllabus_data.
             open_delta: 3x4 array to add to open_data.
         """
-        self.syllabus_data = self.syllabus_data + syllabus_delta
-        self.open_data = self.open_data + open_delta
+        self.syllabus_data = np.where(
+            self.syllabus_data < 0, self.syllabus_data, self.syllabus_data + syllabus_delta
+        )
+        self.open_data = np.where(self.open_data < 0, self.open_data, self.open_data + open_delta)
 
     def _syllabus_columns(self, style: Style) -> np.ndarray:
         """Returns this style's syllabus point columns, using the same
