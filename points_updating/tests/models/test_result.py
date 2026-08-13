@@ -14,6 +14,37 @@ class TestDancerRef(unittest.TestCase):
         ref = DancerRef(first="Jane", last="Doe")
         self.assertEqual(ref.full_name, "Jane Doe")
 
+    def test_lowercase_first_letter_is_capitalized(self):
+        ref = DancerRef(first="jane", last="doe")
+        self.assertEqual(ref.first, "Jane")
+        self.assertEqual(ref.last, "Doe")
+        self.assertEqual(ref.full_name, "Jane Doe")
+
+    def test_interior_capitalization_is_preserved(self):
+        ref = DancerRef(first="McDonald", last="DiCaprio")
+        self.assertEqual(ref.first, "McDonald")
+        self.assertEqual(ref.last, "DiCaprio")
+
+    def test_already_capitalized_name_is_unchanged(self):
+        ref = DancerRef(first="Jane", last="Doe")
+        self.assertEqual(ref.first, "Jane")
+        self.assertEqual(ref.last, "Doe")
+
+    def test_only_last_name_lowercase_is_fixed_independently(self):
+        ref = DancerRef(first="Jane", last="doe")
+        self.assertEqual(ref.first, "Jane")
+        self.assertEqual(ref.last, "Doe")
+
+    def test_only_first_name_lowercase_is_fixed_independently(self):
+        ref = DancerRef(first="jane", last="Doe")
+        self.assertEqual(ref.first, "Jane")
+        self.assertEqual(ref.last, "Doe")
+
+    def test_empty_name_does_not_raise(self):
+        ref = DancerRef(first="", last="doe")
+        self.assertEqual(ref.first, "")
+        self.assertEqual(ref.last, "Doe")
+
 
 class TestCompetitionResult(unittest.TestCase):
     """Tests for the CompetitionResult class."""

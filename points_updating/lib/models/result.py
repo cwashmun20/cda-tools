@@ -25,9 +25,26 @@ class DancerRef:
     first: str
     last: str
 
+    def __post_init__(self) -> None:
+        # A results source occasionally lists a name with a lowercase
+        # first letter, so we normalize here before lookup.
+        object.__setattr__(self, "first", _capitalize_first_letter(self.first))
+        object.__setattr__(self, "last", _capitalize_first_letter(self.last))
+
     @property
     def full_name(self) -> str:
         return f"{self.first} {self.last}"
+
+
+def _capitalize_first_letter(name: str) -> str:
+    """Uppercases just a name's first character, leaving the rest as-is -
+    unlike str.capitalize()/str.title(), this doesn't lowercase interior
+    letters, so names with legitimate internal capitalization (e.g.
+    "McDonald", "DiCaprio") aren't corrupted.
+    """
+    if not name:
+        return name
+    return name[0].upper() + name[1:]
 
 
 @dataclass
