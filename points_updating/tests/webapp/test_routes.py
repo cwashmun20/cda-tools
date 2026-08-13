@@ -41,6 +41,7 @@ class TestIndexRoute(unittest.TestCase):
                 "Alex Zephyr": "=== Alex Zephyr ===\n...",
                 "Jamie Adams": "=== Jamie Adams ===\n...",
             },
+            new_dancer_count=1,
         )
         with mock.patch.object(routes, "run_update", return_value=success) as mock_run:
             response = self.client.post(
@@ -52,6 +53,17 @@ class TestIndexRoute(unittest.TestCase):
         self.assertIn(b'id="results-panel"', response.data)
         self.assertIn(b"Jamie Adams", response.data)
         self.assertIn(b"Show all updates", response.data)
+        self.assertIn(b"1 new dancer", response.data)
+        self.assertNotIn(b"1 new dancers", response.data)  # singular, not "1 dancers"
+
+    def test_new_dancer_count_pluralizes_for_zero_and_multiple(self):
+        success = UpdateSuccess(dancer_names=[], all_text="", dancer_text={}, new_dancer_count=3)
+        with mock.patch.object(routes, "run_update", return_value=success):
+            response = self.client.post(
+                "/", data={"url": ["https://example.com"], "date": ["2026-01-01"]}
+            )
+
+        self.assertIn(b"3 new dancers", response.data)
 
     def test_post_update_error_shows_message_not_results(self):
         with mock.patch.object(
@@ -69,7 +81,9 @@ class TestIndexRoute(unittest.TestCase):
         with mock.patch.object(
             routes,
             "run_update",
-            return_value=UpdateSuccess(dancer_names=[], all_text="", dancer_text={}),
+            return_value=UpdateSuccess(
+                dancer_names=[], all_text="", dancer_text={}, new_dancer_count=0
+            ),
         ) as mock_run:
             self.client.post(
                 "/",

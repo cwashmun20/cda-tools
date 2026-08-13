@@ -37,4 +37,5 @@ def index():
         dancer_names=result.dancer_names,
         all_text=result.all_text,
         results_data={"__all__": result.all_text, **result.dancer_text},
+        new_dancer_count=result.new_dancer_count,
     )

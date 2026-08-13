@@ -45,6 +45,10 @@
 
   {% if dancer_names is defined %}
     <div id="results-panel">
+      <p id="new-dancer-count">
+        {{ new_dancer_count }} new dancer{{ "" if new_dancer_count == 1 else "s" }}
+        not already in the CDA database will be added.
+      </p>
       <div class="results-header">
         <select id="dancer-select">
           <option value="__all__">Show all updates</option>

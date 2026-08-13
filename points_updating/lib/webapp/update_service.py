@@ -40,6 +40,7 @@ class UpdateSuccess:
     dancer_names: list[str]  # sorted by last name
     all_text: str
     dancer_text: dict[str, str]
+    new_dancer_count: int  # dancers not already in the CDA DB, where cda_id is None
 
 
 def run_update(
@@ -86,7 +87,8 @@ def run_update(
     awards_per_competition = engine.run_backfill(competitions)
     all_awards = [award for comp_awards in awards_per_competition for award in comp_awards]
     starting_totals = engine.starting_totals()
-    final_totals = {name: dancer.points for name, dancer in engine.final_totals().items()}
+    ledger = engine.final_totals()
+    final_totals = {name: dancer.points for name, dancer in ledger.items()}
     report = build_report(all_awards, starting_totals, final_totals)
 
     dancer_names = sorted((d.dancer_name for d in report.dancer_reports), key=_last_name_key)
@@ -94,8 +96,12 @@ def run_update(
         d.dancer_name: render_report(UpdateReport(dancer_reports=[d]))
         for d in report.dancer_reports
     }
+    new_dancer_count = sum(1 for dancer in ledger.values() if dancer.cda_id is None)
     return UpdateSuccess(
-        dancer_names=dancer_names, all_text=render_report(report), dancer_text=dancer_text
+        dancer_names=dancer_names,
+        all_text=render_report(report),
+        dancer_text=dancer_text,
+        new_dancer_count=new_dancer_count,
     )
 
 

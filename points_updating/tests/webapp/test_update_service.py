@@ -27,6 +27,19 @@ def _new_dancer_lookup(first: str, last: str) -> DancerRecord:
     )
 
 
+def _existing_dancer_lookup(first: str, last: str) -> DancerRecord:
+    """A dancer already in the CDA DB - has a real cda_id."""
+    return DancerRecord(
+        cda_id=12345,
+        first=first,
+        last=last,
+        first_comp_date=date(2020, 1, 1),
+        created_date="2020-01-01",
+        syllabus_pts=np.zeros((4, 19), dtype=int),
+        open_pts=np.zeros((3, 4), dtype=int),
+    )
+
+
 def _make_result(place: int, num_rounds: int = 2) -> CompetitionResult:
     dance = Dance("Bronze", "Smooth", "Waltz")
     return CompetitionResult(
@@ -76,6 +89,33 @@ class TestRunUpdate(unittest.TestCase):
         self.assertIn("Jamie Adams", result.all_text)
         self.assertIn("Alex Zephyr", result.dancer_text["Alex Zephyr"])
         self.assertNotIn("Jamie Adams", result.dancer_text["Alex Zephyr"])
+        self.assertEqual(result.new_dancer_count, 2)  # both dancers are new, per _new_dancer_lookup
+
+    def test_new_dancer_count_excludes_dancers_already_in_the_db(self):
+        with mock.patch.object(
+            update_service, "parse_results_url", return_value=[_make_result(place=1)]
+        ):
+            result = run_update(
+                ["https://example.com"], ["2026-01-01"], lookup=_existing_dancer_lookup
+            )
+
+        self.assertEqual(result.new_dancer_count, 0)
+
+    def test_new_dancer_count_only_counts_the_dancers_missing_from_the_db(self):
+        def _mixed_lookup(first: str, last: str) -> DancerRecord:
+            # Only the lead ("Alex Zephyr") is new - the follow is already
+            # in the DB - so this exercises a genuine partial count rather
+            # than the all-new/all-existing extremes above.
+            if first == "Alex":
+                return _new_dancer_lookup(first, last)
+            return _existing_dancer_lookup(first, last)
+
+        with mock.patch.object(
+            update_service, "parse_results_url", return_value=[_make_result(place=1)]
+        ):
+            result = run_update(["https://example.com"], ["2026-01-01"], lookup=_mixed_lookup)
+
+        self.assertEqual(result.new_dancer_count, 1)
 
     def test_multiple_urls_paired_with_dates_in_order(self):
         calls = []
