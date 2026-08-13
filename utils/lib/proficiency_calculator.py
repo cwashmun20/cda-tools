@@ -92,7 +92,9 @@ class ProficiencyCalculator:
         # dancer's point-out level in the paired dance of the counterpart style
         # (e.g. Standard Waltz <-> Smooth Waltz, Latin Jive <-> Rhythm Swing).
         # Dances with no cross-style counterpart (Quickstep, Samba, Paso,
-        # Bolero, Mambo) get no cross-style credit.
+        # Bolero, Mambo) get no credit from this specific paired-dance rule -
+        # see the broader any-other-style rule below, which still applies to
+        # them.
         other_style = constants.CROSS_STYLE.get(style)
         if other_style is None:
             raise ValueError(f"'{style}' is not eligible for points (e.g. nightclub dances).")
@@ -104,6 +106,25 @@ class ProficiencyCalculator:
                 cross_style_level,
                 ProficiencyCalculator.compute_point_out_level(dancer, other_style, other_dance) - 2,
             )
+
+        # Cross-Style Proficiency (continued): never less than four levels
+        # lower than the dancer's point-out level in ANY other style - this
+        # covers styles with no dance-name pairing at all (e.g. a Latin
+        # dancer's Samba/Paso Doble floor still rises with their Standard/
+        # Smooth open proficiency, even though neither shares a dance name
+        # with Samba/Paso Doble). The paired style above is technically a
+        # subset of "any other style" too, but its 2-level floor always
+        # dominates this 4-level one for that same style, so it doesn't
+        # need to be excluded here - the final max() picks whichever floor
+        # actually binds.
+        for candidate_style in Style.points_eligible_styles():
+            if candidate_style == style:
+                continue
+            candidate_style_level = max(
+                ProficiencyCalculator.compute_point_out_level(dancer, candidate_style, d)
+                for d in constants.DANCE_NAMES[candidate_style]
+            )
+            cross_style_level = max(cross_style_level, candidate_style_level - 4)
 
         return max(newcomer_level, point_out_level, within_style_level, cross_style_level)
 
