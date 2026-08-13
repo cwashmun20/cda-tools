@@ -20,7 +20,7 @@ dance.am front-end templates over the same backend/data schema:
 import math
 from datetime import date
 
-from points_updating.lib.models.result import CompetitionResult, DancerRef, event_dances_to_score
+from points_updating.lib.models.result import CompetitionResult, DancerRef
 from points_updating.lib.parsing.http_client import ThrottledClient
 from utils.lib.constants import SYLLABUS_LEVELS, Style
 from utils.lib.models.dance import Dance, convert_dance, convert_level
@@ -116,7 +116,7 @@ def parse_competition(
         competition_date: The date the competition was held.
         client: The HTTP client to fetch with.
     Returns:
-        One CompetitionResult per (couple, dance) across every couple event
+        One CompetitionResult per (couple, event) across every couple event
         in the competition. Non-couple events (Jack & Jill, team matches,
         etc.) are skipped here, not raised on - see _parse_event for the
         single-event contract, which does raise for those.
@@ -133,12 +133,15 @@ def parse_competition(
 def _parse_event(
     event: dict, competition_name: str, competition_date: date
 ) -> list[CompetitionResult]:
-    """Parses one already-fetched event's JSON into CompetitionResults.
+    """Parses one already-fetched event's JSON into CompetitionResults, one
+    per couple regardless of how many dances the event covers.
 
     Placement comes from the Summary (combined across dances), except for
     a single-dance event with only one couple entered - Summary Result is
     null there, so we fall back to the dance's own Result. Fractional Results
-    (ties) get floored - "1224" ranking.
+    (ties) get floored - "1224" ranking. Every couple dances every dance in
+    a multi-dance combo, so dances_json[0]'s Competitors list alone is
+    enough to enumerate them.
     """
     if event["Type"] != "Couple":
         raise NotImplementedError(f"Unsupported CompOrganizer event type: {event['Type']!r}")
@@ -167,26 +170,24 @@ def _parse_event(
         dances.append(Dance(level, style, bare_name))
     event_dances = tuple(dances)
 
-    scored_dances = event_dances_to_score(level, event_dances)
     results = []
-    for dance_json, dance in list(zip(dances_json, event_dances))[: len(scored_dances)]:
-        for competitor in dance_json["Competitors"]:
-            place = placements.get(competitor["ID"])
-            if place is None:
-                continue
-            lead, follow = _lead_follow(competitor["Participants"])
-            results.append(
-                CompetitionResult(
-                    dance=dance,
-                    lead=lead,
-                    follow=follow,
-                    place=place,
-                    num_rounds=num_rounds,
-                    competition_name=competition_name,
-                    competition_date=competition_date,
-                    event_dances=event_dances,
-                )
+    for competitor in dances_json[0]["Competitors"]:
+        place = placements.get(competitor["ID"])
+        if place is None:
+            continue
+        lead, follow = _lead_follow(competitor["Participants"])
+        results.append(
+            CompetitionResult(
+                dance=event_dances[0],
+                lead=lead,
+                follow=follow,
+                place=place,
+                num_rounds=num_rounds,
+                competition_name=competition_name,
+                competition_date=competition_date,
+                event_dances=event_dances,
             )
+        )
     return results
 
 

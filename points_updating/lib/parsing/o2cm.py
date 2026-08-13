@@ -12,7 +12,7 @@ from typing import Optional
 
 from bs4 import BeautifulSoup, Tag
 
-from points_updating.lib.models.result import CompetitionResult, DancerRef, event_dances_to_score
+from points_updating.lib.models.result import CompetitionResult, DancerRef
 from points_updating.lib.parsing.http_client import ThrottledClient
 from utils.lib import constants
 from utils.lib.constants import OpenLevel, Style
@@ -97,7 +97,7 @@ def parse_competition(
         competition_date: The date the competition was held.
         client: The HTTP client to fetch with.
     Returns:
-        One CompetitionResult per (couple, dance) across every event's
+        One CompetitionResult per (couple, event) across every event's
         Final round in the competition.
     """
     html = fetch_results_page(comp_id, client)
@@ -108,7 +108,7 @@ def _parse_results_page(
     html: str, competition_name: str, competition_date: date
 ) -> list[CompetitionResult]:
     """Parses a competition's full consolidated results page into
-    CompetitionResults, one per (couple, dance) danced in each event's
+    CompetitionResults, one per (couple, event) danced in each event's
     Final round.
     """
     soup = BeautifulSoup(html, "lxml")
@@ -169,19 +169,18 @@ def _build_results(
     results = []
     for row_text in final_rows:
         place, lead, follow = _parse_placement_row(row_text)
-        for dance in event_dances_to_score(level, event_dances):
-            results.append(
-                CompetitionResult(
-                    dance=dance,
-                    lead=lead,
-                    follow=follow,
-                    place=place,
-                    num_rounds=num_rounds,
-                    competition_name=competition_name,
-                    competition_date=competition_date,
-                    event_dances=event_dances,
-                )
+        results.append(
+            CompetitionResult(
+                dance=event_dances[0],
+                lead=lead,
+                follow=follow,
+                place=place,
+                num_rounds=num_rounds,
+                competition_name=competition_name,
+                competition_date=competition_date,
+                event_dances=event_dances,
             )
+        )
     return results
 
 

@@ -12,7 +12,7 @@ import re
 from datetime import date
 from typing import Optional
 
-from points_updating.lib.models.result import CompetitionResult, DancerRef, event_dances_to_score
+from points_updating.lib.models.result import CompetitionResult, DancerRef
 from points_updating.lib.parsing.http_client import ThrottledClient
 from utils.lib.constants import OpenLevel, Style, SyllabusLevel
 from utils.lib.models.dance import Dance
@@ -156,7 +156,7 @@ def parse_competition(
         competition_date: The date the competition was held.
         client: The HTTP client to fetch with.
     Returns:
-        One CompetitionResult per (couple, dance) across every couple event
+        One CompetitionResult per (couple, event) across every couple event
         in the competition. Non-couple events (e.g. Formation Team) and
         listed events with no recorded results are skipped here, not raised on.
         See _parse_event for the single-event contract, which does raise for
@@ -178,8 +178,8 @@ def _parse_event(
     event: dict, competition_name: str, competition_date: date
 ) -> list[CompetitionResult]:
     """Parses one already-fetched event's JSON (as returned by
-    extract_embedded_json()) into CompetitionResults, one per (couple,
-    dance) danced in it.
+    extract_embedded_json()) into CompetitionResults, one per couple danced
+    in it.
 
     Placement comes from the final round's per-partnership top-level
     `place` field (Ballroom Comp Express's own combined placement across
@@ -196,10 +196,10 @@ def _parse_event(
         competition_name: The competition's name.
         competition_date: The date the competition was held.
     Returns:
-        One CompetitionResult per (couple, dance), every dance in the event
-        sharing one event_dances tuple and one num_rounds. Empty if the
-        event is Rookie/Veteran, Nightclub-style, or a level with no CDA
-        points equivalent (e.g. Pre-Bronze/N Class) - see below.
+        One CompetitionResult per couple, carrying every dance in the
+        event via event_dances and one num_rounds. Empty if the event is
+        Rookie/Veteran, Nightclub-style, or a level with no CDA points
+        equivalent (e.g. Pre-Bronze/N Class) - see below.
     Raises:
         NotImplementedError: if eventinfo["eventtype"] isn't 1 (Couple).
     """
@@ -242,19 +242,18 @@ def _parse_event(
     for partnership_id in final_round["partnershiporder"]:
         partnership = final_round[str(partnership_id)]
         lead, follow = _lead_follow(dancers_json[str(partnership_id)])
-        for dance in event_dances_to_score(level, dances):
-            results.append(
-                CompetitionResult(
-                    dance=dance,
-                    lead=lead,
-                    follow=follow,
-                    place=math.floor(partnership["place"]),
-                    num_rounds=num_rounds,
-                    competition_name=competition_name,
-                    competition_date=competition_date,
-                    event_dances=dances,
-                )
+        results.append(
+            CompetitionResult(
+                dance=dances[0],
+                lead=lead,
+                follow=follow,
+                place=math.floor(partnership["place"]),
+                num_rounds=num_rounds,
+                competition_name=competition_name,
+                competition_date=competition_date,
+                event_dances=dances,
             )
+        )
     return results
 
 

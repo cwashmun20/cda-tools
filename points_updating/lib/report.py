@@ -120,11 +120,11 @@ def _render_award_line(award: ResultAward) -> str:
 
 def _render_dance(result) -> str:
     """Renders a result's dance(s): just the single dance for a
-    single-dance event (unchanged from before), or the shared level/style
-    prefix once followed by every dance name in the combo joined by "/" for
-    a multi-dance event - now that an open combo collapses to one award
-    line, that line should still show everything that was danced rather
-    than only the one dance the award was keyed off.
+    single-dance event, or every dance in the combo joined by "/" for a
+    multi-dance event - one CompetitionResult always represents the whole
+    combo (syllabus and open alike), so this line should show everything
+    that was danced, not only the one dance the award happened to be keyed
+    off of.
     """
     if len(result.event_dances) <= 1:
         return str(result.dance)

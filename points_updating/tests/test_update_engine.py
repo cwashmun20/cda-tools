@@ -103,7 +103,7 @@ class TestUpdateEngine(unittest.TestCase):
 
         self.assertFalse(awards[0].is_split_level)
         self.assertTrue(awards[1].is_split_level)
-        expected_delta2 = cascade.build_cascade_delta(dance2, (9, 18, 21))  # 3x (3, 6, 7)
+        expected_delta2 = cascade.build_cascade_delta((dance2,), (9, 18, 21))  # 3x (3, 6, 7)
         self.assertTrue(np.array_equal(awards[1].delta.syllabus, expected_delta2.syllabus))
         self.assertTrue(np.array_equal(awards[1].delta.open, expected_delta2.open))
 

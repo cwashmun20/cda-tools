@@ -286,9 +286,9 @@ class TestParseResultsPage(unittest.TestCase):
             self.assertEqual(result.event_dances, (expected_dance,))
 
     def test_multi_dance_single_round_uses_bare_style_word(self):
-        # Champ is an open level, so this multi-dance combo scores once per
-        # couple (keyed off the first dance) rather than once per dance -
-        # see event_dances_to_score().
+        # Every multi-dance combo (syllabus or open) scores once per couple,
+        # keyed off the first dance - cascade.py fans the resulting award
+        # out to every dance in event_dances from there.
         waltz = Dance("Champ", "Smooth", "Waltz")
         tango = Dance("Champ", "Smooth", "Tango")
         foxtrot = Dance("Champ", "Smooth", "Foxtrot")
@@ -350,10 +350,7 @@ class TestParseCompetition(unittest.TestCase):
             "isc25", "Claremont Intercollegiate Showdown 2025", date(2025, 11, 14), client
         )
 
-        # Open multi-dance events now collapse to one result per couple
-        # instead of one per dance (see event_dances_to_score()), so this
-        # competition-wide total is lower than it was pre-fix.
-        self.assertGreater(len(results), 800)
+        self.assertGreater(len(results), 700)
         bronze_waltz = [r for r in results if r.dance == Dance("Bronze", "Smooth", "Waltz")]
         self.assertEqual(len(bronze_waltz), 6)
 

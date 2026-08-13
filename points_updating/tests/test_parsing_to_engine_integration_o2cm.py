@@ -110,7 +110,8 @@ class TestParsingToEngineIntegration(unittest.TestCase):
         )
         self.assertEqual(eugene_award.result.place, 1)
         expected_delta = cascade.build_cascade_delta(
-            eugene_award.result.dance, award_table.compute_award(eugene_award.result.num_rounds, 1)
+            eugene_award.result.event_dances,
+            award_table.compute_award(eugene_award.result.num_rounds, 1),
         )
         self.assertTrue(np.array_equal(eugene_award.delta.syllabus, expected_delta.syllabus))
         self.assertTrue(np.array_equal(eugene_award.delta.open, expected_delta.open))

@@ -80,5 +80,7 @@ class PointsCalculator:
         if is_split_level:
             danced, one_below, two_plus_below = danced * 3, one_below * 3, two_plus_below * 3
 
-        delta = cascade.build_cascade_delta(dance, (danced, one_below, two_plus_below))
+        delta = cascade.build_cascade_delta(
+            result.event_dances, (danced, one_below, two_plus_below)
+        )
         return ResultAward(result=result, is_split_level=is_split_level, delta=delta)

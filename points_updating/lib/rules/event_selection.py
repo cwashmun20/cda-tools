@@ -1,22 +1,19 @@
 """Open-level multi-event selection for points_updating.
 
-CompetitionResult is one per (couple, dance, event) for syllabus levels -
-a multi-dance syllabus event's single placement applies the same award to
-each dance's own distinct point column, so each dance gets its own result
-to carry that award to its column. Open levels award points once per
-placement regardless of how many dances the event covered, so an open
-multi-dance event produces a single CompetitionResult (see
-event_dances_to_score() in points_updating/lib/models/result.py) carrying
-every danced Dance in event_dances. When an open level was split across
-more than one event at a competition (e.g. Novice Smooth run as a WTF
-event plus a separate V event), CDA rules use only the event with the most
-dances to calculate points at that level+style for every couple -
-including a couple who finaled in the smaller event but not the larger
-one, who score zero at that level+style rather than falling back to the
-smaller event's placement. The points event is therefore a property of
-the competition (determined from every couple's results at that
-level+style, not just one couple's), not something decided independently
-per couple.
+CompetitionResult is one per (couple, event), carrying every danced Dance
+in event_dances - true for syllabus and open levels alike. A multi-dance
+event's one overall placement produces one award, which cascade.py then
+fans out to every dance in event_dances (syllabus: each dance's own
+column; open: the whole style's columns), rather than one CompetitionResult
+per dance. When an open level was split across more than one event at a
+competition (e.g. Novice Smooth run as a WTF event plus a separate V
+event), CDA rules use only the event with the most dances to calculate
+points at that level+style for every couple - including a couple who
+finaled in the smaller event but not the larger one, who score zero at
+that level+style rather than falling back to the smaller event's
+placement. The points event is therefore a property of the competition
+(determined from every couple's results at that level+style, not just one
+couple's), not something decided independently per couple.
 """
 
 from collections import defaultdict

@@ -63,7 +63,7 @@ class TestPointsCalculator(unittest.TestCase):
         award = PointsCalculator.compute(result, lead, follow)
 
         self.assertFalse(award.is_split_level)
-        expected_delta = cascade.build_cascade_delta(dance, (3, 6, 7))
+        expected_delta = cascade.build_cascade_delta((dance,), (3, 6, 7))
         self.assertTrue(np.array_equal(award.delta.syllabus, expected_delta.syllabus))
         self.assertTrue(np.array_equal(award.delta.open, expected_delta.open))
 
@@ -83,7 +83,7 @@ class TestPointsCalculator(unittest.TestCase):
         award = PointsCalculator.compute(result, lead, follow)
 
         self.assertTrue(award.is_split_level)
-        expected_delta = cascade.build_cascade_delta(dance, (6, 12, 21))  # 3x (2, 4, 7)
+        expected_delta = cascade.build_cascade_delta((dance,), (6, 12, 21))  # 3x (2, 4, 7)
         self.assertTrue(np.array_equal(award.delta.syllabus, expected_delta.syllabus))
         self.assertTrue(np.array_equal(award.delta.open, expected_delta.open))
 
@@ -104,7 +104,7 @@ class TestPointsCalculator(unittest.TestCase):
         award = PointsCalculator.compute(result, lead, follow)
 
         self.assertFalse(award.is_split_level)
-        expected_delta = cascade.build_cascade_delta(dance, (3, 6, 7))
+        expected_delta = cascade.build_cascade_delta((dance,), (3, 6, 7))
         self.assertTrue(np.array_equal(award.delta.syllabus, expected_delta.syllabus))
         self.assertTrue(np.array_equal(award.delta.open, expected_delta.open))
 
@@ -116,6 +116,8 @@ class TestPointsCalculator(unittest.TestCase):
         find no split-level gap (lead and follow are only 1 level apart in
         Waltz specifically), but the lead is fully pointed out of Gold in
         Tango (part of the same combo), which the combo-wide max must catch.
+        The resulting (tripled) award then cascades into both Waltz's and
+        Tango's own columns, per event_dances, not just Waltz's.
         """
         syllabus = np.zeros((4, 19), dtype=int)
         syllabus[0][6] = syllabus[1][6] = syllabus[2][6] = syllabus[3][6] = 7  # Smooth Tango
@@ -128,7 +130,8 @@ class TestPointsCalculator(unittest.TestCase):
         award = PointsCalculator.compute(result, lead, follow)
 
         self.assertTrue(award.is_split_level)
-        expected_delta = cascade.build_cascade_delta(waltz, (9, 18, 21))  # 3x semifinal 1st (3,6,7)
+        # 3x semifinal 1st (3,6,7), fanned into both Waltz's and Tango's columns.
+        expected_delta = cascade.build_cascade_delta((waltz, tango), (9, 18, 21))
         self.assertTrue(np.array_equal(award.delta.syllabus, expected_delta.syllabus))
         self.assertTrue(np.array_equal(award.delta.open, expected_delta.open))
 

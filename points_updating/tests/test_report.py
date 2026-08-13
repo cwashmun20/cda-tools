@@ -31,6 +31,7 @@ def _make_award(
     is_split_level: bool = False,
     event_dances: Optional[tuple[Dance, ...]] = None,
 ) -> ResultAward:
+    resolved_event_dances = event_dances if event_dances is not None else (dance,)
     result = CompetitionResult(
         dance=dance,
         lead=lead,
@@ -39,9 +40,11 @@ def _make_award(
         num_rounds=num_rounds,
         competition_name=comp_name,
         competition_date=comp_date,
-        event_dances=event_dances if event_dances is not None else (dance,),
+        event_dances=resolved_event_dances,
     )
-    delta = cascade.build_cascade_delta(dance, award_table.compute_award(num_rounds, place))
+    delta = cascade.build_cascade_delta(
+        resolved_event_dances, award_table.compute_award(num_rounds, place)
+    )
     return ResultAward(result=result, is_split_level=is_split_level, delta=delta)
 
 
@@ -270,6 +273,35 @@ class TestRenderReport(unittest.TestCase):
 
         self.assertIn("Novice Intl. Waltz/Foxtrot/Quickstep", text)
 
+    def test_syllabus_multi_dance_combo_shows_one_combined_award_line(self):
+        """A syllabus multi-dance combo now also collapses to a single
+        CompetitionResult (the same overall placement's award fans out to
+        every dance's own column via cascade.py) - the report shows one
+        line for the whole combo, same as an open combo, not one line per
+        dance.
+        """
+        lead = DancerRef(first="Lead", last="Dancer")
+        follow = DancerRef(first="Follow", last="Dancer")
+        waltz = Dance("Silver", "Standard", "Waltz")
+        quickstep = Dance("Silver", "Standard", "Quickstep")
+        award = _make_award(
+            waltz,
+            lead,
+            follow,
+            place=3,
+            num_rounds=3,
+            comp_date=date(2025, 10, 4),
+            event_dances=(waltz, quickstep),
+        )
+        starting = {"Lead Dancer": _zero_points(), "Follow Dancer": _zero_points()}
+        final = {"Lead Dancer": _zero_points(), "Follow Dancer": _zero_points()}
+        report = build_report([award], starting, final)
+
+        text = render_report(report)
+
+        self.assertIn("Silver Intl. Waltz/Quickstep", text)
+        self.assertEqual(text.count("Placed"), 2)  # once per dancer's section, not per dance
+
     def test_single_dance_award_line_is_unchanged(self):
         lead = DancerRef(first="Lead", last="Dancer")
         follow = DancerRef(first="Follow", last="Dancer")
@@ -334,7 +366,7 @@ class TestLevelBreakdown(unittest.TestCase):
 
     def test_syllabus_event_breaks_down_by_cascaded_level(self):
         dance = Dance("Silver", "Smooth", "Waltz")
-        delta = cascade.build_cascade_delta(dance, award_table.compute_award(2, 2))
+        delta = cascade.build_cascade_delta((dance,), award_table.compute_award(2, 2))
 
         breakdown = _level_breakdown(delta)
 
@@ -346,7 +378,7 @@ class TestLevelBreakdown(unittest.TestCase):
         overcount by the number of dances in that style.
         """
         dance = Dance("Novice", "Smooth", "Waltz")
-        delta = cascade.build_cascade_delta(dance, award_table.compute_award(2, 1))
+        delta = cascade.build_cascade_delta((dance,), award_table.compute_award(2, 1))
 
         breakdown = _level_breakdown(delta)
 
@@ -357,7 +389,7 @@ class TestLevelBreakdown(unittest.TestCase):
 
     def test_zero_award_has_empty_breakdown(self):
         dance = Dance("Bronze", "Smooth", "Waltz")
-        delta = cascade.build_cascade_delta(dance, award_table.compute_award(2, 7))
+        delta = cascade.build_cascade_delta((dance,), award_table.compute_award(2, 7))
 
         self.assertEqual(_level_breakdown(delta), [])
 

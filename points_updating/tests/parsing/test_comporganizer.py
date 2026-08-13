@@ -245,30 +245,27 @@ class TestParseEvent(unittest.TestCase):
 
         results = _parse_event(event, "Cal Poly Mustang Ball", date(2026, 2, 7))
 
-        self.assertEqual(len(results), 6)  # 2 dances x 3 competitors
+        self.assertEqual(len(results), 3)  # 1 result per couple
         waltz = Dance("Gold", "Standard", "Waltz")
         quickstep = Dance("Gold", "Standard", "Quickstep")
-        self.assertEqual(set(r.dance for r in results), {waltz, quickstep})
+        self.assertEqual(set(r.dance for r in results), {waltz})  # keyed off the first dance
         for result in results:
             self.assertEqual(result.event_dances, (waltz, quickstep))
             self.assertEqual(result.num_rounds, 2)
 
-        # Each couple's placement is the same combined result in both dances,
-        # not a per-dance placement.
-        by_name_and_dance = {(r.lead.full_name, r.dance): r.place for r in results}
-        self.assertEqual(by_name_and_dance[("Kaiyu Ren", waltz)], 5)
-        self.assertEqual(by_name_and_dance[("Kaiyu Ren", quickstep)], 5)
-        self.assertEqual(by_name_and_dance[("Eli Hamre", waltz)], 3)
-        self.assertEqual(by_name_and_dance[("Eli Hamre", quickstep)], 3)
-        self.assertEqual(by_name_and_dance[("Anton Polishko", waltz)], 6)
-        self.assertEqual(by_name_and_dance[("Anton Polishko", quickstep)], 6)
+        # Each couple's placement is the one combined result for the combo.
+        by_name = {r.lead.full_name: r.place for r in results}
+        self.assertEqual(by_name["Kaiyu Ren"], 5)
+        self.assertEqual(by_name["Eli Hamre"], 3)
+        self.assertEqual(by_name["Anton Polishko"], 6)
 
     def test_open_level_multi_dance_event_scores_once_per_couple(self):
         # Real, captured Cal Poly Mustang Ball data (event ID 2, "Novice
-        # Standard (W/F/Q)") - fills a real fixture gap: Novice is an open
-        # level, so this multi-dance combo must score once per couple
-        # (event_dances_to_score()), unlike event_multi_dance.json's Gold/
-        # syllabus combo above, which scores once per dance.
+        # Standard (W/F/Q)") - same one-result-per-couple shape as the
+        # Gold/syllabus combo above; both syllabus and open multi-dance
+        # events collapse to one CompetitionResult per couple, sharing one
+        # overall placement (cascade.py fans that award out to every dance
+        # in the combo differently for each - see cascade.py).
         event = _load_fixture("event_open_multi_dance.json")["Result"]["Event"]
 
         results = _parse_event(event, "Cal Poly Mustang Ball", date(2026, 2, 7))
@@ -387,7 +384,7 @@ class TestParseEvent(unittest.TestCase):
 
         results = _parse_event(event, "Test Classic", date(2026, 2, 7))
 
-        self.assertEqual(len(results), 2)
+        self.assertEqual(len(results), 1)  # 1 result for the event, not per dance
         self.assertEqual({r.place for r in results}, {3})
 
 

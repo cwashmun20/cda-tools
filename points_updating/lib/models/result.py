@@ -8,7 +8,6 @@ source produced the raw strings.
 from dataclasses import dataclass
 from datetime import date
 
-from utils.lib import constants
 from utils.lib.models.dance import Dance
 
 
@@ -49,7 +48,17 @@ def _capitalize_first_letter(name: str) -> str:
 
 @dataclass
 class CompetitionResult:
-    """A single dance/couple/placement result from one competition."""
+    """A single couple/placement result from one competition event.
+
+    One CompetitionResult per (couple, event) - a multi-dance event's one
+    overall placement is carried once here, in event_dances, regardless of
+    whether it's a syllabus or open level; cascade.build_cascade_delta()
+    fans the resulting award out to every dance in event_dances (each
+    dance's own column for syllabus, the whole style's columns for open).
+    dance is the combo's first dance, a convenient single-dance handle for
+    callers that don't need the full combo (e.g. event_dances == (dance,)
+    for a single-dance event).
+    """
 
     dance: Dance
     lead: DancerRef
@@ -59,22 +68,3 @@ class CompetitionResult:
     competition_name: str
     competition_date: date
     event_dances: tuple[Dance, ...]
-
-
-def event_dances_to_score(level: str, dances: tuple[Dance, ...]) -> tuple[Dance, ...]:
-    """Returns which dance(s) in a (possibly multi-dance) event should each
-    get their own CompetitionResult.
-
-    A syllabus multi-dance event's single placement applies the same award
-    to each dance's own distinct point column (cascade.py's syllabus branch
-    keys by the specific dance) - every dance gets its own result so that
-    award reaches every column it's owed to. An open multi-dance event's
-    placement earns points once per style+level (cascade.py's open branch
-    keys only on style/level, never the specific dance) - scoring it once
-    per dance would multi-count one placement N times, so exactly one
-    CompetitionResult (keyed off the first dance) represents the whole
-    combo.
-    """
-    if level in constants.SYLLABUS_LEVELS:
-        return dances
-    return dances[:1]
