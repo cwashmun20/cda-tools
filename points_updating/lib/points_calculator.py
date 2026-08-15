@@ -56,12 +56,10 @@ class PointsCalculator:
             result.num_rounds, result.place
         )
 
-        # A multi-dance event's dance set is fixed by the organizer, not
-        # chosen per-dancer, so the couple's Split-Level Exception
-        # eligibility is decided once for the whole combo - the higher of
-        # each partner's proficiency across every dance in the combo, not
-        # just the one dance this result happens to be keyed off of. For a
-        # single-dance event this max() degenerates to today's behavior.
+        # Same combo-wide proficiency rule as EligibilityChecker.check() (see
+        # its docstring): the higher of each partner's proficiency across
+        # every dance in the combo, falling back to a single dance's level
+        # for a single-dance event.
         lead_level = max(
             ProficiencyCalculator.compute_proficiency_level(lead, dance.style, d.dance)
             for d in result.event_dances

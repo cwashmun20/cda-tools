@@ -1,13 +1,10 @@
 """Chronological point-update orchestration for points_updating.
 
-Provides UpdateEngine, which processes one competition's results at a time
-against a running ledger of Dancers, and run_backfill, which repeats that
-per-competition update across every competition needed to catch the CDA
-points database up to the present. Each competition's results are scored
-against the ledger's state as of immediately before that competition -
-never against points earned earlier in the same competition - so Split-
-Level detection stays correct regardless of the order results happen to be
-processed in.
+Provides UpdateEngine, which scores one competition's results at a time
+against a running ledger of Dancers, and run_backfill(), which repeats that
+across every competition needed to catch the CDA points database up to the
+present. See process_competition() for the ledger-ordering guarantee this
+relies on.
 """
 
 from datetime import date

@@ -8,7 +8,6 @@ from typing import IO
 
 import pandas as pd
 
-# Required columns for a valid competition entry spreadsheet
 REQUIRED_COLUMNS = [
     "Style",
     "Dance",
@@ -19,10 +18,8 @@ REQUIRED_COLUMNS = [
     "Follow Last",
 ]
 
-# Optional columns that may appear
 OPTIONAL_COLUMNS = ["O2CM Name", "Heat", "O2CM Div"]
 
-# Column name aliases for normalization
 COLUMN_ALIASES = {
     "Leader First": "Lead First",
     "Leader Last": "Lead Last",

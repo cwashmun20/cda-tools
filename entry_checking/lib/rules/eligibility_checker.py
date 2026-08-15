@@ -43,11 +43,8 @@ class EligibilityChecker:
             raise ValueError(f"'{rv_ruleset}' is an invalid Rookie/Vet ruleset.")
         if rookie_max_level not in ("Bronze", "Silver"):
             raise ValueError(f"'{rookie_max_level}' is an invalid Rookie max level.")
-        # Narrowed via cast(), not an annotation alone - mypy doesn't narrow a
-        # plain `str` to a Literal from an `in (...)` runtime check above, so
-        # this documents (and enforces, via the checks above it) the actual
-        # guarantee: rv_ruleset/rookie_max_level are real str input until
-        # this exact point.
+        # cast(), not an annotation, since mypy doesn't narrow a plain `str`
+        # to a Literal from the runtime checks above.
         self.rv_ruleset = cast(constants.RvRuleset, rv_ruleset)
         self.rookie_max_level = cast(constants.RookieMaxLevel, rookie_max_level)
 
@@ -66,8 +63,8 @@ class EligibilityChecker:
                 event (the organizer fixes a multi-dance event's dance set -
                 couples don't choose a subset of it - so eligibility is
                 decided once for the whole combo). Defaults to (dance_obj,)
-                for a single-dance event, which degenerates to checking
-                dance_obj alone exactly as before.
+                for a single-dance event, which falls back to checking
+                dance_obj alone.
         Returns:
             An EligibilityResult with the outcome and any violation details.
         """
@@ -114,7 +111,6 @@ class EligibilityChecker:
         if dance_obj.level == NightclubLevel.INT_ADV or dance_obj.level == OpenLevel.CHAMP:
             return EligibilityResult(eligible=True)
 
-        # Check eligibility for Beginner Nightclub
         if dance_obj.level == NightclubLevel.BEGINNER:
             if partnership.nc_beginners:
                 return EligibilityResult(eligible=True)
@@ -128,7 +124,6 @@ class EligibilityChecker:
                 subject_name=partnership.names,
             )
 
-        # Check eligibility for Newcomer
         if dance_obj.level == SyllabusLevel.NEWCOMER:
             if partnership.newcomers:
                 return EligibilityResult(eligible=True)
@@ -141,7 +136,6 @@ class EligibilityChecker:
                 subject_name=partnership.names,
             )
 
-        # Check eligibility for Rookie/Vet
         if self.rv_ruleset == "newcomer":
             result = self._check_rookie_vet_newcomer(partnership, dance_obj)
             if result is not None:
@@ -192,7 +186,6 @@ class EligibilityChecker:
         if combined_level <= event_level:
             return EligibilityResult(eligible=True)
 
-        # Pointed out violation
         lead_eligibility = constants.LEVELS[lead_level]
         follow_eligibility = constants.LEVELS[follow_level]
         recommended_levels = RecommendedLevelsCalculator.compute(partnership, dance_obj.style)

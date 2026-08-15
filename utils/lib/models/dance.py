@@ -1,8 +1,7 @@
 """Dance representation and name/level conversion utilities.
 
-This module provides the Dance class and functions for converting
-dance names and levels from spreadsheet input to standard naming conventions.
-All constants have been moved to utils.lib.constants.
+Converts dance names and levels from spreadsheet input into the standard
+naming conventions defined in utils.lib.constants.
 """
 
 import difflib
@@ -119,14 +118,12 @@ def convert_dance(style: Style, input_name: str) -> str:
     if style == Style.RHYTHM and input_name in rhythm_east_coast_swing_aliases:
         return DanceName.EAST_COAST_SWING
 
-    # Check if dance name is the same as in the standard naming convention.
     if input_name in constants.DANCE_NAMES[style]:
         return input_name
 
-    # Check if dance is abbreviated in standard naming convention. Longer
-    # names are checked first so a more specific name (e.g. "Viennese Waltz")
-    # is matched before a shorter one that happens to be its substring
-    # (e.g. "Waltz").
+    # Longer names are checked first so a more specific name (e.g. "Viennese
+    # Waltz") is matched before a shorter one that happens to be its
+    # substring (e.g. "Waltz").
     for dance_name in sorted(constants.DANCE_NAMES[style], key=len, reverse=True):
         if dance_name in input_name:
             return dance_name
@@ -141,7 +138,6 @@ def convert_dance(style: Style, input_name: str) -> str:
     if match is not None:
         return match
 
-    # Unrecognized dance name format.
     raise ValueError(f"""Unrecognized dance.
                      Please add support for '{style} {input_name}' to convert_dance in dance.py.""")
 
@@ -218,7 +214,6 @@ def convert_level(input_name: str) -> str:
     if match is not None:
         return match
 
-    # Unrecognized level name format.
     raise ValueError(f"""Unrecognized level name.
                      Please add support for '{input_name}' to convert_level in dance.py.""")
 

@@ -1,7 +1,6 @@
 """Violation types and structured results for rule checking.
 
-This module defines the data structures used to represent rule-checking
-results, replacing direct print() calls with structured dataclasses.
+Defines the data structures used to represent rule-checking results.
 """
 
 from dataclasses import dataclass, field
@@ -35,11 +34,7 @@ class LevelViolationType(StrEnum):
 
 @dataclass
 class EligibilityResult:
-    """Structured result from an eligibility check.
-
-    This replaces print() side effects in the eligibility logic with a
-    dataclass that can be consumed programmatically (e.g., by a web UI).
-    """
+    """Outcome of an eligibility check, consumable by both the CLI and a web UI."""
 
     eligible: bool
     violation_type: Optional[ViolationType] = None

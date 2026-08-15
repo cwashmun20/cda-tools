@@ -1,11 +1,9 @@
-"""Cascades a placement's point award down through lower levels.
+"""Cascades a placement's point award down through lower levels of the same
+style.
 
-Syllabus events cascade down the same dance only - but a multi-dance
-syllabus combo's one overall placement cascades identically into every
-dance in the combo, not just one. Open events cascade into every dance in
-the lower syllabus levels of the same style regardless of how many dances
-the combo covered. See award_table.compute_award for the per-placement
-point values being cascaded.
+See build_cascade_delta() below for the syllabus/open mechanics, and
+award_table.compute_award for the per-placement point values being
+cascaded.
 """
 
 from dataclasses import dataclass

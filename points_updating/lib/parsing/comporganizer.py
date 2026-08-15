@@ -2,19 +2,20 @@
 
 CompOrganizer/NDCA Premier is a shared third-party backend behind
 school-branded dance.am results pages, not dance.am's own backend.
-Confirmed against two real 2026 CDA competitions using two different
-dance.am front-end templates over the same backend/data schema:
+Confirmed against two real 2026 CDA competitions, each using a different
+dance.am front-end template over the same backend/data schema:
 
 - Cal Poly Mustang Ball (mustangball.dance.am): embeds a callback token
-  (`var cbid = "...";`) in its results page, resolved to a Comp_Year_ID via
-  callback-comps - see resolve_comp_year_id()/fetch_competition_name().
-- Stanford Cardinal Classic (m-cardinal.dance.am): no cbid at all - its
-  Comp_Year_ID is resolved directly from a `/shared/comp.php` endpoint on
-  the school's own dance.am subdomain (keyed by hostname, not a token) -
-  see resolve_comp_year_id_from_host()/fetch_competition_name_from_host().
-  Both templates' data ultimately comes from the same ndcapremier.com feed
-  API once a Comp_Year_ID is known, confirmed by diffing real event-list/
-  event-results responses from both competitions against the same schema.
+  (`var cbid = "...";`), resolved to a Comp_Year_ID via callback-comps -
+  see resolve_comp_year_id()/fetch_competition_name().
+- Stanford Cardinal Classic (m-cardinal.dance.am): no cbid - its
+  Comp_Year_ID resolves from a `/shared/comp.php` endpoint on the
+  school's own subdomain instead - see
+  resolve_comp_year_id_from_host()/fetch_competition_name_from_host().
+
+Both templates pull from the same ndcapremier.com feed API once a
+Comp_Year_ID is known, confirmed by diffing real event-list/event-results
+responses from both competitions against the same schema.
 """
 
 import math

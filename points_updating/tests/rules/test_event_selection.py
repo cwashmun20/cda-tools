@@ -70,7 +70,7 @@ class TestSelectScoringResults(unittest.TestCase):
         """A couple who finaled in the single-dance event but NOT the
         multi-dance one must not fall back to the single-dance placement -
         the multi-dance event is still the points event for this level+
-        style (another couple finaled there), so this couple simply has no
+        style (another couple finaled there), so this couple has no
         points-event result at all.
         """
         wtf_results = [

@@ -1,4 +1,3 @@
-# CDA Points Database API Key
-# Copy this file to config.py in the utils/lib/api/ directory and add your API key.
-# The config.py file is gitignored to keep secrets out of version control.
+# Copy to config.py and set your API key — see README's "API Layer" section for setup.
+# config.py is gitignored to keep secrets out of version control.
 API_KEY = "your-api-key-here"

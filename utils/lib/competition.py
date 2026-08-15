@@ -50,6 +50,6 @@ class Competition:
         self.rookie_max_level = rookie_max_level
         self.raw_data = raw_data
 
-        self.competitors: dict[str, Dancer] = {}  # Competitor name keys
-        self.partnerships: dict[str, Partnership] = {}  # Partnership name keys
+        self.competitors: dict[str, Dancer] = {}
+        self.partnerships: dict[str, Partnership] = {}
         self.entries: set[Entry] = set()

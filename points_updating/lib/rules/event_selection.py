@@ -1,19 +1,11 @@
 """Open-level multi-event selection for points_updating.
 
-CompetitionResult is one per (couple, event), carrying every danced Dance
-in event_dances - true for syllabus and open levels alike. A multi-dance
-event's one overall placement produces one award, which cascade.py then
-fans out to every dance in event_dances (syllabus: each dance's own
-column; open: the whole style's columns), rather than one CompetitionResult
-per dance. When an open level was split across more than one event at a
-competition (e.g. Novice Smooth run as a WTF event plus a separate V
-event), CDA rules use only the event with the most dances to calculate
-points at that level+style for every couple - including a couple who
-finaled in the smaller event but not the larger one, who score zero at
-that level+style rather than falling back to the smaller event's
-placement. The points event is therefore a property of the competition
-(determined from every couple's results at that level+style, not just one
-couple's), not something decided independently per couple.
+When an open level is split across more than one event at a competition
+(e.g. Novice Smooth run as a WTF event plus a separate V event), CDA rules
+use only the event with the most dances to calculate points for every
+couple at that level+style - including a couple who finaled in the
+smaller event but not the larger one, who score zero rather than falling
+back to their own result.
 """
 
 from collections import defaultdict

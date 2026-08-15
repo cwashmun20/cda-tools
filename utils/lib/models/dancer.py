@@ -86,13 +86,9 @@ class Dancer:
         return False
 
     def is_registered_newcomer(self, curr_style: Style) -> bool:
-        # Returns True if the dancer is registered for a Newcomer event in the
-        # current style; otherwise, False.
         return self._is_registered_at_level(curr_style, SyllabusLevel.NEWCOMER)
 
     def is_registered_bronze(self, curr_style: Style) -> bool:
-        # Returns True if the dancer is registered for a Bronze event in the
-        # current style; otherwise, False.
         return self._is_registered_at_level(curr_style, SyllabusLevel.BRONZE)
 
     def nc_beginner(self) -> bool:

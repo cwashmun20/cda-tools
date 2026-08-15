@@ -26,10 +26,7 @@ class DancerLookupError(Exception):
 
 @dataclass
 class DancerRecord:
-    """Typed representation of a dancer record from the CDA points database.
-
-    This replaces the raw dictionary returned by the original lookup_dancer function.
-    """
+    """Typed representation of a dancer record from the CDA points database."""
 
     cda_id: Optional[int]
     first: str

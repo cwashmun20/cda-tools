@@ -29,14 +29,10 @@ class Points:
 
         A negative cell value is the CDA database's marker for "already
         pointed out via cross-style pairing" (see
-        ProficiencyCalculator.has_pointed_out(), which already treats <0 the
-        same as >=7) - not a literal negative point count to accumulate
-        onto. Adding a real award on top of it (e.g. -1 + 7 = 6) would
-        corrupt that marker into a misleadingly low value, so such a cell
-        is left untouched instead - it's already functionally equivalent to
-        7 for every consumer that matters (entry_checking's
-        has_pointed_out() treats <0 and >=7 identically), so there's
-        nothing to gain by trying to compute a "real" total for it.
+        ProficiencyCalculator.has_pointed_out(), which treats <0 the same as
+        >=7), not a literal point count. Adding a delta on top of it would
+        corrupt that marker into a misleadingly low value, so such cells are
+        left untouched instead.
 
         Args:
             syllabus_delta: 4x19 array to add to syllabus_data.

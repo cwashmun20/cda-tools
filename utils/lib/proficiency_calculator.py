@@ -59,9 +59,7 @@ class ProficiencyCalculator:
     def compute_proficiency_level(dancer: Dancer, style: Style, dance_name: str) -> int:
         """Returns an int representing a dancer's proficiency level for a given dance.
 
-        Corresponds to the index of the level in constants.LEVELS:
-        0 = Newcomer, 1 = Bronze, 2 = Silver, 3 = Gold, 4 = Novice,
-        5 = Pre-Champ, 6 = Championship
+        Corresponds to the level's index in constants.LEVELS.
 
         Args:
             dancer: A Dancer object.

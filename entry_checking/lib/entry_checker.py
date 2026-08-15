@@ -35,13 +35,9 @@ class EntryChecker:
 
     check_entry() and register_entry() operate on a single partnership/dance
     pair and are the building blocks check() is written in terms of — they're
-    also what a future live-registration caller (checking one entry at a time
-    against entries already registered so far) would call directly. Note
-    that the "newcomer" ruleset's Rookie/Vet checks depend on a dancer's
-    *other* entries in that style already being registered - check() handles
-    this by registering every non-Rookie/Vet entry first, but a live-
-    registration caller submitting entries one at a time would need to do
-    the same (submit Rookie/Vet entries last) to get accurate results.
+    also what a future live-registration caller would call directly, one
+    entry at a time. Such a caller needs to submit Rookie/Vet entries last,
+    for the same reason check() does — see check()'s docstring.
     """
 
     def __init__(self, comp: "competition.Competition"):

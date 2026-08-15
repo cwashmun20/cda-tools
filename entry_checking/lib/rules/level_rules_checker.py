@@ -81,7 +81,6 @@ class LevelRulesChecker:
             for dance, level_set in dances.items():
                 sorted_levels = sorted(level_set)
 
-                # Check for too many levels registered for this dance
                 if len(level_set) > consecutive_level_limit:
                     violations.append(
                         LevelViolation(
@@ -103,7 +102,6 @@ class LevelRulesChecker:
                         )
                     )
 
-                # Check for non-consecutive levels registered for this dance
                 else:
                     curr_idx, next_idx = 0, 1
                     while next_idx < len(sorted_levels):

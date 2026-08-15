@@ -21,13 +21,12 @@ class Entry:
         return str((self.partnership, self.dance_data))
 
     def __eq__(self, other) -> bool:
-        """Two entries are considered equal if they are for the same dance at the
-        same level. NOTE: Equivalent entries do not have to have the same partnership.
-        This is to aid in checking each dancer for duplicate entries, regardless of
-        who they're dancing with."""
+        """Two entries are equal if they're for the same dance at the same level,
+        regardless of partnership — this lets duplicate-entry checks catch a
+        dancer entered twice at a level with different partners."""
         if isinstance(other, Entry):
             return self.dance_data == other.dance_data
-        # You can also check equality between Entries and Dances.
+        # An Entry is also comparable directly to a Dance, ignoring partnership.
         elif isinstance(other, Dance):
             return self.dance_data == other
         return False
